@@ -10,327 +10,328 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <style>
-        /* === Dashboard Intuitivo para todos los usuarios === */
+        /* === Dashboard estilo CRAISA machote === */
 
-        /* Bienvenida / Resumen del día */
-        .welcome-bar {
-            background: linear-gradient(135deg, var(--craisa-primary) 0%, var(--craisa-primary-deep) 100%);
-            color: white;
-            border-radius: 12px;
-            padding: 1.25rem 1.5rem;
+        /* Bienvenida */
+        .dash-welcome {
+            background: #FFFFFF;
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 1rem;
+            box-shadow: var(--shadow-card);
         }
-        .welcome-text h2 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            color: white;
+        .dash-welcome-left h2 {
+            font-size: 1.375rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
             font-family: var(--font-display);
+            margin-bottom: 0.25rem;
         }
-        .welcome-text p {
+        .dash-welcome-left p {
             font-size: 0.875rem;
-            color: rgba(255,255,255,0.85);
+            color: var(--text-secondary);
         }
-        .welcome-stats {
+        .dash-welcome-right {
             display: flex;
-            gap: 1.5rem;
+            gap: 2rem;
             flex-wrap: wrap;
         }
-        .welcome-stat {
-            text-align: center;
+        .dash-welcome-stat {
+            text-align: right;
         }
-        .welcome-stat-value {
+        .dash-welcome-stat-value {
             font-size: 1.5rem;
             font-weight: 800;
-            color: white;
+            color: var(--craisa-primary);
             font-family: var(--font-display);
             line-height: 1;
         }
-        .welcome-stat-label {
+        .dash-welcome-stat-label {
             font-size: 0.7rem;
-            color: rgba(255,255,255,0.75);
+            color: var(--text-tertiary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-top: 0.25rem;
         }
 
-        /* KPI Cards - Grandes y claros */
-        .kpi-grid-main {
+        /* KPIs */
+        .kpi-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
-        .kpi-main {
+        .kpi-box {
             background: #FFFFFF;
             border: 1px solid var(--border-default);
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 1.25rem;
             box-shadow: var(--shadow-card);
             transition: all 0.2s ease;
             position: relative;
-            overflow: hidden;
         }
-        .kpi-main:hover {
+        .kpi-box:hover {
             border-color: var(--craisa-primary);
             box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
         }
-        .kpi-main::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-        }
-        .kpi-main.blue::before { background: var(--craisa-primary); }
-        .kpi-main.orange::before { background: var(--line-construccion); }
-        .kpi-main.green::before { background: var(--line-carga); }
-        .kpi-main.red::before { background: var(--line-agricola); }
-        .kpi-main-header {
+        .kpi-box-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 0.75rem;
         }
-        .kpi-main-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
+        .kpi-box-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: rgba(20, 63, 127, 0.06);
+            border: 1px solid rgba(20, 63, 127, 0.1);
         }
-        .kpi-main-icon svg { width: 22px; height: 22px; }
-        .kpi-main-badge {
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.25rem 0.625rem;
-            border-radius: 999px;
+        .kpi-box-icon svg { width: 20px; height: 20px; }
+        .kpi-box-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
             background: var(--bg-subtle);
-            color: var(--text-secondary);
+            color: var(--text-tertiary);
         }
-        .kpi-main-value {
-            font-size: 2.25rem;
+        .kpi-box-value {
+            font-size: 2rem;
             font-weight: 800;
             line-height: 1;
             font-family: var(--font-display);
             color: var(--text-primary);
             margin-bottom: 0.25rem;
         }
-        .kpi-main-label {
-            font-size: 0.875rem;
+        .kpi-box-label {
+            font-size: 0.8125rem;
             color: var(--text-secondary);
             font-weight: 500;
         }
-        .kpi-main-sub {
-            font-size: 0.75rem;
+        .kpi-box-sub {
+            font-size: 0.7rem;
             color: var(--text-tertiary);
             margin-top: 0.375rem;
         }
 
-        /* Sección de "Qué hacer ahora" */
-        .action-section {
+        /* Sección de acciones */
+        .dash-section {
             background: #FFFFFF;
             border: 1px solid var(--border-default);
-            border-radius: 12px;
-            padding: 1.25rem;
+            border-radius: 8px;
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow-card);
+            overflow: hidden;
         }
-        .action-section-header {
+        .dash-section-header {
+            padding: 0.875rem 1.25rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            background: #FAFBFC;
         }
-        .action-section-title {
-            font-size: 1.125rem;
+        .dash-section-title {
+            font-size: 0.9375rem;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
             color: var(--text-primary);
             font-family: var(--font-display);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-        .action-section-title svg { color: var(--craisa-primary); width: 20px; height: 20px; }
+        .dash-section-title::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: var(--craisa-primary);
+            border-radius: 2px;
+        }
+        .dash-section-body {
+            padding: 1.25rem;
+        }
+
+        /* Action items */
         .action-list {
             display: flex;
             flex-direction: column;
-            gap: 0.625rem;
+            gap: 0.5rem;
         }
-        .action-item {
+        .action-row {
             display: flex;
             align-items: center;
             gap: 1rem;
             padding: 0.875rem 1rem;
-            border-radius: 8px;
             border: 1px solid var(--border-light);
-            background: var(--bg-subtle);
+            border-radius: 6px;
+            background: #FFFFFF;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             text-decoration: none;
             color: inherit;
         }
-        .action-item:hover {
-            background: #FFFFFF;
+        .action-row:hover {
             border-color: var(--craisa-primary);
-            box-shadow: var(--shadow-sm);
-            transform: translateX(2px);
+            background: rgba(20, 63, 127, 0.02);
         }
-        .action-item-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
+        .action-row-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
-        .action-item-icon svg { width: 20px; height: 20px; }
-        .action-item-content { flex: 1; min-width: 0; }
-        .action-item-title {
-            font-weight: 700;
+        .action-row-icon svg { width: 18px; height: 18px; }
+        .action-row-content { flex: 1; min-width: 0; }
+        .action-row-title {
+            font-weight: 600;
             font-size: 0.875rem;
             color: var(--text-primary);
             margin-bottom: 0.125rem;
         }
-        .action-item-desc {
+        .action-row-desc {
             font-size: 0.75rem;
             color: var(--text-secondary);
         }
-        .action-item-badge {
-            font-size: 0.75rem;
+        .action-row-badge {
+            font-size: 0.7rem;
             font-weight: 700;
-            padding: 0.375rem 0.75rem;
-            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.3rem 0.625rem;
+            border-radius: 4px;
             flex-shrink: 0;
         }
-        .action-item-badge.urgent { background: rgba(170,24,44,0.1); color: var(--line-agricola); }
-        .action-item-badge.warning { background: rgba(212,126,0,0.1); color: var(--line-construccion); }
-        .action-item-badge.info { background: rgba(20,63,127,0.1); color: var(--craisa-primary); }
+        .action-row-badge.urgent { background: rgba(170,24,44,0.08); color: var(--line-agricola); border: 1px solid rgba(170,24,44,0.15); }
+        .action-row-badge.warning { background: rgba(212,126,0,0.08); color: var(--line-construccion); border: 1px solid rgba(212,126,0,0.15); }
+        .action-row-badge.info { background: rgba(20,63,127,0.08); color: var(--craisa-primary); border: 1px solid rgba(20,63,127,0.15); }
 
-        /* Cards de gráficas */
-        .chart-card {
-            background: #FFFFFF;
-            border: 1px solid var(--border-default);
-            border-radius: 12px;
-            box-shadow: var(--shadow-card);
-            overflow: hidden;
+        /* Grid de 2 columnas */
+        .dash-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
-        .chart-card-header {
-            padding: 1rem 1.25rem 0.75rem;
+
+        /* Estado de leads - lista simple */
+        .status-list {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border-light);
-        }
-        .chart-card-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            font-family: var(--font-display);
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 0.5rem;
         }
-        .chart-card-title svg { color: var(--craisa-primary); width: 18px; height: 18px; }
-        .chart-card-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-        }
-        .chart-card-body {
-            padding: 1rem 1.25rem 1.25rem;
-        }
-
-        /* Barras de progreso */
-        .progress-row {
+        .status-row {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-        .progress-label {
-            width: 110px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-align: right;
-            flex-shrink: 0;
-            font-weight: 500;
-        }
-        .progress-track {
-            flex: 1;
-            height: 28px;
-            background: var(--bg-subtle);
-            border-radius: 6px;
-            overflow: hidden;
-            position: relative;
-        }
-        .progress-fill {
-            height: 100%;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            padding-left: 0.75rem;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: width 0.8s ease;
-            min-width: 32px;
-        }
-        .progress-value {
-            width: 40px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        /* Leyenda de estados */
-        .status-legend {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-        }
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
             padding: 0.625rem 0.75rem;
-            border-radius: 6px;
-            background: var(--bg-subtle);
-            transition: all 0.15s ease;
+            border-radius: 4px;
+            transition: background 0.15s ease;
         }
-        .status-item:hover { background: #FFFFFF; box-shadow: var(--shadow-sm); }
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 3px;
+        .status-row:hover { background: var(--bg-subtle); }
+        .status-row-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
             flex-shrink: 0;
         }
-        .status-name {
+        .status-row-name {
             flex: 1;
-            font-size: 0.8rem;
+            font-size: 0.8125rem;
             color: var(--text-secondary);
             font-weight: 500;
         }
-        .status-count {
-            font-size: 0.85rem;
+        .status-row-bar {
+            width: 80px;
+            height: 6px;
+            background: var(--bg-subtle);
+            border-radius: 3px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .status-row-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+        .status-row-count {
+            font-size: 0.8125rem;
             font-weight: 700;
             color: var(--text-primary);
+            width: 28px;
+            text-align: right;
+            flex-shrink: 0;
         }
-        .status-pct {
+        .status-row-pct {
             font-size: 0.7rem;
             color: var(--text-tertiary);
             width: 32px;
             text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Barras de progreso (líneas/canales) */
+        .progress-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .progress-item-label {
+            width: 100px;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            text-align: right;
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+        .progress-item-track {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-subtle);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-item-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding-left: 0.625rem;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: width 0.6s ease;
+        }
+        .progress-item-value {
+            width: 36px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: right;
+            flex-shrink: 0;
         }
 
         /* Actividad */
@@ -347,21 +348,22 @@
         }
         .activity-row:last-child { border-bottom: none; }
         .activity-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             color: white;
             flex-shrink: 0;
+            text-transform: uppercase;
         }
         .activity-info { flex: 1; min-width: 0; }
         .activity-who {
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.8125rem;
             color: var(--text-primary);
         }
         .activity-what {
@@ -378,10 +380,9 @@
             flex-shrink: 0;
         }
 
-        /* Trend chart */
-        .trend-container {
+        /* Tendencia */
+        .trend-wrap {
             position: relative;
-            padding: 0.5rem 0;
         }
 
         /* Footer */
@@ -407,49 +408,15 @@
             font-size: 0.75rem;
         }
 
-        /* Ayuda tooltip */
-        .help-tip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--bg-subtle);
-            color: var(--text-tertiary);
-            font-size: 0.7rem;
-            font-weight: 700;
-            cursor: help;
-            position: relative;
-        }
-        .help-tip:hover::after {
-            content: attr(data-tip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--text-primary);
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 400;
-            white-space: nowrap;
-            z-index: 10;
-            margin-bottom: 0.5rem;
-            box-shadow: var(--shadow-md);
-        }
-
         /* Responsive */
         @media (max-width: 1024px) {
-            .kpi-grid-main { grid-template-columns: repeat(2, 1fr); }
-            .welcome-bar { flex-direction: column; align-items: flex-start; }
-            .welcome-stats { width: 100%; justify-content: space-around; }
+            .kpi-row { grid-template-columns: repeat(2, 1fr); }
+            .dash-grid-2 { grid-template-columns: 1fr; }
+            .dash-welcome { flex-direction: column; align-items: flex-start; }
         }
         @media (max-width: 768px) {
-            .kpi-grid-main { grid-template-columns: 1fr; }
-            .status-legend { grid-template-columns: 1fr; }
-            .action-section { padding: 1rem; }
+            .kpi-row { grid-template-columns: 1fr; }
+            .dash-welcome-right { width: 100%; justify-content: space-around; }
         }
     </style>
 </head>
@@ -495,294 +462,292 @@
 
     <main class="main">
         <div class="container">
-            <!-- Welcome Bar -->
-            <div class="welcome-bar">
-                <div class="welcome-text">
-                    <h2>Buenos días, María 👋</h2>
-                    <p>Resumen de la gestión de leads · Últimos 30 días · Actualizado hoy a las 09:14</p>
+            <!-- Welcome -->
+            <div class="dash-welcome">
+                <div class="dash-welcome-left">
+                    <h2>Dashboard Comercial</h2>
+                    <p>Resumen de la gestión de leads · Últimos 30 días · Actualizado 22/10/2026</p>
                 </div>
-                <div class="welcome-stats">
-                    <div class="welcome-stat">
-                        <div class="welcome-stat-value">184</div>
-                        <div class="welcome-stat-label">Leads totales</div>
+                <div class="dash-welcome-right">
+                    <div class="dash-welcome-stat">
+                        <div class="dash-welcome-stat-value">184</div>
+                        <div class="dash-welcome-stat-label">Leads totales</div>
                     </div>
-                    <div class="welcome-stat">
-                        <div class="welcome-stat-value">21</div>
-                        <div class="welcome-stat-label">Ganados</div>
+                    <div class="dash-welcome-stat">
+                        <div class="dash-welcome-stat-value">21</div>
+                        <div class="dash-welcome-stat-label">Ganados</div>
                     </div>
-                    <div class="welcome-stat">
-                        <div class="welcome-stat-value">11.4%</div>
-                        <div class="welcome-stat-label">Tasa cierre</div>
+                    <div class="dash-welcome-stat">
+                        <div class="dash-welcome-stat-value">11.4%</div>
+                        <div class="dash-welcome-stat-label">Tasa de cierre</div>
                     </div>
                 </div>
             </div>
 
-            <!-- KPIs Principales -->
-            <div class="kpi-grid-main">
-                <div class="kpi-main blue">
-                    <div class="kpi-main-header">
-                        <div class="kpi-main-icon" style="background: rgba(20,63,127,0.08);">
+            <!-- KPIs -->
+            <div class="kpi-row">
+                <div class="kpi-box">
+                    <div class="kpi-box-top">
+                        <div class="kpi-box-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="var(--craisa-primary)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </div>
-                        <span class="kpi-main-badge">Total</span>
+                        <span class="kpi-box-badge">Total</span>
                     </div>
-                    <div class="kpi-main-value">184</div>
-                    <div class="kpi-main-label">Leads registrados</div>
-                    <div class="kpi-main-sub">+12 vs. mes anterior</div>
+                    <div class="kpi-box-value">184</div>
+                    <div class="kpi-box-label">Leads registrados</div>
+                    <div class="kpi-box-sub">+12 vs. mes anterior</div>
                 </div>
-                <div class="kpi-main orange">
-                    <div class="kpi-main-header">
-                        <div class="kpi-main-icon" style="background: rgba(212,126,0,0.08);">
+                <div class="kpi-box">
+                    <div class="kpi-box-top">
+                        <div class="kpi-box-icon" style="background: rgba(212,126,0,0.06); border-color: rgba(212,126,0,0.1);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-construccion)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         </div>
-                        <span class="kpi-main-badge">Activos</span>
+                        <span class="kpi-box-badge">Activos</span>
                     </div>
-                    <div class="kpi-main-value">143</div>
-                    <div class="kpi-main-label">En gestión activa</div>
-                    <div class="kpi-main-sub">78% del total</div>
+                    <div class="kpi-box-value">143</div>
+                    <div class="kpi-box-label">En gestión activa</div>
+                    <div class="kpi-box-sub">78% del total</div>
                 </div>
-                <div class="kpi-main green">
-                    <div class="kpi-main-header">
-                        <div class="kpi-main-icon" style="background: rgba(61,174,43,0.08);">
+                <div class="kpi-box">
+                    <div class="kpi-box-top">
+                        <div class="kpi-box-icon" style="background: rgba(61,174,43,0.06); border-color: rgba(61,174,43,0.1);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-carga)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                         </div>
-                        <span class="kpi-main-badge">Cerrados</span>
+                        <span class="kpi-box-badge">Cerrados</span>
                     </div>
-                    <div class="kpi-main-value">21</div>
-                    <div class="kpi-main-label">Leads ganados</div>
-                    <div class="kpi-main-sub">Tasa de cierre 11.4%</div>
+                    <div class="kpi-box-value">21</div>
+                    <div class="kpi-box-label">Leads ganados</div>
+                    <div class="kpi-box-sub">Tasa de cierre 11.4%</div>
                 </div>
-                <div class="kpi-main red">
-                    <div class="kpi-main-header">
-                        <div class="kpi-main-icon" style="background: rgba(170,24,44,0.08);">
+                <div class="kpi-box">
+                    <div class="kpi-box-top">
+                        <div class="kpi-box-icon" style="background: rgba(170,24,44,0.06); border-color: rgba(170,24,44,0.1);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-agricola)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                         </div>
-                        <span class="kpi-main-badge">Urgente</span>
+                        <span class="kpi-box-badge">Urgente</span>
                     </div>
-                    <div class="kpi-main-value">9</div>
-                    <div class="kpi-main-label">Requieren acción</div>
-                    <div class="kpi-main-sub">3 vencidas · 6 sin acción</div>
+                    <div class="kpi-box-value">9</div>
+                    <div class="kpi-box-label">Requieren acción</div>
+                    <div class="kpi-box-sub">3 vencidas · 6 sin acción</div>
                 </div>
             </div>
 
             <!-- Qué hacer ahora -->
-            <div class="action-section">
-                <div class="action-section-header">
-                    <div class="action-section-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        Qué hacer ahora
-                    </div>
+            <div class="dash-section">
+                <div class="dash-section-header">
+                    <div class="dash-section-title">Qué hacer ahora</div>
                     <span style="font-size: 0.75rem; color: var(--text-tertiary);">Acciones prioritarias</span>
                 </div>
-                <div class="action-list">
-                    <a href="leads.html?filter=vencidas" class="action-item">
-                        <div class="action-item-icon" style="background: rgba(212,126,0,0.1);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-construccion)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        </div>
-                        <div class="action-item-content">
-                            <div class="action-item-title">3 acciones vencidas</div>
-                            <div class="action-item-desc">Leads con próxima acción antes de hoy · Requieren atención inmediata</div>
-                        </div>
-                        <span class="action-item-badge warning">Urgente</span>
-                    </a>
-                    <a href="leads.html?filter=sin-accion" class="action-item">
-                        <div class="action-item-icon" style="background: rgba(170,24,44,0.1);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-agricola)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        </div>
-                        <div class="action-item-content">
-                            <div class="action-item-title">6 leads sin próxima acción</div>
-                            <div class="action-item-desc">Asignados hace más de 5 días · Programar seguimiento</div>
-                        </div>
-                        <span class="action-item-badge urgent">Importante</span>
-                    </a>
-                    <a href="leads.html?filter=sin-asignar" class="action-item">
-                        <div class="action-item-icon" style="background: rgba(20,63,127,0.1);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--craisa-primary)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        </div>
-                        <div class="action-item-content">
-                            <div class="action-item-title">2 leads sin asignar</div>
-                            <div class="action-item-desc">Ingresaron por el sitio web · Asignar a un vendedor</div>
-                        </div>
-                        <span class="action-item-badge info">Pendiente</span>
-                    </a>
+                <div class="dash-section-body">
+                    <div class="action-list">
+                        <a href="leads.html?filter=vencidas" class="action-row">
+                            <div class="action-row-icon" style="background: rgba(212,126,0,0.08);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-construccion)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <div class="action-row-content">
+                                <div class="action-row-title">3 acciones vencidas</div>
+                                <div class="action-row-desc">Leads con próxima acción antes de hoy · Requieren atención inmediata</div>
+                            </div>
+                            <span class="action-row-badge warning">Urgente</span>
+                        </a>
+                        <a href="leads.html?filter=sin-accion" class="action-row">
+                            <div class="action-row-icon" style="background: rgba(170,24,44,0.08);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-agricola)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            </div>
+                            <div class="action-row-content">
+                                <div class="action-row-title">6 leads sin próxima acción</div>
+                                <div class="action-row-desc">Asignados hace más de 5 días · Programar seguimiento</div>
+                            </div>
+                            <span class="action-row-badge urgent">Importante</span>
+                        </a>
+                        <a href="leads.html?filter=sin-asignar" class="action-row">
+                            <div class="action-row-icon" style="background: rgba(20,63,127,0.08);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="var(--craisa-primary)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <div class="action-row-content">
+                                <div class="action-row-title">2 leads sin asignar</div>
+                                <div class="action-row-desc">Ingresaron por el sitio web · Asignar a un vendedor</div>
+                            </div>
+                            <span class="action-row-badge info">Pendiente</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- Gráficas principales -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+            <!-- Grid: Estado + Líneas -->
+            <div class="dash-grid-2">
                 <!-- Estado de Leads -->
-                <div class="chart-card">
-                    <div class="chart-card-header">
-                        <div class="chart-card-title">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-                            Estado de los Leads
-                        </div>
-                        <span class="chart-card-subtitle">184 total</span>
+                <div class="dash-section" style="margin-bottom: 0;">
+                    <div class="dash-section-header">
+                        <div class="dash-section-title">Estado de los Leads</div>
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">184 total</span>
                     </div>
-                    <div class="chart-card-body">
-                        <div class="status-legend">
-                            <div class="status-item">
-                                <span class="status-dot" style="background: var(--estado-nuevo);"></span>
-                                <span class="status-name">Nuevo</span>
-                                <span class="status-count">27</span>
-                                <span class="status-pct">15%</span>
+                    <div class="dash-section-body">
+                        <div class="status-list">
+                            <div class="status-row">
+                                <span class="status-row-dot" style="background: var(--estado-nuevo);"></span>
+                                <span class="status-row-name">Nuevo</span>
+                                <div class="status-row-bar"><div class="status-row-fill" style="width: 15%; background: var(--estado-nuevo);"></div></div>
+                                <span class="status-row-count">27</span>
+                                <span class="status-row-pct">15%</span>
                             </div>
-                            <div class="status-item">
-                                <span class="status-dot" style="background: var(--estado-asignado);"></span>
-                                <span class="status-name">Asignado</span>
-                                <span class="status-count">22</span>
-                                <span class="status-pct">12%</span>
+                            <div class="status-row">
+                                <span class="status-row-dot" style="background: var(--estado-asignado);"></span>
+                                <span class="status-row-name">Asignado</span>
+                                <div class="status-row-bar"><div class="status-row-fill" style="width: 12%; background: var(--estado-asignado);"></div></div>
+                                <span class="status-row-count">22</span>
+                                <span class="status-row-pct">12%</span>
                             </div>
-                            <div class="status-item">
-                                <span class="status-dot" style="background: var(--estado-contactado);"></span>
-                                <span class="status-name">Contactado</span>
-                                <span class="status-count">40</span>
-                                <span class="status-pct">22%</span>
+                            <div class="status-row">
+                                <span class="status-row-dot" style="background: var(--estado-contactado);"></span>
+                                <span class="status-row-name">Contactado</span>
+                                <div class="status-row-bar"><div class="status-row-fill" style="width: 22%; background: var(--estado-contactado);"></div></div>
+                                <span class="status-row-count">40</span>
+                                <span class="status-row-pct">22%</span>
                             </div>
-                            <div class="status-item">
-                                <span class="status-dot" style="background: var(--estado-seguimiento);"></span>
-                                <span class="status-name">En seguimiento</span>
-                                <span class="status-count">44</span>
-                                <span class="status-pct">24%</span>
+                            <div class="status-row">
+                                <span class="status-row-dot" style="background: var(--estado-seguimiento);"></span>
+                                <span class="status-row-name">En seguimiento</span>
+                                <div class="status-row-bar"><div class="status-row-fill" style="width: 24%; background: var(--estado-seguimiento);"></div></div>
+                                <span class="status-row-count">44</span>
+                                <span class="status-row-pct">24%</span>
                             </div>
-                            <div class="status-item">
-                                <span class="status-dot" style="background: var(--estado-oportunidad);"></span>
-                                <span class="status-name">Oportunidad</span>
-                                <span class="status-count">24</span>
-                                <span class="status-pct">13%</span>
+                            <div class="status-row">
+                                <span class="status-row-dot" style="background: var(--estado-oportunidad);"></span>
+                                <span class="status-row-name">Oportunidad</span>
+                                <div class="status-row-bar"><div class="status-row-fill" style="width: 13%; background: var(--estado-oportunidad);"></div></div>
+                                <span class="status-row-count">24</span>
+                                <span class="status-row-pct">13%</span>
                             </div>
-                            <div class="status-item">
-                                <span class="status-dot" style="background: var(--estado-ganado);"></span>
-                                <span class="status-name">Ganado</span>
-                                <span class="status-count">21</span>
-                                <span class="status-pct">8%</span>
+                            <div class="status-row">
+                                <span class="status-row-dot" style="background: var(--estado-ganado);"></span>
+                                <span class="status-row-name">Ganado</span>
+                                <div class="status-row-bar"><div class="status-row-fill" style="width: 8%; background: var(--estado-ganado);"></div></div>
+                                <span class="status-row-count">21</span>
+                                <span class="status-row-pct">8%</span>
                             </div>
-                            <div class="status-item">
-                                <span class="status-dot" style="background: var(--estado-perdido);"></span>
-                                <span class="status-name">Perdido</span>
-                                <span class="status-count">16</span>
-                                <span class="status-pct">6%</span>
+                            <div class="status-row">
+                                <span class="status-row-dot" style="background: var(--estado-perdido);"></span>
+                                <span class="status-row-name">Perdido</span>
+                                <div class="status-row-bar"><div class="status-row-fill" style="width: 6%; background: var(--estado-perdido);"></div></div>
+                                <span class="status-row-count">16</span>
+                                <span class="status-row-pct">6%</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Por Línea de Negocio -->
-                <div class="chart-card">
-                    <div class="chart-card-header">
-                        <div class="chart-card-title">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                            Por Línea de Negocio
-                        </div>
-                        <span class="chart-card-subtitle">5 líneas</span>
+                <div class="dash-section" style="margin-bottom: 0;">
+                    <div class="dash-section-header">
+                        <div class="dash-section-title">Por Línea de Negocio</div>
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">5 líneas</span>
                     </div>
-                    <div class="chart-card-body">
-                        <div class="progress-row">
-                            <span class="progress-label">Agrícola</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 100%; background: var(--line-agricola);">62 leads</div>
+                    <div class="dash-section-body">
+                        <div class="progress-list">
+                            <div class="progress-item">
+                                <span class="progress-item-label">Agrícola</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 100%; background: var(--line-agricola);">62 leads</div>
+                                </div>
+                                <span class="progress-item-value">62</span>
                             </div>
-                            <span class="progress-value">62</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">Construcción</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 71%; background: var(--line-construccion);">44 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">Construcción</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 71%; background: var(--line-construccion);">44 leads</div>
+                                </div>
+                                <span class="progress-item-value">44</span>
                             </div>
-                            <span class="progress-value">44</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">Mov. de Carga</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 50%; background: var(--line-carga);">31 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">Mov. de Carga</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 50%; background: var(--line-carga);">31 leads</div>
+                                </div>
+                                <span class="progress-item-value">31</span>
                             </div>
-                            <span class="progress-value">31</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">Agr. Precisión</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 43.5%; background: var(--line-precision);">27 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">Agr. Precisión</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 43.5%; background: var(--line-precision);">27 leads</div>
+                                </div>
+                                <span class="progress-item-value">27</span>
                             </div>
-                            <span class="progress-value">27</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">Postventa</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 32.3%; background: var(--line-postventa);">20 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">Postventa</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 32.3%; background: var(--line-postventa);">20 leads</div>
+                                </div>
+                                <span class="progress-item-value">20</span>
                             </div>
-                            <span class="progress-value">20</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Segunda fila: Canal + Actividad -->
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+            <!-- Grid: Canal + Actividad -->
+            <div class="dash-grid-2">
                 <!-- Por Canal -->
-                <div class="chart-card">
-                    <div class="chart-card-header">
-                        <div class="chart-card-title">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                            Leads por Canal de Origen
-                        </div>
-                        <span class="chart-card-subtitle">9 canales activos</span>
+                <div class="dash-section" style="margin-bottom: 0;">
+                    <div class="dash-section-header">
+                        <div class="dash-section-title">Leads por Canal de Origen</div>
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">9 canales</span>
                     </div>
-                    <div class="chart-card-body">
-                        <div class="progress-row">
-                            <span class="progress-label">Sitio web</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 100%; background: var(--craisa-primary);">42 leads</div>
+                    <div class="dash-section-body">
+                        <div class="progress-list">
+                            <div class="progress-item">
+                                <span class="progress-item-label">Sitio web</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 100%; background: var(--craisa-primary);">42 leads</div>
+                                </div>
+                                <span class="progress-item-value">42</span>
                             </div>
-                            <span class="progress-value">42</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">WhatsApp</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 73.8%; background: var(--line-carga);">31 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">WhatsApp</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 73.8%; background: var(--line-carga);">31 leads</div>
+                                </div>
+                                <span class="progress-item-value">31</span>
                             </div>
-                            <span class="progress-value">31</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">Facebook</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 45.2%; background: var(--line-agricola);">19 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">Facebook</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 45.2%; background: var(--line-agricola);">19 leads</div>
+                                </div>
+                                <span class="progress-item-value">19</span>
                             </div>
-                            <span class="progress-value">19</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">Instagram</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 33.3%; background: var(--line-precision);">14 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">Instagram</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 33.3%; background: var(--line-precision);">14 leads</div>
+                                </div>
+                                <span class="progress-item-value">14</span>
                             </div>
-                            <span class="progress-value">14</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">Feria</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 28.6%; background: var(--line-construccion);">12 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">Feria</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 28.6%; background: var(--line-construccion);">12 leads</div>
+                                </div>
+                                <span class="progress-item-value">12</span>
                             </div>
-                            <span class="progress-value">12</span>
-                        </div>
-                        <div class="progress-row">
-                            <span class="progress-label">Llamada</span>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 23.8%; background: var(--carbon-gray);">10 leads</div>
+                            <div class="progress-item">
+                                <span class="progress-item-label">Llamada</span>
+                                <div class="progress-item-track">
+                                    <div class="progress-item-fill" style="width: 23.8%; background: var(--carbon-gray);">10 leads</div>
+                                </div>
+                                <span class="progress-item-value">10</span>
                             </div>
-                            <span class="progress-value">10</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Actividad Reciente -->
-                <div class="chart-card">
-                    <div class="chart-card-header">
-                        <div class="chart-card-title">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                            Actividad Reciente
-                        </div>
+                <div class="dash-section" style="margin-bottom: 0;">
+                    <div class="dash-section-header">
+                        <div class="dash-section-title">Actividad Reciente</div>
                         <a href="#" style="font-size: 0.75rem; color: var(--craisa-primary); text-decoration: none; font-weight: 600;">Ver todo →</a>
                     </div>
-                    <div class="chart-card-body" style="padding: 0.5rem 1.25rem 1rem;">
+                    <div class="dash-section-body" style="padding: 0.5rem 1.25rem 1rem;">
                         <div class="activity-list">
                             <div class="activity-row">
                                 <div class="activity-avatar" style="background: var(--line-agricola);">JP</div>
@@ -830,12 +795,9 @@
             </div>
 
             <!-- Tendencia -->
-            <div class="chart-card" style="margin-bottom: 1.5rem;">
-                <div class="chart-card-header">
-                    <div class="chart-card-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        Tendencia de Leads (30 días)
-                    </div>
+            <div class="dash-section">
+                <div class="dash-section-header">
+                    <div class="dash-section-title">Tendencia de Leads (30 días)</div>
                     <div style="display: flex; gap: 1.25rem; font-size: 0.75rem; color: var(--text-secondary);">
                         <span style="display: flex; align-items: center; gap: 0.375rem;">
                             <span style="width: 16px; height: 3px; background: var(--craisa-primary); border-radius: 2px;"></span>
@@ -847,8 +809,8 @@
                         </span>
                     </div>
                 </div>
-                <div class="chart-card-body" style="padding: 1rem 1.25rem 0.5rem;">
-                    <div class="trend-container">
+                <div class="dash-section-body" style="padding: 1rem 1.25rem 0.5rem;">
+                    <div class="trend-wrap">
                         <svg width="100%" height="160" viewBox="0 0 900 160" preserveAspectRatio="none" style="display: block;">
                             <!-- Grid lines -->
                             <g stroke="var(--border-light)" stroke-width="1">
@@ -867,7 +829,7 @@
                                 <text x="-8" y="164" text-anchor="end">0</text>
                             </g>
                             <!-- Area under leads line -->
-                            <path d="M0,120 C75,90 150,60 225,45 C300,30 375,75 450,60 C525,45 600,30 675,37 C750,45 825,30 900,22 L900,160 L0,160 Z" fill="rgba(20,63,127,0.06)"/>
+                            <path d="M0,120 C75,90 150,60 225,45 C300,30 375,75 450,60 C525,45 600,30 675,37 C750,45 825,30 900,22 L900,160 L0,160 Z" fill="rgba(20,63,127,0.05)"/>
                             <!-- Leads line -->
                             <path d="M0,120 C75,90 150,60 225,45 C300,30 375,75 450,60 C525,45 600,30 675,37 C750,45 825,30 900,22" fill="none" stroke="var(--craisa-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             <!-- Conversion line -->
@@ -891,7 +853,7 @@
             <!-- Footer -->
             <div class="dash-footer">
                 <div class="dash-footer-left">
-                    <img src="assets/logo-craisa.png" alt="CRAISA" style="height: 20px;">
+                    <img src="assets/logo-craisa.png" alt="CRAISA" style="height: 18px;">
                     <span>Última actualización: 22/10/2026 09:14 · Datos de prototipo</span>
                 </div>
                 <div class="dash-footer-right">
