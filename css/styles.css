@@ -295,6 +295,34 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0.25rem;
     color: var(--text-primary);
     font-family: var(--font-display);
+    text-transform: uppercase;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-tertiary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 2px;
+    background: var(--craisa-primary);
+}
+
+/* Controles de filtro */
+#searchInput:focus,
+.filter-select:focus,
+input[type="date"]:focus {
+    border-color: var(--craisa-primary) !important;
+    box-shadow: 0 0 0 3px rgba(20, 63, 127, 0.1);
 }
 
 .page-subtitle {
