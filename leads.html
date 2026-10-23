@@ -151,6 +151,32 @@
                 </div>
             </div>
 
+            <!-- Bulk Actions Bar -->
+            <div id="bulkActionsBar" style="display: none; margin-bottom: 1rem; padding: 0.75rem 1.25rem; background: rgba(20, 63, 127, 0.06); border: 1px solid rgba(20, 63, 127, 0.15); border-radius: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-weight: 600; font-size: 0.875rem; color: var(--craisa-primary);" id="selectedCount">0 seleccionados</span>
+                    <button class="btn btn-ghost" style="padding: 0.375rem 0.75rem; font-size: 0.75rem;" id="clearSelection">Limpiar</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" style="padding: 0.375rem 0.75rem; font-size: 0.75rem;" id="bulkAssign">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Asignar
+                    </button>
+                    <button class="btn btn-secondary" style="padding: 0.375rem 0.75rem; font-size: 0.75rem;" id="bulkStatus">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        Cambiar estado
+                    </button>
+                    <button class="btn btn-secondary" style="padding: 0.375rem 0.75rem; font-size: 0.75rem;" id="bulkExport">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Exportar seleccionados
+                    </button>
+                    <button class="btn btn-secondary" style="padding: 0.375rem 0.75rem; font-size: 0.75rem; color: var(--line-agricola);" id="bulkDelete">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+
             <!-- Tabla -->
             <div class="card">
                 <div class="card-body" style="padding: 0;">
@@ -158,12 +184,15 @@
                         <table class="table" id="leadsTable">
                             <thead>
                                 <tr>
+                                    <th style="width: 40px;"><input type="checkbox" id="selectAll" style="width: 16px; height: 16px; accent-color: var(--craisa-primary); cursor: pointer;"></th>
                                     <th style="width: 150px;">Código</th>
                                     <th style="width: 100px;">Fecha</th>
                                     <th style="width: 160px;">Cliente</th>
                                     <th style="min-width: 180px;">Empresa</th>
                                     <th style="width: 130px;">Canal</th>
                                     <th style="width: 160px;">Línea</th>
+                                    <th style="width: 80px;">Score</th>
+                                    <th style="width: 100px;">Valor Est.</th>
                                     <th style="width: 150px;">Estado</th>
                                     <th style="width: 130px;">Responsable</th>
                                     <th style="width: 120px;">Próx. Acción</th>
@@ -218,34 +247,34 @@
     <script>
     // Datos de leads ficticios
     const LEADS_DATA = [
-        { code: 'LEAD-2026-0142', date: '20/10/2026', client: 'Ana Rodríguez', company: 'Finca La Sabana', canal: 'WhatsApp', linea: 'Agrícola', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
-        { code: 'LEAD-2026-0141', date: '19/10/2026', client: 'Luis Miranda', company: 'Constructora Hidalgo', canal: 'Sitio web', linea: 'Construcción', estado: 'seguimiento', responsable: 'M. Rojas', proxAccion: '22/10', proxFecha: '22/10/2026' },
-        { code: 'LEAD-2026-0140', date: '19/10/2026', client: 'Banacol S.A.', company: 'Banacol', canal: 'Feria', linea: 'Agrícola', estado: 'oportunidad', responsable: 'J. Pérez', proxAccion: '23/10', proxFecha: '23/10/2026' },
-        { code: 'LEAD-2026-0139', date: '18/10/2026', client: 'Denis Vargas', company: 'Materiales Ciudad Neyly', canal: 'Instagram', linea: 'Movimiento de Carga', estado: 'contactado', responsable: 'S. Mora', proxAccion: '24/10', proxFecha: '24/10/2026' },
-        { code: 'LEAD-2026-0138', date: '18/10/2026', client: 'Carlos Quesada', company: 'Del Monte', canal: 'Visita comercial', linea: 'Agricultura de Precisión', estado: 'asignado', responsable: 'M. Rojas', proxAccion: '21/10', proxFecha: '21/10/2026' },
-        { code: 'LEAD-2026-0137', date: '17/10/2026', client: 'Gonar Costa Rica', company: 'Gonar', canal: 'Correo', linea: 'Postventa', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026' },
-        { code: 'LEAD-2026-0136', date: '17/10/2026', client: 'Wilber Rojas', company: 'Plásticos WR', canal: 'Facebook', linea: 'Construcción', estado: 'ganado', responsable: 'J. Pérez', proxAccion: '—', proxFecha: null },
-        { code: 'LEAD-2026-0135', date: '16/10/2026', client: 'Mainor Alfaro', company: 'Transportes Alfaro', canal: 'Llamada', linea: 'Movimiento de Carga', estado: 'perdido', responsable: 'S. Mora', proxAccion: '—', proxFecha: null },
-        { code: 'LEAD-2026-0134', date: '16/10/2026', client: 'Tornillos del Valle', company: 'Tornillos CR', canal: 'Sitio web', linea: 'Institucional', estado: 'contactado', responsable: 'M. Rojas', proxAccion: '23/10', proxFecha: '23/10/2026' },
-        { code: 'LEAD-2026-0133', date: '15/10/2026', client: 'El Viejo Comercial', company: 'El Viejo', canal: 'Otro', linea: 'Construcción', estado: 'asignado', responsable: 'J. Pérez', proxAccion: '21/10', proxFecha: '21/10/2026' },
-        { code: 'LEAD-2026-0132', date: '15/10/2026', client: 'María Solís', company: 'AgroSol', canal: 'WhatsApp', linea: 'Agrícola', estado: 'nuevo', responsable: 'M. Rojas', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
-        { code: 'LEAD-2026-0131', date: '14/10/2026', client: 'Roberto Castro', company: 'Castro y Asociados', canal: 'Sitio web', linea: 'Construcción', estado: 'oportunidad', responsable: 'J. Pérez', proxAccion: '23/10', proxFecha: '23/10/2026' },
-        { code: 'LEAD-2026-0130', date: '14/10/2026', client: 'Logística Sur', company: 'Logística Sur S.A.', canal: 'Llamada', linea: 'Movimiento de Carga', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026' },
-        { code: 'LEAD-2026-0129', date: '13/10/2026', client: 'Precisión Tech', company: 'Precisión Tech CR', canal: 'Correo', linea: 'Agricultura de Precisión', estado: 'nuevo', responsable: 'A. López', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
-        { code: 'LEAD-2026-0128', date: '12/10/2026', client: 'Fertilizantes del Norte', company: 'Fertinorte', canal: 'Feria', linea: 'Agrícola', estado: 'contactado', responsable: 'M. Rojas', proxAccion: '24/10', proxFecha: '24/10/2026' },
-        { code: 'LEAD-2026-0127', date: '11/10/2026', client: 'Constructora M&V', company: 'M&V Construcciones', canal: 'Visita comercial', linea: 'Construcción', estado: 'asignado', responsable: 'J. Pérez', proxAccion: '21/10', proxFecha: '21/10/2026' },
-        { code: 'LEAD-2026-0126', date: '11/10/2026', client: 'Carga Pesada SA', company: 'Carga Pesada', canal: 'WhatsApp', linea: 'Movimiento de Carga', estado: 'ganado', responsable: 'S. Mora', proxAccion: '—', proxFecha: null },
-        { code: 'LEAD-2026-0125', date: '10/10/2026', client: 'Postventa Norte', company: 'Servicios Postventa', canal: 'Correo', linea: 'Postventa', estado: 'perdido', responsable: 'M. Rojas', proxAccion: '—', proxFecha: null },
-        { code: 'LEAD-2026-0124', date: '09/10/2026', client: 'Drones Agro', company: 'Drones Agro CR', canal: 'Instagram', linea: 'Agricultura de Precisión', estado: 'oportunidad', responsable: 'A. López', proxAccion: '24/10', proxFecha: '24/10/2026' },
-        { code: 'LEAD-2026-0123', date: '08/10/2026', client: 'Hacienda San Juan', company: 'Hacienda San Juan', canal: 'Sitio web', linea: 'Agrícola', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0142', date: '20/10/2026', client: 'Ana Rodríguez', company: 'Finca La Sabana', canal: 'WhatsApp', linea: 'Agrícola', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0141', date: '19/10/2026', client: 'Luis Miranda', company: 'Constructora Hidalgo', canal: 'Sitio web', linea: 'Construcción', estado: 'seguimiento', responsable: 'M. Rojas', proxAccion: '22/10', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0140', date: '19/10/2026', client: 'Banacol S.A.', company: 'Banacol', canal: 'Feria', linea: 'Agrícola', estado: 'oportunidad', responsable: 'J. Pérez', proxAccion: '23/10', proxFecha: '23/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0139', date: '18/10/2026', client: 'Denis Vargas', company: 'Materiales Ciudad Neyly', canal: 'Instagram', linea: 'Movimiento de Carga', estado: 'contactado', responsable: 'S. Mora', proxAccion: '24/10', proxFecha: '24/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0138', date: '18/10/2026', client: 'Carlos Quesada', company: 'Del Monte', canal: 'Visita comercial', linea: 'Agricultura de Precisión', estado: 'asignado', responsable: 'M. Rojas', proxAccion: '21/10', proxFecha: '21/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0137', date: '17/10/2026', client: 'Gonar Costa Rica', company: 'Gonar', canal: 'Correo', linea: 'Postventa', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0136', date: '17/10/2026', client: 'Wilber Rojas', company: 'Plásticos WR', canal: 'Facebook', linea: 'Construcción', estado: 'ganado', responsable: 'J. Pérez', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
+        { code: 'LEAD-2026-0135', date: '16/10/2026', client: 'Mainor Alfaro', company: 'Transportes Alfaro', canal: 'Llamada', linea: 'Movimiento de Carga', estado: 'perdido', responsable: 'S. Mora', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
+        { code: 'LEAD-2026-0134', date: '16/10/2026', client: 'Tornillos del Valle', company: 'Tornillos CR', canal: 'Sitio web', linea: 'Institucional', estado: 'contactado', responsable: 'M. Rojas', proxAccion: '23/10', proxFecha: '23/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0133', date: '15/10/2026', client: 'El Viejo Comercial', company: 'El Viejo', canal: 'Otro', linea: 'Construcción', estado: 'asignado', responsable: 'J. Pérez', proxAccion: '21/10', proxFecha: '21/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0132', date: '15/10/2026', client: 'María Solís', company: 'AgroSol', canal: 'WhatsApp', linea: 'Agrícola', estado: 'nuevo', responsable: 'M. Rojas', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0131', date: '14/10/2026', client: 'Roberto Castro', company: 'Castro y Asociados', canal: 'Sitio web', linea: 'Construcción', estado: 'oportunidad', responsable: 'J. Pérez', proxAccion: '23/10', proxFecha: '23/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0130', date: '14/10/2026', client: 'Logística Sur', company: 'Logística Sur S.A.', canal: 'Llamada', linea: 'Movimiento de Carga', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0129', date: '13/10/2026', client: 'Precisión Tech', company: 'Precisión Tech CR', canal: 'Correo', linea: 'Agricultura de Precisión', estado: 'nuevo', responsable: 'A. López', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0128', date: '12/10/2026', client: 'Fertilizantes del Norte', company: 'Fertinorte', canal: 'Feria', linea: 'Agrícola', estado: 'contactado', responsable: 'M. Rojas', proxAccion: '24/10', proxFecha: '24/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0127', date: '11/10/2026', client: 'Constructora M&V', company: 'M&V Construcciones', canal: 'Visita comercial', linea: 'Construcción', estado: 'asignado', responsable: 'J. Pérez', proxAccion: '21/10', proxFecha: '21/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0126', date: '11/10/2026', client: 'Carga Pesada SA', company: 'Carga Pesada', canal: 'WhatsApp', linea: 'Movimiento de Carga', estado: 'ganado', responsable: 'S. Mora', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
+        { code: 'LEAD-2026-0125', date: '10/10/2026', client: 'Postventa Norte', company: 'Servicios Postventa', canal: 'Correo', linea: 'Postventa', estado: 'perdido', responsable: 'M. Rojas', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
+        { code: 'LEAD-2026-0124', date: '09/10/2026', client: 'Drones Agro', company: 'Drones Agro CR', canal: 'Instagram', linea: 'Agricultura de Precisión', estado: 'oportunidad', responsable: 'A. López', proxAccion: '24/10', proxFecha: '24/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0123', date: '08/10/2026', client: 'Hacienda San Juan', company: 'Hacienda San Juan', canal: 'Sitio web', linea: 'Agrícola', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
         // ... más datos para paginación
-        { code: 'LEAD-2026-0122', date: '07/10/2026', client: 'Cliente 22', company: 'Empresa 22', canal: 'Facebook', linea: 'Construcción', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '23/10', proxFecha: '23/10/2026' },
-        { code: 'LEAD-2026-0121', date: '06/10/2026', client: 'Cliente 21', company: 'Empresa 21', canal: 'Llamada', linea: 'Institucional', estado: 'asignado', responsable: 'M. Rojas', proxAccion: '21/10', proxFecha: '21/10/2026' },
-        { code: 'LEAD-2026-0120', date: '05/10/2026', client: 'Cliente 20', company: 'Empresa 20', canal: 'Otro', linea: 'Postventa', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
-        { code: 'LEAD-2026-0119', date: '04/10/2026', client: 'Cliente 19', company: 'Empresa 19', canal: 'Sitio web', linea: 'Agrícola', estado: 'contactado', responsable: 'A. López', proxAccion: '24/10', proxFecha: '24/10/2026' },
-        { code: 'LEAD-2026-0118', date: '03/10/2026', client: 'Cliente 18', company: 'Empresa 18', canal: 'WhatsApp', linea: 'Construcción', estado: 'oportunidad', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026' },
-        { code: 'LEAD-2026-0117', date: '02/10/2026', client: 'Cliente 17', company: 'Empresa 17', canal: 'Feria', linea: 'Movimiento de Carga', estado: 'ganado', responsable: 'M. Rojas', proxAccion: '—', proxFecha: null },
-        { code: 'LEAD-2026-0116', date: '01/10/2026', client: 'Cliente 16', company: 'Empresa 16', canal: 'Visita comercial', linea: 'Agricultura de Precisión', estado: 'perdido', responsable: 'J. Pérez', proxAccion: '—', proxFecha: null }
+        { code: 'LEAD-2026-0122', date: '07/10/2026', client: 'Cliente 22', company: 'Empresa 22', canal: 'Facebook', linea: 'Construcción', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '23/10', proxFecha: '23/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0121', date: '06/10/2026', client: 'Cliente 21', company: 'Empresa 21', canal: 'Llamada', linea: 'Institucional', estado: 'asignado', responsable: 'M. Rojas', proxAccion: '21/10', proxFecha: '21/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0120', date: '05/10/2026', client: 'Cliente 20', company: 'Empresa 20', canal: 'Otro', linea: 'Postventa', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0119', date: '04/10/2026', client: 'Cliente 19', company: 'Empresa 19', canal: 'Sitio web', linea: 'Agrícola', estado: 'contactado', responsable: 'A. López', proxAccion: '24/10', proxFecha: '24/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0118', date: '03/10/2026', client: 'Cliente 18', company: 'Empresa 18', canal: 'WhatsApp', linea: 'Construcción', estado: 'oportunidad', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
+        { code: 'LEAD-2026-0117', date: '02/10/2026', client: 'Cliente 17', company: 'Empresa 17', canal: 'Feria', linea: 'Movimiento de Carga', estado: 'ganado', responsable: 'M. Rojas', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
+        { code: 'LEAD-2026-0116', date: '01/10/2026', client: 'Cliente 16', company: 'Empresa 16', canal: 'Visita comercial', linea: 'Agricultura de Precisión', estado: 'perdido', responsable: 'J. Pérez', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' }
     ];
 
     // Mapeos
@@ -319,6 +348,7 @@
             
             return `
                 <tr data-code="${lead.code}" style="cursor: pointer;">
+                    <td><input type="checkbox" class="lead-checkbox" data-code="${lead.code}" style="width: 16px; height: 16px; accent-color: var(--craisa-primary); cursor: pointer;"></td>
                     <td><span style="font-weight: 700; color: var(--craisa-accent); font-size: 0.8rem;">${lead.code}</span></td>
                     <td><span style="color: var(--text-secondary);">${lead.date}</span></td>
                     <td><span style="font-weight: 600;">${lead.client}</span></td>
@@ -330,6 +360,12 @@
                             ${LINEA_LABELS[lead.linea] || lead.linea}
                         </span>
                     </td>
+                    <td>
+                        <span style="color: ${lead.score >= 4 ? 'var(--line-construccion)' : lead.score >= 3 ? 'var(--craisa-primary)' : 'var(--text-tertiary)'}; font-size: 0.8rem; font-weight: 600;" title="Score de prioridad (1-5)">
+                            ${'★'.repeat(lead.score)}${'☆'.repeat(5 - lead.score)}
+                        </span>
+                    </td>
+                    <td><span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 600;">${lead.valorEstimado || '—'}</span></td>
                     <td><span class="badge ${estadoClass}"><span class="badge-dot"></span> ${lead.estado.charAt(0).toUpperCase() + lead.estado.slice(1)}</span></td>
                     <td><span style="color: var(--text-secondary); font-size: 0.8rem;">${RESPONSABLE_LABELS[lead.responsable] || lead.responsable}</span></td>
                     <td ${proxClass}>${lead.proxAccion}</td>
@@ -528,6 +564,59 @@
             window.CRAISA.showNotification('CSV exportado correctamente (' + filteredLeads.length + ' registros)', 'success');
         }
     }
+
+    // Bulk selection
+    const selectAll = document.getElementById('selectAll');
+    const bulkActionsBar = document.getElementById('bulkActionsBar');
+    const selectedCount = document.getElementById('selectedCount');
+    const clearSelection = document.getElementById('clearSelection');
+
+    function updateBulkActions() {
+        const checked = document.querySelectorAll('.lead-checkbox:checked');
+        if (checked.length > 0) {
+            bulkActionsBar.style.display = 'flex';
+            selectedCount.textContent = checked.length + ' seleccionado' + (checked.length > 1 ? 's' : '');
+        } else {
+            bulkActionsBar.style.display = 'none';
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            document.querySelectorAll('.lead-checkbox').forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            updateBulkActions();
+        });
+    }
+
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('lead-checkbox')) {
+            updateBulkActions();
+            const allChecked = document.querySelectorAll('.lead-checkbox').length === document.querySelectorAll('.lead-checkbox:checked').length;
+            if (selectAll) selectAll.checked = allChecked;
+        }
+    });
+
+    if (clearSelection) {
+        clearSelection.addEventListener('click', function() {
+            document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = false);
+            if (selectAll) selectAll.checked = false;
+            updateBulkActions();
+        });
+    }
+
+    ['bulkAssign', 'bulkStatus', 'bulkExport', 'bulkDelete'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener('click', function() {
+                const count = document.querySelectorAll('.lead-checkbox:checked').length;
+                if (window.CRAISA) {
+                    window.CRAISA.showNotification('Acción aplicada a ' + count + ' lead(s)', 'success');
+                }
+            });
+        }
+    });
 
     // Initial render
     renderLeads();
