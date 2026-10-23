@@ -1257,6 +1257,62 @@
         </div>
     </main>
 
+    <script>
+    // Period filter functionality
+    const periodSelect = document.querySelector('.page-actions select');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function() {
+            const period = this.value;
+            // Update subtitle
+            const subtitle = document.querySelector('.craisa-hero-sub');
+            if (subtitle) {
+                const periodLabels = {
+                    'Últimos 30 días': 'Últimos 30 días',
+                    'Últimos 7 días': 'Últimos 7 días',
+                    'Este mes': 'Mes actual',
+                    'Trimestre actual': 'Trimestre actual'
+                };
+                subtitle.textContent = 'Resumen de la gestión de leads · ' + (periodLabels[period] || period) + ' · Actualizado 22/10/2026';
+            }
+            if (window.CRAISA) {
+                window.CRAISA.showNotification('Periodo actualizado: ' + period, 'info');
+            }
+        });
+    }
+
+    // Quick filter active state
+    const quickFilters = document.querySelectorAll('.quick-filter');
+    quickFilters.forEach(filter => {
+        filter.addEventListener('click', function(e) {
+            // Remove active from all
+            quickFilters.forEach(f => f.classList.remove('active'));
+            // Add active to clicked
+            this.classList.add('active');
+        });
+    });
+
+    // KPI hover tooltips
+    const kpiBoxes = document.querySelectorAll('.kpi-box');
+    kpiBoxes.forEach(box => {
+        box.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        box.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Section hover effect for hero
+    const hero = document.querySelector('.craisa-hero');
+    if (hero) {
+        hero.addEventListener('mouseenter', function() {
+            this.style.borderColor = 'var(--craisa-primary)';
+        });
+        hero.addEventListener('mouseleave', function() {
+            this.style.borderColor = 'var(--border-default)';
+        });
+    }
+    </script>
     <script src="js/app.js"></script>
 </body>
 </html>
