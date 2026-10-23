@@ -133,9 +133,9 @@
                         <!-- Fechas -->
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <span style="font-size: 0.75rem; color: var(--text-tertiary);">Desde</span>
-                            <input type="date" style="padding: 0.625rem 0.75rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); outline: none;">
+                            <input type="date" id="dateFrom" style="padding: 0.625rem 0.75rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); outline: none;">
                             <span style="font-size: 0.75rem; color: var(--text-tertiary);">Hasta</span>
-                            <input type="date" style="padding: 0.625rem 0.75rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); outline: none;">
+                            <input type="date" id="dateTo" style="padding: 0.625rem 0.75rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); outline: none;">
                         </div>
 
                         <!-- Limpiar filtros -->
@@ -334,6 +334,15 @@
     const clearFilters = document.getElementById('clearFilters');
     const clearFiltersFromEmpty = document.getElementById('clearFiltersFromEmpty');
     const exportBtn = document.getElementById('exportBtn');
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
+
+    // Convierte DD/MM/AAAA a Date local
+    function parseLeadDate(value) {
+        if (!value || !/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return null;
+        const [d, m, y] = value.split('/').map(Number);
+        return new Date(y, m - 1, d);
+    }
 
     // Renderizado
     function renderLeads() {
@@ -457,6 +466,10 @@
         const canal = canalFilter.value;
         const linea = lineaFilter.value;
         const responsable = responsableFilter.value;
+        const fromValue = dateFrom.value;
+        const toValue = dateTo.value;
+        const fromDate = fromValue ? new Date(fromValue + 'T00:00:00') : null;
+        const toDate = toValue ? new Date(toValue + 'T23:59:59') : null;
 
         filteredLeads = LEADS_DATA.filter(lead => {
             const matchesSearch = !search || 
@@ -469,6 +482,9 @@
             const matchesCanal = !canal || canalKey(lead.canal) === canal;
             const matchesLinea = !linea || lineaKey(lead.linea) === linea;
             const matchesResponsable = !responsable || responsableKey(lead.responsable) === responsable;
+            const leadDate = parseLeadDate(lead.date);
+            const matchesFrom = !fromDate || (leadDate && leadDate >= fromDate);
+            const matchesTo = !toDate || (leadDate && leadDate <= toDate);
 
             // Special filters from dashboard
             let matchesSpecial = true;
@@ -487,7 +503,7 @@
                 matchesSpecial = lead.proxAccion === '—' || !lead.proxAccion || lead.proxAccion === null;
             }
 
-            return matchesSearch && matchesEstado && matchesCanal && matchesLinea && matchesResponsable && matchesSpecial;
+            return matchesSearch && matchesEstado && matchesCanal && matchesLinea && matchesResponsable && matchesFrom && matchesTo && matchesSpecial;
         });
 
         currentPage = 1;
@@ -502,6 +518,8 @@
         if (canalFilter.value) filters.push({ label: 'Canal: ' + CANAL_LABELS[canalFilter.value], key: 'canal' });
         if (lineaFilter.value) filters.push({ label: 'Línea: ' + LINEA_LABELS[lineaFilter.value], key: 'linea' });
         if (responsableFilter.value) filters.push({ label: 'Responsable: ' + RESPONSABLE_LABELS[responsableFilter.value], key: 'responsable' });
+        if (dateFrom.value) filters.push({ label: 'Desde: ' + dateFrom.value, key: 'dateFrom' });
+        if (dateTo.value) filters.push({ label: 'Hasta: ' + dateTo.value, key: 'dateTo' });
 
         if (specialFilter) {
             const specialLabels = {
@@ -532,6 +550,8 @@
             case 'canal': canalFilter.value = ''; break;
             case 'linea': lineaFilter.value = ''; break;
             case 'responsable': responsableFilter.value = ''; break;
+            case 'dateFrom': dateFrom.value = ''; break;
+            case 'dateTo': dateTo.value = ''; break;
             case 'special': specialFilter = null; break;
         }
         applyFilters();
@@ -544,7 +564,8 @@
         lineaFilter.value = '';
         responsableFilter.value = '';
         specialFilter = null;
-        document.querySelectorAll('input[type="date"]').forEach(i => i.value = '');
+        dateFrom.value = '';
+        dateTo.value = '';
         applyFilters();
     }
 
@@ -565,6 +586,10 @@
 
     clearFilters.addEventListener('click', clearAllFilters);
     clearFiltersFromEmpty.addEventListener('click', clearAllFilters);
+
+    [dateFrom, dateTo].forEach(input => {
+        input.addEventListener('change', applyFilters);
+    });
 
     prevPage.addEventListener('click', () => {
         if (currentPage > 1) {

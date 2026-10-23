@@ -1,0 +1,164 @@
+// CRAISA · Sistema de Gestión de Leads
+// Esquema portable SQLite (desarrollo) / PostgreSQL (producción).
+//
+// Los campos enumerados se modelan como String para mantener un único esquema
+// entre ambos motores (SQLite no soporta enums nativos en Prisma). Los valores
+// permitidos están documentados en docs/modelo-datos.md y se validan en la capa
+// de aplicación (Zod) antes de escribir.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // cambiar a "postgresql" en producción
+  url      = env("DATABASE_URL")
+}
+
+/// Usuarios internos de CRAISA. Roles: ADMIN | VENDEDOR | MERCADEO
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("VENDEDOR")
+  /// Línea de negocio principal del vendedor (clave de LineaNegocio)
+  line         String?
+  phone        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  leads       Lead[]        @relation("LeadResponsable")
+  interactions Interaction[]
+  tasks       Task[]        @relation("TaskAssignee")
+  auditLogs   AuditLog[]
+
+  @@index([role, active])
+  @@map("users")
+}
+
+/// Lead comercial. `code` es el identificador visible (LEAD-AAAA-####).
+model Lead {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  /// Fecha de ingreso declarada por el canal; createdAt conserva la fecha de sistema
+  entryDate      DateTime @default(now())
+  firstName      String
+  company        String?
+  phone          String
+  email          String?
+  /// Clave de Canal: web | facebook | instagram | whatsapp | llamada |
+  /// correo | feria | visita | otro
+  channel        String
+  /// Clave de LineaNegocio: agricola | construccion | carga | precision |
+  /// postventa | administrativo
+  businessLine   String
+  product        String?
+  description    String?
+  /// Clave de EstadoLead: nuevo | asignado | contactado | seguimiento |
+  /// oportunidad | ganado | perdido
+  status         String   @default("nuevo")
+  /// Prioridad 1–5 calculada o ajustada manualmente
+  score          Int      @default(3)
+  /// Monto estimado en colones costarricenses
+  estimatedValue Int?
+  lossReason     String?
+  /// Fecha para volver a contactar un lead perdido o en pausa
+  recontactAt    DateTime?
+  sourceDetail   String?
+  responsableId  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  responsable  User?        @relation("LeadResponsable", fields: [responsableId], references: [id], onDelete: SetNull)
+  interactions Interaction[]
+  tasks        Task[]
+  tags         LeadTag[]
+  auditLogs    AuditLog[]
+
+  @@index([status, updatedAt])
+  @@index([responsableId, status])
+  @@index([channel])
+  @@index([businessLine])
+  @@index([entryDate])
+  @@map("leads")
+}
+
+/// Bitácora del lead: notas, llamadas, correos, reuniones y cambios de estado.
+model Interaction {
+  id            String   @id @default(cuid())
+  leadId        String
+  userId        String?
+  /// nota | llamada | correo | whatsapp | reunion | cambio-estado | sistema
+  type          String   @default("nota")
+  content       String
+  previousStatus String?
+  newStatus      String?
+  createdAt     DateTime @default(now())
+
+  lead Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([leadId, createdAt])
+  @@map("interactions")
+}
+
+/// Próxima acción / tarea asociada a un lead.
+model Task {
+  id           String    @id @default(cuid())
+  leadId       String
+  assignedToId String?
+  title        String
+  notes        String?
+  dueDate      DateTime
+  completed    Boolean   @default(false)
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  lead       Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  assignedTo User? @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([dueDate, completed])
+  @@index([assignedToId, completed])
+  @@map("tasks")
+}
+
+/// Etiquetas libres para segmentar leads (feria, cliente estratégico, etc.).
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  color String @default("#143F7F")
+
+  leads LeadTag[]
+
+  @@map("tags")
+}
+
+model LeadTag {
+  leadId String
+  tagId  String
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([leadId, tagId])
+  @@map("lead_tags")
+}
+
+/// Trazabilidad de acciones sensibles (cambios de estado, reasignaciones, borrados).
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  leadId    String?
+  action    String
+  detail    String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([leadId, createdAt])
+  @@map("audit_logs")
+}
