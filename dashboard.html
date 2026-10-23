@@ -10,59 +10,110 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <style>
-        /* === Dashboard estilo CRAISA machote === */
+        /* === Dashboard con identidad CRAISA === */
 
-        /* Bienvenida */
-        .dash-welcome {
-            background: #FFFFFF;
-            border: 1px solid var(--border-default);
+        /* Hero de bienvenida (estilo machote) */
+        .craisa-hero {
+            background: linear-gradient(135deg, #143F7F 0%, #0B2450 60%, #111418 100%);
+            color: white;
             border-radius: 8px;
-            padding: 1.5rem;
+            padding: 2rem 2rem;
             margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .craisa-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.15;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.08) 20px, rgba(255,255,255,0.08) 40px);
+        }
+        .craisa-hero::after {
+            content: '';
+            position: absolute;
+            -right: 2rem;
+            -top: 2rem;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            filter: blur(40px);
+        }
+        .craisa-hero-content {
+            position: relative;
+            z-index: 1;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 1rem;
-            box-shadow: var(--shadow-card);
+            gap: 1.5rem;
         }
-        .dash-welcome-left h2 {
-            font-size: 1.375rem;
+        .craisa-hero-left {
+            flex: 1;
+            min-width: 280px;
+        }
+        .craisa-hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .craisa-hero-eyebrow::before {
+            content: '';
+            width: 24px;
+            height: 2px;
+            background: #B2D043;
+        }
+        .craisa-hero-title {
+            font-size: 1.75rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: -0.02em;
-            color: var(--text-primary);
+            color: white;
             font-family: var(--font-display);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.375rem;
+            line-height: 1.1;
         }
-        .dash-welcome-left p {
+        .craisa-hero-sub {
             font-size: 0.875rem;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.8);
+            max-width: 480px;
         }
-        .dash-welcome-right {
+        .craisa-hero-right {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             flex-wrap: wrap;
         }
-        .dash-welcome-stat {
-            text-align: right;
+        .craisa-hero-stat {
+            text-align: center;
+            padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            backdrop-filter: blur(4px);
         }
-        .dash-welcome-stat-value {
+        .craisa-hero-stat-value {
             font-size: 1.5rem;
             font-weight: 800;
-            color: var(--craisa-primary);
+            color: white;
             font-family: var(--font-display);
             line-height: 1;
         }
-        .dash-welcome-stat-label {
-            font-size: 0.7rem;
-            color: var(--text-tertiary);
+        .craisa-hero-stat-label {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.7);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-top: 0.25rem;
         }
 
-        /* KPIs */
+        /* KPIs con identidad */
         .kpi-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -77,35 +128,47 @@
             box-shadow: var(--shadow-card);
             transition: all 0.2s ease;
             position: relative;
+            overflow: hidden;
         }
         .kpi-box:hover {
             border-color: var(--craisa-primary);
             box-shadow: var(--shadow-md);
         }
+        .kpi-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+        .kpi-box.blue::before { background: var(--craisa-primary); }
+        .kpi-box.orange::before { background: var(--line-construccion); }
+        .kpi-box.green::before { background: var(--line-carga); }
+        .kpi-box.red::before { background: var(--line-agricola); }
         .kpi-box-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 0.75rem;
+            padding-left: 0.5rem;
         }
         .kpi-box-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(20, 63, 127, 0.06);
-            border: 1px solid rgba(20, 63, 127, 0.1);
         }
-        .kpi-box-icon svg { width: 20px; height: 20px; }
+        .kpi-box-icon svg { width: 18px; height: 18px; }
         .kpi-box-badge {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.08em;
             padding: 0.2rem 0.5rem;
-            border-radius: 4px;
+            border-radius: 3px;
             background: var(--bg-subtle);
             color: var(--text-tertiary);
         }
@@ -116,19 +179,22 @@
             font-family: var(--font-display);
             color: var(--text-primary);
             margin-bottom: 0.25rem;
+            padding-left: 0.5rem;
         }
         .kpi-box-label {
             font-size: 0.8125rem;
             color: var(--text-secondary);
             font-weight: 500;
+            padding-left: 0.5rem;
         }
         .kpi-box-sub {
             font-size: 0.7rem;
             color: var(--text-tertiary);
             margin-top: 0.375rem;
+            padding-left: 0.5rem;
         }
 
-        /* Sección */
+        /* Sección con identidad */
         .dash-section {
             background: #FFFFFF;
             border: 1px solid var(--border-default);
@@ -146,10 +212,10 @@
             background: #FAFBFC;
         }
         .dash-section-title {
-            font-size: 0.9375rem;
+            font-size: 0.875rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
             color: var(--text-primary);
             font-family: var(--font-display);
             display: flex;
@@ -159,7 +225,7 @@
         .dash-section-title::before {
             content: '';
             width: 3px;
-            height: 16px;
+            height: 14px;
             background: var(--craisa-primary);
             border-radius: 2px;
         }
@@ -212,7 +278,7 @@
             color: var(--text-secondary);
         }
         .action-row-badge {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -408,7 +474,7 @@
             font-size: 0.75rem;
         }
 
-        /* Funnel de conversión */
+        /* Funnel */
         .funnel-container {
             display: flex;
             flex-direction: column;
@@ -522,57 +588,6 @@
             width: 56px;
         }
 
-        /* Pipeline value */
-        .pipeline-box {
-            background: linear-gradient(135deg, var(--craisa-primary) 0%, var(--craisa-primary-deep) 100%);
-            color: white;
-            border-radius: 8px;
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .pipeline-left h3 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 0.25rem;
-            font-family: var(--font-display);
-        }
-        .pipeline-value {
-            font-size: 2rem;
-            font-weight: 800;
-            font-family: var(--font-display);
-            color: white;
-            line-height: 1;
-        }
-        .pipeline-right {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-        .pipeline-stat {
-            text-align: center;
-        }
-        .pipeline-stat-value {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: white;
-            font-family: var(--font-display);
-        }
-        .pipeline-stat-label {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.7);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 0.125rem;
-        }
-
         /* Quick filters */
         .quick-filters {
             display: flex;
@@ -620,15 +635,16 @@
         @media (max-width: 1024px) {
             .kpi-row { grid-template-columns: repeat(2, 1fr); }
             .dash-grid-2 { grid-template-columns: 1fr; }
-            .dash-welcome { flex-direction: column; align-items: flex-start; }
+            .craisa-hero-content { flex-direction: column; align-items: flex-start; }
         }
         @media (max-width: 768px) {
             .kpi-row { grid-template-columns: 1fr; }
-            .pipeline-right { width: 100%; justify-content: space-around; }
+            .craisa-hero-right { width: 100%; justify-content: space-around; }
         }
     </style>
 </head>
 <body>
+    <!-- Header CRAISA -->
     <header class="header">
         <div class="container header-content">
             <div class="logo-section">
@@ -670,31 +686,34 @@
 
     <main class="main">
         <div class="container">
-            <!-- Welcome -->
-            <div class="dash-welcome">
-                <div class="dash-welcome-left">
-                    <h2>Dashboard Comercial</h2>
-                    <p>Resumen de la gestión de leads · Últimos 30 días · Actualizado 22/10/2026</p>
-                </div>
-                <div class="dash-welcome-right">
-                    <div class="dash-welcome-stat">
-                        <div class="dash-welcome-stat-value">184</div>
-                        <div class="dash-welcome-stat-label">Leads totales</div>
+            <!-- Hero CRAISA -->
+            <div class="craisa-hero">
+                <div class="craisa-hero-content">
+                    <div class="craisa-hero-left">
+                        <div class="craisa-hero-eyebrow">Centro de Repuestos Agrícolas e Industriales S.A.</div>
+                        <h1 class="craisa-hero-title">Dashboard Comercial</h1>
+                        <p class="craisa-hero-sub">Resumen de la gestión de leads · Últimos 30 días · Actualizado 22/10/2026</p>
                     </div>
-                    <div class="dash-welcome-stat">
-                        <div class="dash-welcome-stat-value">21</div>
-                        <div class="dash-welcome-stat-label">Ganados</div>
-                    </div>
-                    <div class="dash-welcome-stat">
-                        <div class="dash-welcome-stat-value">11.4%</div>
-                        <div class="dash-welcome-stat-label">Tasa de cierre</div>
+                    <div class="craisa-hero-right">
+                        <div class="craisa-hero-stat">
+                            <div class="craisa-hero-stat-value">184</div>
+                            <div class="craisa-hero-stat-label">Leads totales</div>
+                        </div>
+                        <div class="craisa-hero-stat">
+                            <div class="craisa-hero-stat-value">21</div>
+                            <div class="craisa-hero-stat-label">Ganados</div>
+                        </div>
+                        <div class="craisa-hero-stat">
+                            <div class="craisa-hero-stat-value">11.4%</div>
+                            <div class="craisa-hero-stat-label">Tasa de cierre</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- KPIs -->
             <div class="kpi-row">
-                <div class="kpi-box">
+                <div class="kpi-box blue">
                     <div class="kpi-box-top">
                         <div class="kpi-box-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="var(--craisa-primary)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -705,7 +724,7 @@
                     <div class="kpi-box-label">Leads registrados</div>
                     <div class="kpi-box-sub">+12 vs. mes anterior</div>
                 </div>
-                <div class="kpi-box">
+                <div class="kpi-box orange">
                     <div class="kpi-box-top">
                         <div class="kpi-box-icon" style="background: rgba(212,126,0,0.06); border-color: rgba(212,126,0,0.1);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-construccion)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -716,7 +735,7 @@
                     <div class="kpi-box-label">En gestión activa</div>
                     <div class="kpi-box-sub">78% del total</div>
                 </div>
-                <div class="kpi-box">
+                <div class="kpi-box green">
                     <div class="kpi-box-top">
                         <div class="kpi-box-icon" style="background: rgba(61,174,43,0.06); border-color: rgba(61,174,43,0.1);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-carga)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -727,7 +746,7 @@
                     <div class="kpi-box-label">Leads ganados</div>
                     <div class="kpi-box-sub">Tasa de cierre 11.4%</div>
                 </div>
-                <div class="kpi-box">
+                <div class="kpi-box red">
                     <div class="kpi-box-top">
                         <div class="kpi-box-icon" style="background: rgba(170,24,44,0.06); border-color: rgba(170,24,44,0.1);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-agricola)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -815,7 +834,7 @@
                 </div>
             </div>
 
-            <!-- Grid: Estado + Líneas + Funnel -->
+            <!-- Grid: Estado + Funnel -->
             <div class="dash-grid-2">
                 <!-- Estado de Leads -->
                 <div class="dash-section" style="margin-bottom: 0;">
@@ -1203,10 +1222,10 @@
             <div class="dash-footer">
                 <div class="dash-footer-left">
                     <img src="assets/logo-craisa.png" alt="CRAISA" style="height: 18px;">
-                    <span>Última actualización: 22/10/2026 09:14 · Datos de prototipo</span>
+                    <span>CRAISA · Centro de Repuestos Agrícolas e Industriales S.A. · Desde 1981</span>
                 </div>
                 <div class="dash-footer-right">
-                    CRAISA 2026 · Sistema de Gestión de Leads
+                    Sistema de Gestión de Leads · v1.0
                 </div>
             </div>
         </div>
