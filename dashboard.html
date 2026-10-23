@@ -128,7 +128,7 @@
             margin-top: 0.375rem;
         }
 
-        /* Sección de acciones */
+        /* Sección */
         .dash-section {
             background: #FFFFFF;
             border: 1px solid var(--border-default);
@@ -232,7 +232,7 @@
             margin-bottom: 1.5rem;
         }
 
-        /* Estado de leads - lista simple */
+        /* Estado de leads */
         .status-list {
             display: flex;
             flex-direction: column;
@@ -287,7 +287,7 @@
             flex-shrink: 0;
         }
 
-        /* Barras de progreso (líneas/canales) */
+        /* Barras de progreso */
         .progress-list {
             display: flex;
             flex-direction: column;
@@ -408,6 +408,214 @@
             font-size: 0.75rem;
         }
 
+        /* Funnel de conversión */
+        .funnel-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+        .funnel-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .funnel-label {
+            width: 110px;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            text-align: right;
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+        .funnel-bar {
+            flex: 1;
+            height: 32px;
+            background: var(--bg-subtle);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .funnel-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding-left: 0.75rem;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: width 0.6s ease;
+        }
+        .funnel-value {
+            width: 48px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .funnel-pct {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            width: 40px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Rendimiento del equipo */
+        .team-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .team-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 0.75rem;
+            border-radius: 4px;
+            transition: background 0.15s ease;
+        }
+        .team-row:hover { background: var(--bg-subtle); }
+        .team-rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .team-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+        .team-info { flex: 1; min-width: 0; }
+        .team-name {
+            font-weight: 600;
+            font-size: 0.8125rem;
+            color: var(--text-primary);
+        }
+        .team-stats {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .team-score {
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--craisa-primary);
+            text-align: right;
+            flex-shrink: 0;
+            width: 56px;
+        }
+
+        /* Pipeline value */
+        .pipeline-box {
+            background: linear-gradient(135deg, var(--craisa-primary) 0%, var(--craisa-primary-deep) 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .pipeline-left h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 0.25rem;
+            font-family: var(--font-display);
+        }
+        .pipeline-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: var(--font-display);
+            color: white;
+            line-height: 1;
+        }
+        .pipeline-right {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .pipeline-stat {
+            text-align: center;
+        }
+        .pipeline-stat-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: white;
+            font-family: var(--font-display);
+        }
+        .pipeline-stat-label {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.125rem;
+        }
+
+        /* Quick filters */
+        .quick-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .quick-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.875rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid var(--border-default);
+            background: #FFFFFF;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .quick-filter:hover {
+            border-color: var(--craisa-primary);
+            color: var(--craisa-primary);
+            background: rgba(20,63,127,0.04);
+        }
+        .quick-filter.active {
+            background: var(--craisa-primary);
+            color: white;
+            border-color: var(--craisa-primary);
+        }
+        .quick-filter-count {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.125rem 0.375rem;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.06);
+        }
+        .quick-filter.active .quick-filter-count {
+            background: rgba(255,255,255,0.2);
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .kpi-row { grid-template-columns: repeat(2, 1fr); }
@@ -416,7 +624,7 @@
         }
         @media (max-width: 768px) {
             .kpi-row { grid-template-columns: 1fr; }
-            .dash-welcome-right { width: 100%; justify-content: space-around; }
+            .pipeline-right { width: 100%; justify-content: space-around; }
         }
     </style>
 </head>
@@ -484,6 +692,28 @@
                 </div>
             </div>
 
+            <!-- Pipeline Value -->
+            <div class="pipeline-box">
+                <div class="pipeline-left">
+                    <h3>Valor Estimado del Pipeline</h3>
+                    <div class="pipeline-value">$1.2M</div>
+                </div>
+                <div class="pipeline-right">
+                    <div class="pipeline-stat">
+                        <div class="pipeline-stat-value">$850K</div>
+                        <div class="pipeline-stat-label">En negociación</div>
+                    </div>
+                    <div class="pipeline-stat">
+                        <div class="pipeline-stat-value">$350K</div>
+                        <div class="pipeline-stat-label">Oportunidades</div>
+                    </div>
+                    <div class="pipeline-stat">
+                        <div class="pipeline-stat-value">12</div>
+                        <div class="pipeline-stat-label">Deals activos</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- KPIs -->
             <div class="kpi-row">
                 <div class="kpi-box">
@@ -532,6 +762,39 @@
                 </div>
             </div>
 
+            <!-- Acciones rápidas -->
+            <div class="quick-filters">
+                <a href="leads.html" class="quick-filter">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+                    Todos los leads
+                    <span class="quick-filter-count">184</span>
+                </a>
+                <a href="leads.html?filter=nuevo" class="quick-filter">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    Nuevos
+                    <span class="quick-filter-count">27</span>
+                </a>
+                <a href="leads.html?filter=sin-asignar" class="quick-filter">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    Sin asignar
+                    <span class="quick-filter-count">2</span>
+                </a>
+                <a href="leads.html?filter=vencidas" class="quick-filter">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Vencidas
+                    <span class="quick-filter-count">3</span>
+                </a>
+                <a href="leads.html?filter=sin-accion" class="quick-filter">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Sin acción
+                    <span class="quick-filter-count">6</span>
+                </a>
+                <a href="nuevo-lead.html" class="quick-filter" style="background: var(--craisa-primary); color: white; border-color: var(--craisa-primary);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nuevo Lead
+                </a>
+            </div>
+
             <!-- Qué hacer ahora -->
             <div class="dash-section">
                 <div class="dash-section-header">
@@ -574,7 +837,7 @@
                 </div>
             </div>
 
-            <!-- Grid: Estado + Líneas -->
+            <!-- Grid: Estado + Líneas + Funnel -->
             <div class="dash-grid-2">
                 <!-- Estado de Leads -->
                 <div class="dash-section" style="margin-bottom: 0;">
@@ -637,6 +900,57 @@
                     </div>
                 </div>
 
+                <!-- Funnel de conversión -->
+                <div class="dash-section" style="margin-bottom: 0;">
+                    <div class="dash-section-header">
+                        <div class="dash-section-title">Funnel de Conversión</div>
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">Pipeline</span>
+                    </div>
+                    <div class="dash-section-body">
+                        <div class="funnel-container">
+                            <div class="funnel-step">
+                                <span class="funnel-label">Leads totales</span>
+                                <div class="funnel-bar">
+                                    <div class="funnel-fill" style="width: 100%; background: var(--craisa-primary);">184</div>
+                                </div>
+                                <span class="funnel-value">184</span>
+                                <span class="funnel-pct">100%</span>
+                            </div>
+                            <div class="funnel-step">
+                                <span class="funnel-label">Contactados</span>
+                                <div class="funnel-bar">
+                                    <div class="funnel-fill" style="width: 67%; background: var(--estado-contactado);">124</div>
+                                </div>
+                                <span class="funnel-value">124</span>
+                                <span class="funnel-pct">67%</span>
+                            </div>
+                            <div class="funnel-step">
+                                <span class="funnel-label">Oportunidad</span>
+                                <div class="funnel-bar">
+                                    <div class="funnel-fill" style="width: 24%; background: var(--estado-oportunidad);">44</div>
+                                </div>
+                                <span class="funnel-value">44</span>
+                                <span class="funnel-pct">24%</span>
+                            </div>
+                            <div class="funnel-step">
+                                <span class="funnel-label">Ganados</span>
+                                <div class="funnel-bar">
+                                    <div class="funnel-fill" style="width: 11.4%; background: var(--estado-ganado);">21</div>
+                                </div>
+                                <span class="funnel-value">21</span>
+                                <span class="funnel-pct">11.4%</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary);">
+                            <span>Tiempo promedio de conversión: <strong>12 días</strong></span>
+                            <span>Tasa de pérdida: <strong>8.7%</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid: Líneas + Canales -->
+            <div class="dash-grid-2">
                 <!-- Por Línea de Negocio -->
                 <div class="dash-section" style="margin-bottom: 0;">
                     <div class="dash-section-header">
@@ -683,10 +997,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Grid: Canal + Actividad -->
-            <div class="dash-grid-2">
                 <!-- Por Canal -->
                 <div class="dash-section" style="margin-bottom: 0;">
                     <div class="dash-section-header">
@@ -736,6 +1047,66 @@
                                     <div class="progress-item-fill" style="width: 23.8%; background: var(--carbon-gray);">10 leads</div>
                                 </div>
                                 <span class="progress-item-value">10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid: Rendimiento del equipo + Actividad -->
+            <div class="dash-grid-2">
+                <!-- Rendimiento del equipo -->
+                <div class="dash-section" style="margin-bottom: 0;">
+                    <div class="dash-section-header">
+                        <div class="dash-section-title">Rendimiento del Equipo</div>
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">Top 5</span>
+                    </div>
+                    <div class="dash-section-body" style="padding: 0.5rem 1.25rem 1rem;">
+                        <div class="team-list">
+                            <div class="team-row">
+                                <span class="team-rank" style="background: var(--line-construccion);">1</span>
+                                <div class="team-avatar" style="background: var(--line-agricola);">JP</div>
+                                <div class="team-info">
+                                    <div class="team-name">Jorge Pérez</div>
+                                    <div class="team-stats">12 leads · 4 ganados · 33% cierre</div>
+                                </div>
+                                <div class="team-score">4 gan.</div>
+                            </div>
+                            <div class="team-row">
+                                <span class="team-rank" style="background: var(--text-tertiary);">2</span>
+                                <div class="team-avatar" style="background: var(--line-construccion);">MR</div>
+                                <div class="team-info">
+                                    <div class="team-name">María Rojas</div>
+                                    <div class="team-stats">15 leads · 3 ganados · 20% cierre</div>
+                                </div>
+                                <div class="team-score">3 gan.</div>
+                            </div>
+                            <div class="team-row">
+                                <span class="team-rank" style="background: var(--text-tertiary);">3</span>
+                                <div class="team-avatar" style="background: var(--line-carga);">SM</div>
+                                <div class="team-info">
+                                    <div class="team-name">Sergio Mora</div>
+                                    <div class="team-stats">10 leads · 3 ganados · 30% cierre</div>
+                                </div>
+                                <div class="team-score">3 gan.</div>
+                            </div>
+                            <div class="team-row">
+                                <span class="team-rank" style="background: var(--text-tertiary);">4</span>
+                                <div class="team-avatar" style="background: var(--carbon-blue);">RB</div>
+                                <div class="team-info">
+                                    <div class="team-name">Rebeca Blandón</div>
+                                    <div class="team-stats">8 leads · 2 ganados · 25% cierre</div>
+                                </div>
+                                <div class="team-score">2 gan.</div>
+                            </div>
+                            <div class="team-row">
+                                <span class="team-rank" style="background: var(--text-tertiary);">5</span>
+                                <div class="team-avatar" style="background: var(--line-precision);">AL</div>
+                                <div class="team-info">
+                                    <div class="team-name">Andrea López</div>
+                                    <div class="team-stats">9 leads · 2 ganados · 22% cierre</div>
+                                </div>
+                                <div class="team-score">2 gan.</div>
                             </div>
                         </div>
                     </div>
