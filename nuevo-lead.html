@@ -481,6 +481,49 @@
                             </div>
                         </div>
 
+                        <!-- Sección: Información Adicional -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                Información Adicional
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="valorEstimado" class="form-label">
+                                        Valor estimado del deal
+                                    </label>
+                                    <input type="text" id="valorEstimado" name="valorEstimado" class="form-input" placeholder="Ej: $45,000">
+                                    <span class="form-hint">Monto aproximado de la oportunidad comercial</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="score" class="form-label">
+                                        Score de prioridad
+                                    </label>
+                                    <select id="score" name="score" class="form-select">
+                                        <option value="1">★☆☆☆☆ Baja</option>
+                                        <option value="2">★★☆☆☆ Media-baja</option>
+                                        <option value="3" selected>★★★☆☆ Media</option>
+                                        <option value="4">★★★★☆ Alta</option>
+                                        <option value="5">★★★★★ Urgente</option>
+                                    </select>
+                                    <span class="form-hint">Prioridad del lead para seguimiento</span>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="tags" class="form-label">
+                                        Etiquetas (tags)
+                                    </label>
+                                    <input type="text" id="tags" name="tags" class="form-input" placeholder="Ej: temporada-alta, cliente-recurrente, urgente">
+                                    <span class="form-hint">Separar con comas. Usadas para filtrar y agrupar leads</span>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="notasInternas" class="form-label">
+                                        Notas internas
+                                    </label>
+                                    <textarea id="notasInternas" name="notasInternas" class="form-textarea" placeholder="Observaciones internas del equipo..." style="min-height: 60px;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Acciones del formulario -->
                         <div class="form-actions">
                             <button type="button" class="btn btn-secondary" id="resetBtn">
