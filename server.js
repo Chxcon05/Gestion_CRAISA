@@ -4,6 +4,8 @@ const path = require('path');
 
 const server = http.createServer((req, res) => {
     let f = req.url === '/' ? 'index.html' : req.url.slice(1);
+    // Strip query parameters
+    f = f.split('?')[0];
     const fp = path.join(process.cwd(), f);
     fs.readFile(fp, (e, d) => {
         if (e) { res.writeHead(404); res.end('Not found'); return; }

@@ -304,6 +304,7 @@
     let filteredLeads = [...LEADS_DATA];
     let currentPage = 1;
     const PAGE_SIZE = 10;
+    let specialFilter = null; // 'sin-asignar', 'vencidas', 'sin-accion'
 
     // Elementos DOM
     const searchInput = document.getElementById('searchInput');
@@ -457,7 +458,24 @@
             const matchesLinea = !linea || lead.linea === linea;
             const matchesResponsable = !responsable || lead.responsable.toLowerCase() === responsable.toLowerCase();
 
-            return matchesSearch && matchesEstado && matchesCanal && matchesLinea && matchesResponsable;
+            // Special filters from dashboard
+            let matchesSpecial = true;
+            if (specialFilter === 'sin-asignar') {
+                matchesSpecial = !lead.responsable || lead.responsable === '';
+            } else if (specialFilter === 'vencidas') {
+                if (lead.proxFecha) {
+                    const proxDate = new Date(lead.proxFecha.split('/').reverse().join('-'));
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    matchesSpecial = proxDate < today && lead.estado !== 'ganado' && lead.estado !== 'perdido';
+                } else {
+                    matchesSpecial = false;
+                }
+            } else if (specialFilter === 'sin-accion') {
+                matchesSpecial = lead.proxAccion === '—' || !lead.proxAccion || lead.proxAccion === null;
+            }
+
+            return matchesSearch && matchesEstado && matchesCanal && matchesLinea && matchesResponsable && matchesSpecial;
         });
 
         currentPage = 1;
@@ -473,7 +491,14 @@
         if (lineaFilter.value) filters.push({ label: 'Línea: ' + LINEA_LABELS[lineaFilter.value], key: 'linea' });
         if (responsableFilter.value) filters.push({ label: 'Responsable: ' + RESPONSABLE_LABELS[responsableFilter.value], key: 'responsable' });
 
-        if (filters.length > 0) {
+        if (specialFilter) {
+            const specialLabels = {
+                'sin-asignar': 'Sin asignar',
+                'vencidas': 'Acciones vencidas',
+                'sin-accion': 'Sin próxima acción'
+            };
+            filters.push({ label: 'Filtro: ' + specialLabels[specialFilter], key: 'special' });
+        }
             activeFilters.style.display = 'flex';
             activeFilters.innerHTML = '<span style="font-size: 0.75rem; color: var(--text-tertiary);">Filtros aplicados:</span>' + 
                 filters.map(f => `<span class="badge badge-asignado" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">${f.label} <button type="button" data-filter="${f.key}" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 0.375rem; padding: 0; font-size: 0.9rem; line-height: 1;">×</button></span>`).join('');
@@ -493,6 +518,7 @@
             case 'canal': canalFilter.value = ''; break;
             case 'linea': lineaFilter.value = ''; break;
             case 'responsable': responsableFilter.value = ''; break;
+            case 'special': specialFilter = null; break;
         }
         applyFilters();
     }
@@ -503,6 +529,7 @@
         canalFilter.value = '';
         lineaFilter.value = '';
         responsableFilter.value = '';
+        specialFilter = null;
         document.querySelectorAll('input[type="date"]').forEach(i => i.value = '');
         applyFilters();
     }
@@ -511,11 +538,15 @@
     let searchDebounce;
     searchInput.addEventListener('input', () => {
         clearTimeout(searchDebounce);
+        specialFilter = null;
         searchDebounce = setTimeout(applyFilters, 300);
     });
 
     [estadoFilter, canalFilter, lineaFilter, responsableFilter].forEach(sel => {
-        sel.addEventListener('change', applyFilters);
+        sel.addEventListener('change', () => {
+            specialFilter = null;
+            applyFilters();
+        });
     });
 
     clearFilters.addEventListener('click', clearAllFilters);
@@ -617,6 +648,28 @@
             });
         }
     });
+
+    // Apply filters from URL parameters (from dashboard quick filters)
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterParam = urlParams.get('filter');
+    if (filterParam) {
+        switch (filterParam) {
+            case 'nuevo':
+                estadoFilter.value = 'nuevo';
+                specialFilter = null;
+                break;
+            case 'sin-asignar':
+                specialFilter = 'sin-asignar';
+                break;
+            case 'vencidas':
+                specialFilter = 'vencidas';
+                break;
+            case 'sin-accion':
+                specialFilter = 'sin-accion';
+                break;
+        }
+        applyFilters();
+    }
 
     // Initial render
     renderLeads();
