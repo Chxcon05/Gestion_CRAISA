@@ -11,6 +11,7 @@ Prototipo funcional del sistema interno de leads de **CRAISA** (Centro de Repues
 ├── leads.html            Listado, búsqueda, filtros, acciones masivas y CSV
 ├── detalle-lead.html     Ficha del lead, bitácora, tareas y cambio de estado
 ├── nuevo-lead.html       Registro con validación y detección de duplicados
+├── reportes.html         Reportes: resumen, funnel, pipeline, canal, equipo y pérdidas
 ├── css/styles.css        Design system CRAISA 2025
 ├── js/app.js             Utilidades de interfaz y notificaciones
 ├── js/leads-data.js      Datos ficticios compartidos (listado y ficha)
