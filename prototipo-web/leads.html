@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads - CRAISA Leads</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+<body>
+    <div class="bg-particles"></div>
+    <div class="bg-grid"></div>
+
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo-section">
+                <img src="assets/logo-craisa.png" alt="CRAISA" class="logo-img">
+                <div class="logo-text">
+                    <span class="logo-title">Sistema de Gestión de Leads</span>
+                    <span class="logo-subtitle">Listado de Consultas</span>
+                </div>
+            </div>
+            
+            <nav class="nav" role="navigation" aria-label="Navegación principal">
+                <a href="dashboard.html" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="leads.html" class="nav-link active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+                    <span>Leads</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Reportes</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Agenda</span>
+                </a>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar">MR</div>
+                <div class="user-info">
+                    <span class="user-name">María Rojas</span>
+                    <span class="user-role">Vendedora · Agrícola</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="page-header">
+                <div class="page-title-section">
+                    <h1>Leads Comerciales</h1>
+                    <p class="page-subtitle">184 registros · 9 requieren acción</p>
+                </div>
+                <div class="page-actions">
+                    <a href="nuevo-lead.html" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nuevo Lead
+                    </a>
+                    <a href="#" class="btn btn-secondary" id="exportBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Exportar CSV
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                        <!-- Buscador -->
+                        <div style="flex: 1; min-width: 280px; position: relative;">
+                            <svg style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--text-tertiary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="searchInput" placeholder="Buscar por nombre, empresa, correo, código..." style="width: 100%; padding: 0.75rem 1rem 0.75rem 3rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; transition: all 0.3s ease;">
+                        </div>
+
+                        <!-- Filtro Estado -->
+                        <select class="filter-select" style="padding: 0.75rem 2.5rem 0.75rem 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23B8C5D6\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; min-width: 160px;">
+                            <option value="">Estado: Todos</option>
+                            <option value="nuevo">Nuevo</option>
+                            <option value="asignado">Asignado</option>
+                            <option value="contactado">Contactado</option>
+                            <option value="seguimiento">En seguimiento</option>
+                            <option value="oportunidad">Oportunidad comercial</option>
+                            <option value="ganado">Ganado</option>
+                            <option value="perdido">Perdido</option>
+                        </select>
+
+                        <!-- Filtro Canal -->
+                        <select class="filter-select" style="padding: 0.75rem 2.5rem 0.75rem 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23B8C5D6\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; min-width: 160px;">
+                            <option value="">Canal: Todos</option>
+                            <option value="web">Sitio web</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="llamada">Llamada</option>
+                            <option value="correo">Correo</option>
+                            <option value="feria">Feria</option>
+                            <option value="visita">Visita comercial</option>
+                            <option value="otro">Otro</option>
+                        </select>
+
+                        <!-- Filtro Línea -->
+                        <select class="filter-select" style="padding: 0.75rem 2.5rem 0.75rem 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23B8C5D6\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; min-width: 180px;">
+                            <option value="">Línea: Todas</option>
+                            <option value="agricola">Agrícola</option>
+                            <option value="construccion">Construcción</option>
+                            <option value="carga">Movimiento de Carga</option>
+                            <option value="precision">Agricultura de Precisión</option>
+                            <option value="postventa">Postventa</option>
+                            <option value="institucional">Institucional</option>
+                        </select>
+
+                        <!-- Filtro Responsable -->
+                        <select class="filter-select" style="padding: 0.75rem 2.5rem 0.75rem 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23B8C5D6\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; min-width: 160px;">
+                            <option value="">Responsable: Todos</option>
+                            <option value="jperez">Jorge Pérez</option>
+                            <option value="mrojas">María Rojas</option>
+                            <option value="smora">Sergio Mora</option>
+                            <option value="rblandon">Rebeca Blandón</option>
+                            <option value="alopez">Andrea López</option>
+                        </select>
+
+                        <!-- Fechas -->
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="font-size: 0.75rem; color: var(--text-tertiary);">Desde</span>
+                            <input type="date" style="padding: 0.625rem 0.75rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); outline: none;">
+                            <span style="font-size: 0.75rem; color: var(--text-tertiary);">Hasta</span>
+                            <input type="date" style="padding: 0.625rem 0.75rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); outline: none;">
+                        </div>
+
+                        <!-- Limpiar filtros -->
+                        <button class="btn btn-ghost" id="clearFilters">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Limpiar
+                        </button>
+                    </div>
+
+                    <!-- Chips de filtros activos -->
+                    <div id="activeFilters" style="display: none; margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">Filtros aplicados:</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="card">
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="table" id="leadsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">Código</th>
+                                    <th style="width: 100px;">Fecha</th>
+                                    <th style="width: 160px;">Cliente</th>
+                                    <th style="min-width: 180px;">Empresa</th>
+                                    <th style="width: 130px;">Canal</th>
+                                    <th style="width: 160px;">Línea</th>
+                                    <th style="width: 150px;">Estado</th>
+                                    <th style="width: 130px;">Responsable</th>
+                                    <th style="width: 120px;">Próx. Acción</th>
+                                    <th style="width: 60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-top: 1px solid var(--border-light);">
+                        <div style="font-size: 0.875rem; color: var(--text-tertiary);">
+                            <span id="paginationInfo">Mostrando 1–10 de 184 registros</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" id="prevPage" disabled style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                            </button>
+                            <div id="pageNumbers" style="display: flex; gap: 0.25rem; align-items: center;">
+                            </div>
+                            <button class="btn btn-secondary" id="nextPage" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado vacío -->
+            <div id="emptyState" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--text-tertiary);">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1.5rem; opacity: 0.3;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.5rem;">No se encontraron leads</h3>
+                <p style="margin-bottom: 1.5rem;">No hay registros que coincidan con los filtros aplicados</p>
+                <button class="btn btn-secondary" id="clearFiltersFromEmpty">Limpiar filtros</button>
+            </div>
+
+            <!-- Footer -->
+            <footer style="margin-top: 3rem; padding: 1.5rem 0; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="assets/logo-craisa.png" alt="CRAISA" style="height: 28px;">
+                    <span style="color: var(--text-tertiary); font-size: 0.8rem;">Datos de prototipo · 22/10/2026</span>
+                </div>
+                <div style="color: var(--text-tertiary); font-size: 0.75rem;">
+                    CRAISA 2026 · Sistema de Gestión de Leads
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+    // Datos de leads ficticios
+    const LEADS_DATA = [
+        { code: 'LEAD-2026-0142', date: '20/10/2026', client: 'Ana Rodríguez', company: 'Finca La Sabana', canal: 'WhatsApp', linea: 'Agrícola', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0141', date: '19/10/2026', client: 'Luis Miranda', company: 'Constructora Hidalgo', canal: 'Sitio web', linea: 'Construcción', estado: 'seguimiento', responsable: 'M. Rojas', proxAccion: '22/10', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0140', date: '19/10/2026', client: 'Banacol S.A.', company: 'Banacol', canal: 'Feria', linea: 'Agrícola', estado: 'oportunidad', responsable: 'J. Pérez', proxAccion: '23/10', proxFecha: '23/10/2026' },
+        { code: 'LEAD-2026-0139', date: '18/10/2026', client: 'Denis Vargas', company: 'Materiales Ciudad Neyly', canal: 'Instagram', linea: 'Movimiento de Carga', estado: 'contactado', responsable: 'S. Mora', proxAccion: '24/10', proxFecha: '24/10/2026' },
+        { code: 'LEAD-2026-0138', date: '18/10/2026', client: 'Carlos Quesada', company: 'Del Monte', canal: 'Visita comercial', linea: 'Agricultura de Precisión', estado: 'asignado', responsable: 'M. Rojas', proxAccion: '21/10', proxFecha: '21/10/2026' },
+        { code: 'LEAD-2026-0137', date: '17/10/2026', client: 'Gonar Costa Rica', company: 'Gonar', canal: 'Correo', linea: 'Postventa', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0136', date: '17/10/2026', client: 'Wilber Rojas', company: 'Plásticos WR', canal: 'Facebook', linea: 'Construcción', estado: 'ganado', responsable: 'J. Pérez', proxAccion: '—', proxFecha: null },
+        { code: 'LEAD-2026-0135', date: '16/10/2026', client: 'Mainor Alfaro', company: 'Transportes Alfaro', canal: 'Llamada', linea: 'Movimiento de Carga', estado: 'perdido', responsable: 'S. Mora', proxAccion: '—', proxFecha: null },
+        { code: 'LEAD-2026-0134', date: '16/10/2026', client: 'Tornillos del Valle', company: 'Tornillos CR', canal: 'Sitio web', linea: 'Institucional', estado: 'contactado', responsable: 'M. Rojas', proxAccion: '23/10', proxFecha: '23/10/2026' },
+        { code: 'LEAD-2026-0133', date: '15/10/2026', client: 'El Viejo Comercial', company: 'El Viejo', canal: 'Otro', linea: 'Construcción', estado: 'asignado', responsable: 'J. Pérez', proxAccion: '21/10', proxFecha: '21/10/2026' },
+        { code: 'LEAD-2026-0132', date: '15/10/2026', client: 'María Solís', company: 'AgroSol', canal: 'WhatsApp', linea: 'Agrícola', estado: 'nuevo', responsable: 'M. Rojas', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0131', date: '14/10/2026', client: 'Roberto Castro', company: 'Castro y Asociados', canal: 'Sitio web', linea: 'Construcción', estado: 'oportunidad', responsable: 'J. Pérez', proxAccion: '23/10', proxFecha: '23/10/2026' },
+        { code: 'LEAD-2026-0130', date: '14/10/2026', client: 'Logística Sur', company: 'Logística Sur S.A.', canal: 'Llamada', linea: 'Movimiento de Carga', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0129', date: '13/10/2026', client: 'Precisión Tech', company: 'Precisión Tech CR', canal: 'Correo', linea: 'Agricultura de Precisión', estado: 'nuevo', responsable: 'A. López', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0128', date: '12/10/2026', client: 'Fertilizantes del Norte', company: 'Fertinorte', canal: 'Feria', linea: 'Agrícola', estado: 'contactado', responsable: 'M. Rojas', proxAccion: '24/10', proxFecha: '24/10/2026' },
+        { code: 'LEAD-2026-0127', date: '11/10/2026', client: 'Constructora M&V', company: 'M&V Construcciones', canal: 'Visita comercial', linea: 'Construcción', estado: 'asignado', responsable: 'J. Pérez', proxAccion: '21/10', proxFecha: '21/10/2026' },
+        { code: 'LEAD-2026-0126', date: '11/10/2026', client: 'Carga Pesada SA', company: 'Carga Pesada', canal: 'WhatsApp', linea: 'Movimiento de Carga', estado: 'ganado', responsable: 'S. Mora', proxAccion: '—', proxFecha: null },
+        { code: 'LEAD-2026-0125', date: '10/10/2026', client: 'Postventa Norte', company: 'Servicios Postventa', canal: 'Correo', linea: 'Postventa', estado: 'perdido', responsable: 'M. Rojas', proxAccion: '—', proxFecha: null },
+        { code: 'LEAD-2026-0124', date: '09/10/2026', client: 'Drones Agro', company: 'Drones Agro CR', canal: 'Instagram', linea: 'Agricultura de Precisión', estado: 'oportunidad', responsable: 'A. López', proxAccion: '24/10', proxFecha: '24/10/2026' },
+        { code: 'LEAD-2026-0123', date: '08/10/2026', client: 'Hacienda San Juan', company: 'Hacienda San Juan', canal: 'Sitio web', linea: 'Agrícola', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
+        // ... más datos para paginación
+        { code: 'LEAD-2026-0122', date: '07/10/2026', client: 'Cliente 22', company: 'Empresa 22', canal: 'Facebook', linea: 'Construcción', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '23/10', proxFecha: '23/10/2026' },
+        { code: 'LEAD-2026-0121', date: '06/10/2026', client: 'Cliente 21', company: 'Empresa 21', canal: 'Llamada', linea: 'Institucional', estado: 'asignado', responsable: 'M. Rojas', proxAccion: '21/10', proxFecha: '21/10/2026' },
+        { code: 'LEAD-2026-0120', date: '05/10/2026', client: 'Cliente 20', company: 'Empresa 20', canal: 'Otro', linea: 'Postventa', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0119', date: '04/10/2026', client: 'Cliente 19', company: 'Empresa 19', canal: 'Sitio web', linea: 'Agrícola', estado: 'contactado', responsable: 'A. López', proxAccion: '24/10', proxFecha: '24/10/2026' },
+        { code: 'LEAD-2026-0118', date: '03/10/2026', client: 'Cliente 18', company: 'Empresa 18', canal: 'WhatsApp', linea: 'Construcción', estado: 'oportunidad', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026' },
+        { code: 'LEAD-2026-0117', date: '02/10/2026', client: 'Cliente 17', company: 'Empresa 17', canal: 'Feria', linea: 'Movimiento de Carga', estado: 'ganado', responsable: 'M. Rojas', proxAccion: '—', proxFecha: null },
+        { code: 'LEAD-2026-0116', date: '01/10/2026', client: 'Cliente 16', company: 'Empresa 16', canal: 'Visita comercial', linea: 'Agricultura de Precisión', estado: 'perdido', responsable: 'J. Pérez', proxAccion: '—', proxFecha: null }
+    ];
+
+    // Mapeos
+    const CANAL_LABELS = {
+        'web': 'Sitio web', 'whatsapp': 'WhatsApp', 'facebook': 'Facebook',
+        'instagram': 'Instagram', 'llamada': 'Llamada', 'correo': 'Correo',
+        'feria': 'Feria', 'visita': 'Visita comercial', 'otro': 'Otro'
+    };
+    const LINEA_LABELS = {
+        'agricola': 'Agrícola', 'construccion': 'Construcción', 'carga': 'Movimiento de Carga',
+        'precision': 'Agricultura de Precisión', 'postventa': 'Postventa', 'institucional': 'Institucional'
+    };
+    const LINEA_COLORS = {
+        'agricola': 'var(--line-agricola)',
+        'construccion': 'var(--line-construccion)',
+        'carga': 'var(--line-carga)',
+        'precision': 'var(--line-precision)',
+        'postventa': 'var(--line-postventa)',
+        'institucional': 'var(--line-institucional)'
+    };
+    const RESPONSABLE_LABELS = {
+        'jperez': 'J. Pérez', 'mrojas': 'M. Rojas', 'smora': 'S. Mora',
+        'rblandon': 'R. Blandón', 'alopez': 'A. López'
+    };
+
+    // Estado
+    let filteredLeads = [...LEADS_DATA];
+    let currentPage = 1;
+    const PAGE_SIZE = 10;
+
+    // Elementos DOM
+    const searchInput = document.getElementById('searchInput');
+    const estadoFilter = document.querySelectorAll('.filter-select')[0];
+    const canalFilter = document.querySelectorAll('.filter-select')[1];
+    const lineaFilter = document.querySelectorAll('.filter-select')[2];
+    const responsableFilter = document.querySelectorAll('.filter-select')[3];
+    const leadsBody = document.getElementById('leadsBody');
+    const activeFilters = document.getElementById('activeFilters');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const pageNumbers = document.getElementById('pageNumbers');
+    const prevPage = document.getElementById('prevPage');
+    const nextPage = document.getElementById('nextPage');
+    const emptyState = document.getElementById('emptyState');
+    const clearFilters = document.getElementById('clearFilters');
+    const clearFiltersFromEmpty = document.getElementById('clearFiltersFromEmpty');
+    const exportBtn = document.getElementById('exportBtn');
+
+    // Renderizado
+    function renderLeads() {
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const end = start + PAGE_SIZE;
+        const pageLeads = filteredLeads.slice(start, end);
+        
+        if (pageLeads.length === 0) {
+            leadsBody.innerHTML = '';
+            document.querySelector('.table-container').style.display = 'none';
+            document.querySelector('.card:last-child > .card-body > div:last-child').style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+        
+        document.querySelector('.table-container').style.display = 'block';
+        document.querySelector('.card:last-child > .card-body > div:last-child').style.display = 'flex';
+        emptyState.style.display = 'none';
+
+        leadsBody.innerHTML = pageLeads.map(lead => {
+            const estadoClass = `badge-${lead.estado}`;
+            const proxClass = lead.proxAccion === 'Hoy' ? 'style="font-weight: 700; color: var(--line-agricola);"' : 
+                             (lead.proxFecha && new Date(lead.proxFecha.split('/').reverse().join('-')) < new Date() && lead.estado !== 'ganado' && lead.estado !== 'perdido') 
+                             ? 'style="font-weight: 700; color: var(--line-agricola);"' : '';
+            
+            return `
+                <tr data-code="${lead.code}" style="cursor: pointer;">
+                    <td><span style="font-weight: 700; color: var(--craisa-accent); font-size: 0.8rem;">${lead.code}</span></td>
+                    <td><span style="color: var(--text-secondary);">${lead.date}</span></td>
+                    <td><span style="font-weight: 600;">${lead.client}</span></td>
+                    <td><span style="color: var(--text-secondary);">${lead.company}</span></td>
+                    <td><span style="color: var(--text-secondary); font-size: 0.8rem;">${CANAL_LABELS[lead.canal] || lead.canal}</span></td>
+                    <td>
+                        <span style="display: inline-flex; align-items: center; gap: 0.375rem; color: var(--text-secondary); font-size: 0.8rem;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${LINEA_COLORS[lead.linea] || 'var(--text-tertiary)'};"></span>
+                            ${LINEA_LABELS[lead.linea] || lead.linea}
+                        </span>
+                    </td>
+                    <td><span class="badge ${estadoClass}"><span class="badge-dot"></span> ${lead.estado.charAt(0).toUpperCase() + lead.estado.slice(1)}</span></td>
+                    <td><span style="color: var(--text-secondary); font-size: 0.8rem;">${RESPONSABLE_LABELS[lead.responsable] || lead.responsable}</span></td>
+                    <td ${proxClass}>${lead.proxAccion}</td>
+                    <td>
+                        <a href="detalle-lead.html?code=${lead.code}" class="btn btn-ghost" style="padding: 0.375rem; width: 32px; height: 32px; justify-content: center;" aria-label="Ver detalle">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </a>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Click en fila para ir a detalle
+        document.querySelectorAll('#leadsBody tr').forEach(row => {
+            row.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON' && !e.target.closest('a')) {
+                    const code = row.dataset.code;
+                    window.location.href = `detalle-lead.html?code=${code}`;
+                }
+            });
+        });
+
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const totalPages = Math.ceil(filteredLeads.length / PAGE_SIZE);
+        paginationInfo.textContent = `Mostrando ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, filteredLeads.length)} de ${filteredLeads.length} registros`;
+        
+        prevPage.disabled = currentPage === 1;
+        nextPage.disabled = currentPage === totalPages;
+
+        pageNumbers.innerHTML = '';
+        
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                addPageButton(i);
+            }
+        } else {
+            if (currentPage <= 4) {
+                for (let i = 1; i <= 5; i++) addPageButton(i);
+                pageNumbers.innerHTML += '<span style="color: var(--text-tertiary); padding: 0 0.5rem;">…</span>';
+                addPageButton(totalPages);
+            } else if (currentPage >= totalPages - 3) {
+                addPageButton(1);
+                pageNumbers.innerHTML += '<span style="color: var(--text-tertiary); padding: 0 0.5rem;">…</span>';
+                for (let i = totalPages - 4; i <= totalPages; i++) addPageButton(i);
+            } else {
+                addPageButton(1);
+                pageNumbers.innerHTML += '<span style="color: var(--text-tertiary); padding: 0 0.5rem;">…</span>';
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) addPageButton(i);
+                pageNumbers.innerHTML += '<span style="color: var(--text-tertiary); padding: 0 0.5rem;">…</span>';
+                addPageButton(totalPages);
+            }
+        }
+    }
+
+    function addPageButton(page) {
+        const btn = document.createElement('button');
+        btn.className = `btn ${page === currentPage ? 'btn-primary' : 'btn-secondary'}`;
+        btn.style.padding = '0.375rem 0.75rem';
+        btn.style.fontSize = '0.8rem';
+        btn.style.minWidth = '32px';
+        btn.textContent = page;
+        btn.addEventListener('click', () => {
+            currentPage = page;
+            renderLeads();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        pageNumbers.appendChild(btn);
+    }
+
+    function applyFilters() {
+        const search = searchInput.value.toLowerCase().trim();
+        const estado = estadoFilter.value;
+        const canal = canalFilter.value;
+        const linea = lineaFilter.value;
+        const responsable = responsableFilter.value;
+
+        filteredLeads = LEADS_DATA.filter(lead => {
+            const matchesSearch = !search || 
+                lead.code.toLowerCase().includes(search) ||
+                lead.client.toLowerCase().includes(search) ||
+                lead.company.toLowerCase().includes(search) ||
+                (lead.client + ' ' + lead.company).toLowerCase().includes(search);
+            
+            const matchesEstado = !estado || lead.estado === estado;
+            const matchesCanal = !canal || lead.canal === canal;
+            const matchesLinea = !linea || lead.linea === linea;
+            const matchesResponsable = !responsable || lead.responsable.toLowerCase() === responsable.toLowerCase();
+
+            return matchesSearch && matchesEstado && matchesCanal && matchesLinea && matchesResponsable;
+        });
+
+        currentPage = 1;
+        updateActiveFilters();
+        renderLeads();
+    }
+
+    function updateActiveFilters() {
+        const filters = [];
+        if (searchInput.value.trim()) filters.push({ label: 'Búsqueda: "' + searchInput.value + '"', key: 'search' });
+        if (estadoFilter.value) filters.push({ label: 'Estado: ' + estadoFilter.value, key: 'estado' });
+        if (canalFilter.value) filters.push({ label: 'Canal: ' + CANAL_LABELS[canalFilter.value], key: 'canal' });
+        if (lineaFilter.value) filters.push({ label: 'Línea: ' + LINEA_LABELS[lineaFilter.value], key: 'linea' });
+        if (responsableFilter.value) filters.push({ label: 'Responsable: ' + RESPONSABLE_LABELS[responsableFilter.value], key: 'responsable' });
+
+        if (filters.length > 0) {
+            activeFilters.style.display = 'flex';
+            activeFilters.innerHTML = '<span style="font-size: 0.75rem; color: var(--text-tertiary);">Filtros aplicados:</span>' + 
+                filters.map(f => `<span class="badge badge-asignado" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">${f.label} <button type="button" data-filter="${f.key}" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 0.375rem; padding: 0; font-size: 0.9rem; line-height: 1;">×</button></span>`).join('');
+            
+            activeFilters.querySelectorAll('button[data-filter]').forEach(btn => {
+                btn.addEventListener('click', () => clearFilter(btn.dataset.filter));
+            });
+        } else {
+            activeFilters.style.display = 'none';
+        }
+    }
+
+    function clearFilter(key) {
+        switch(key) {
+            case 'search': searchInput.value = ''; break;
+            case 'estado': estadoFilter.value = ''; break;
+            case 'canal': canalFilter.value = ''; break;
+            case 'linea': lineaFilter.value = ''; break;
+            case 'responsable': responsableFilter.value = ''; break;
+        }
+        applyFilters();
+    }
+
+    function clearAllFilters() {
+        searchInput.value = '';
+        estadoFilter.value = '';
+        canalFilter.value = '';
+        lineaFilter.value = '';
+        responsableFilter.value = '';
+        document.querySelectorAll('input[type="date"]').forEach(i => i.value = '');
+        applyFilters();
+    }
+
+    // Event listeners
+    let searchDebounce;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(applyFilters, 300);
+    });
+
+    [estadoFilter, canalFilter, lineaFilter, responsableFilter].forEach(sel => {
+        sel.addEventListener('change', applyFilters);
+    });
+
+    clearFilters.addEventListener('click', clearAllFilters);
+    clearFiltersFromEmpty.addEventListener('click', clearAllFilters);
+
+    prevPage.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderLeads();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
+    nextPage.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredLeads.length / PAGE_SIZE);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderLeads();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
+    // Exportar CSV
+    exportBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        exportToCSV();
+    });
+
+    function exportToCSV() {
+        const headers = ['Código', 'Fecha Ingreso', 'Nombre', 'Empresa', 'Teléfono', 'Correo', 'Canal', 'Línea', 'Producto', 'Descripción', 'Estado', 'Responsable', 'Próxima Acción', 'Fecha Próxima Acción'];
+        const rows = filteredLeads.map(l => [
+            l.code, l.date, l.client, l.company, 
+            '+506 8812-4477', l.client.toLowerCase().replace(' ', '.') + '@' + l.company.toLowerCase().replace(/\s+/g, '') + '.cr',
+            CANAL_LABELS[l.canal], LINEA_LABELS[l.linea], 'Producto de interés',
+            'Descripción de la consulta del lead...', l.estado, RESPONSABLE_LABELS[l.responsable] || l.responsable, l.proxAccion, l.proxFecha || ''
+        ]);
+        
+        const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `craisa_leads_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        
+        if (window.CRAISA) {
+            window.CRAISA.showNotification('CSV exportado correctamente (' + filteredLeads.length + ' registros)', 'success');
+        }
+    }
+
+    // Initial render
+    renderLeads();
+    updateActiveFilters();
+    </script>
+</body>
+</html>

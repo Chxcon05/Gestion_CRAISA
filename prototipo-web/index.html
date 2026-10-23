@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRAISA - Sistema de Gestión y Seguimiento de Leads Comerciales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+<body>
+    <!-- Partículas de fondo -->
+    <div class="bg-particles"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo-section">
+                <img src="assets/logo-craisa.png" alt="CRAISA" class="logo-img">
+                <div class="logo-text">
+                    <span class="logo-title">Sistema de Gestión de Leads</span>
+                    <span class="logo-subtitle">Prototipo v1.0</span>
+                </div>
+            </div>
+            
+            <nav class="nav" role="navigation" aria-label="Navegación principal">
+                <a href="dashboard.html" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="leads.html" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+                    <span>Leads</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Reportes</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Agenda</span>
+                </a>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar">MR</div>
+                <div class="user-info">
+                    <span class="user-name">María Rojas</span>
+                    <span class="user-role">Vendedora · Agrícola</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Hero Inmersivo -->
+            <section class="card" style="margin-bottom: 3rem; padding: 4rem 3rem; position: relative; overflow: hidden;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(31, 123, 255, 0.05) 0%, transparent 50%, rgba(178, 208, 67, 0.05) 100%);"></div>
+                <div style="position: absolute; top: -50%; right: -10%; width: 60%; height: 200%; background: radial-gradient(ellipse, rgba(31, 123, 255, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+                
+                <div style="position: relative; z-index: 1; max-width: 800px;">
+                    <span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(31, 123, 255, 0.1); border: 1px solid rgba(31, 123, 255, 0.2); border-radius: 8px; color: var(--craisa-accent); font-size: 0.875rem; font-weight: 600; margin-bottom: 1.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        Prototipo funcional · Datos ficticios
+                    </span>
+                    
+                    <h1 style="font-size: 3.5rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1.5rem; background: linear-gradient(135deg, #FFFFFF 0%, #B8C5D6 50%, #B2D043 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        Centraliza, organiza y convierte<br>tus consultas comerciales
+                    </h1>
+                    
+                    <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 2.5rem; max-width: 600px; line-height: 1.7;">
+                        Prototipo web inmersivo para CRAISA. Registra consultas, da seguimiento al estado de cada lead, visualiza KPIs en tiempo real y exporta reportes. Diseñado con la identidad corporativa oficial.
+                    </p>
+                    
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;">
+                        <a href="dashboard.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1rem;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="20"/><line x1="12" y1="20" x2="12" y2="20"/><line x1="6" y1="20" x2="6" y2="20"/></svg>
+                            Ver Dashboard en vivo
+                        </a>
+                        <a href="leads.html" class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1rem;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            Explorar Leads
+                        </a>
+                    </div>
+                    
+                    <!-- Stats rápidas -->
+                    <div style="display: flex; gap: 3rem; flex-wrap: wrap;">
+                        <div>
+                            <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #4D9BFF 0%, #B2D043 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">184</div>
+                            <div style="color: var(--text-tertiary); font-size: 0.875rem;">Leads activos</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #4D9BFF 0%, #B2D043 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">5</div>
+                            <div style="color: var(--text-tertiary); font-size: 0.875rem;">Líneas de negocio</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #4D9BFF 0%, #B2D043 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">9</div>
+                            <div style="color: var(--text-tertiary); font-size: 0.875rem;">Canales de origen</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #4D9BFF 0%, #B2D043 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">3</div>
+                            <div style="color: var(--text-tertiary); font-size: 0.875rem;">Roles de acceso</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pantallas del sistema -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem; background: linear-gradient(135deg, #FFFFFF 0%, #B8C5D6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Pantallas del Prototipo</h2>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                <!-- Dashboard -->
+                <a href="dashboard.html" class="card" style="padding: 2rem; text-decoration: none; color: inherit; display: block;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--craisa-primary) 0%, var(--craisa-accent) 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(31, 123, 255, 0.4);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 700;">Dashboard Ejecutivo</h3>
+                            <p style="color: var(--text-tertiary); font-size: 0.875rem;">KPIs, distribución por estado, canal y línea</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                        <span class="badge badge-nuevo"><span class="badge-dot"></span> 4 KPIs</span>
+                        <span class="badge badge-contactado"><span class="badge-dot"></span> Gráficas</span>
+                        <span class="badge badge-seguimiento"><span class="badge-dot"></span> Alertas</span>
+                    </div>
+                </a>
+
+                <!-- Leads -->
+                <a href="leads.html" class="card" style="padding: 2rem; text-decoration: none; color: inherit; display: block;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--line-agricola) 0%, var(--line-construccion) 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(170, 24, 44, 0.4);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 700;">Listado de Leads</h3>
+                            <p style="color: var(--text-tertiary); font-size: 0.875rem;">Búsqueda, filtros, paginación y exportación</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                        <span class="badge badge-asignado"><span class="badge-dot"></span> 184 registros</span>
+                        <span class="badge badge-oportunidad"><span class="badge-dot"></span> 6 filtros</span>
+                        <span class="badge badge-ganado"><span class="badge-dot"></span> Exportar CSV</span>
+                    </div>
+                </a>
+
+                <!-- Detalle Lead -->
+                <a href="detalle-lead.html" class="card" style="padding: 2rem; text-decoration: none; color: inherit; display: block;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--line-carga) 0%, var(--line-precision) 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(61, 174, 43, 0.4);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 700;">Detalle del Lead</h3>
+                            <p style="color: var(--text-tertiary); font-size: 0.875rem;">Bitácora, historial de estados, próxima acción</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                        <span class="badge badge-nuevo"><span class="badge-dot"></span> Estados</span>
+                        <span class="badge badge-oportunidad"><span class="badge-dot"></span> Próxima acción</span>
+                        <span class="badge badge-ganado"><span class="badge-dot"></span> Auditoría</span>
+                    </div>
+                </a>
+
+                <!-- Nuevo Lead -->
+                <a href="nuevo-lead.html" class="card" style="padding: 2rem; text-decoration: none; color: inherit; display: block;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--carbon-blue) 0%, var(--carbon-green) 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(111, 161, 214, 0.4);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 700;">Nuevo Lead</h3>
+                            <p style="color: var(--text-tertiary); font-size: 0.875rem;">Formulario validado, detección de duplicados</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                        <span class="badge badge-asignado"><span class="badge-dot"></span> 10 campos</span>
+                        <span class="badge badge-seguimiento"><span class="badge-dot"></span> Validación Zod</span>
+                        <span class="badge badge-oportunidad"><span class="badge-dot"></span> Duplicados</span>
+                    </div>
+                </a>
+
+                <!-- Login -->
+                <a href="login.html" class="card" style="padding: 2rem; text-decoration: none; color: inherit; display: block;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--craisa-primary-deep) 0%, var(--craisa-primary) 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(20, 63, 127, 0.4);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 700;">Inicio de Sesión</h3>
+                            <p style="color: var(--text-tertiary); font-size: 0.875rem;">Autenticación con roles y acceso restringido</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                        <span class="badge badge-nuevo"><span class="badge-dot"></span> 3 Roles</span>
+                        <span class="badge badge-contactado"><span class="badge-dot"></span> Auditado</span>
+                    </div>
+                </a>
+
+                <!-- Estado del proyecto -->
+                <div class="card" style="padding: 2rem; border-color: var(--border-glow); background: linear-gradient(135deg, rgba(31, 123, 255, 0.1) 0%, rgba(20, 63, 127, 0.3) 100%);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--carbon-green) 0%, #4D9BFF 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(178, 208, 67, 0.4);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 700;">Estado del Proyecto</h3>
+                            <p style="color: var(--text-tertiary); font-size: 0.875rem;">Prototipo completado · Listo para demo</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--carbon-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span style="color: var(--text-secondary);">Diseño inmersivo corporativo completado</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--carbon-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span style="color: var(--text-secondary);">5 pantallas funcionales con datos ficticios</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--carbon-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span style="color: var(--text-secondary);">Identidad CRAISA oficial aplicada</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--craisa-accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            <span style="color: var(--text-secondary);">Siguiente: Next.js + Prisma + Auth.js</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer style="margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="assets/logo-craisa.png" alt="CRAISA" style="height: 32px; filter: drop-shadow(0 0 15px rgba(31, 123, 255, 0.3));">
+                    <span style="color: var(--text-tertiary); font-size: 0.875rem;">Sistema de Gestión y Seguimiento de Leads Comerciales</span>
+                </div>
+                <div style="display: flex; gap: 2rem; color: var(--text-tertiary); font-size: 0.75rem;">
+                    <span>Prototipo v1.0</span>
+                    <span>·</span>
+                    <span>Datos ficticios</span>
+                    <span>·</span>
+                    <span>CRAISA 2026</span>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

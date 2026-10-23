@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Lead - CRAISA Leads</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <style>
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .detail-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .detail-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+        }
+        .detail-card h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .detail-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.5rem;
+        }
+        .tab {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab:hover {
+            color: var(--text-primary);
+            background: rgba(31, 123, 255, 0.1);
+        }
+        .tab.active {
+            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(31, 123, 255, 0.2) 0%, rgba(31, 123, 255, 0.1) 100%);
+            border: 1px solid var(--border-glow);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--craisa-accent), var(--carbon-green));
+        }
+        .timeline-item {
+            position: relative;
+            padding: 1rem;
+            background: rgba(15, 27, 58, 0.4);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+        .timeline-item:hover {
+            border-color: var(--border-glow);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 1.25rem;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--craisa-accent);
+            border: 3px solid var(--bg-dark);
+            box-shadow: 0 0 15px var(--craisa-accent-glow);
+        }
+        .timeline-item .date {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-bottom: 0.25rem;
+        }
+        .timeline-item .title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .timeline-item .desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .info-block {
+            background: rgba(15, 27, 58, 0.3);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .info-block-label {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-bottom: 0.25rem;
+        }
+        .info-block-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .next-action-card {
+            background: linear-gradient(135deg, rgba(31, 123, 255, 0.15) 0%, rgba(20, 63, 127, 0.3) 100%);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .next-action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--craisa-accent), var(--carbon-green));
+        }
+        .status-change-btn {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .status-change-btn .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+        @media (max-width: 1024px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-particles"></div>
+    <div class="bg-grid"></div>
+
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo-section">
+                <img src="assets/logo-craisa.png" alt="CRAISA" class="logo-img">
+                <div class="logo-text">
+                    <span class="logo-title">Sistema de Gestión de Leads</span>
+                    <span class="logo-subtitle">Detalle del Lead</span>
+                </div>
+            </div>
+            
+            <nav class="nav" role="navigation" aria-label="Navegación principal">
+                <a href="dashboard.html" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="leads.html" class="nav-link active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+                    <span>Leads</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Reportes</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Agenda</span>
+                </a>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar">MR</div>
+                <div class="user-info">
+                    <span class="user-name">María Rojas</span>
+                    <span class="user-role">Vendedora · Agrícola</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="page-header">
+                <div class="page-title-section">
+                    <a href="leads.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-tertiary); text-decoration: none; font-size: 0.875rem; margin-bottom: 0.75rem; transition: color 0.2s;" onmouseover="this.style.color='var(--craisa-accent)'" onmouseout="this.style.color='var(--text-tertiary)'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                        Volver al listado
+                    </a>
+                    <h1 id="leadTitle">LEAD-2026-0142</h1>
+                    <p class="page-subtitle" id="leadSubtitle">Ana Rodríguez · Finca La Sabana · Agrícola</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" id="changeStateBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        Cambiar estado
+                    </button>
+                    <a href="nuevo-lead.html" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nuevo Lead
+                    </a>
+                </div>
+            </div>
+
+            <!-- Next Action Card -->
+            <div class="next-action-card" id="nextActionCard">
+                <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="font-size: 0.75rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Próxima Acción</div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;" id="nextActionText">Llamar a cliente y enviar cotización</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);" id="nextActionDetail">Programada para hoy · 22/10/2026 · Responsable: J. Pérez</div>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary" id="completeActionBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Marcar completada
+                        </button>
+                        <button class="btn btn-secondary" id="editActionBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 1-2 2v14a2 2 0 0 1 2 2h14a2 2 0 0 1 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Reprogramar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-grid">
+                <!-- Columna principal -->
+                <div>
+                    <!-- Información del Lead -->
+                    <div class="detail-card" style="margin-bottom: 1.5rem;">
+                        <h3>Información del Lead</h3>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <div class="info-block-label">Código</div>
+                                <div class="info-block-value" style="color: var(--craisa-accent);">LEAD-2026-0142</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Fecha de ingreso</div>
+                                <div class="info-block-value">20/10/2026 · 09:45</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Cliente</div>
+                                <div class="info-block-value">Ana Rodríguez</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Empresa</div>
+                                <div class="info-block-value">Finca La Sabana S.A.</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Teléfono</div>
+                                <div class="info-block-value">+506 8812-4477</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Correo</div>
+                                <div class="info-block-value">ana.rodriguez@fincalasabana.cr</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Canal de origen</div>
+                                <div class="info-block-value">WhatsApp</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Línea de negocio</div>
+                                <div class="info-block-value">
+                                    <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                                        <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--line-agricola); box-shadow: 0 0 10px var(--line-agricola);"></span>
+                                        Agrícola
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Producto de interés</div>
+                                <div class="info-block-value">Fertilizantes y repuestos agrícolas</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="info-block-label">Responsable</div>
+                                <div class="info-block-value">Jorge Pérez</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1.5rem;">
+                            <div class="info-block-label">Descripción de la consulta</div>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.7; margin-top: 0.5rem;">
+                                Cliente interesado en adquirir repuestos para maquinaria agrícola John Deere. 
+                                Solicita cotización de filtros, correas y rodamientos para mantenimiento preventivo de tractor 6420. 
+                                También pregunta por disponibilidad de fertilizantes para 15 hectáreas de maíz.
+                                Requiere atención urgente por temporada de cosecha.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Tabs: Bitácora / Historial / Archivos -->
+                    <div class="detail-card">
+                        <div class="tabs">
+                            <button class="tab active" data-tab="bitacora">Bitácora</button>
+                            <button class="tab" data-tab="historial">Historial de Estados</button>
+                            <button class="tab" data-tab="archivos">Archivos</button>
+                            <button class="tab" data-tab="notas">Notas Internas</button>
+                        </div>
+
+                        <!-- Bitácora -->
+                        <div class="tab-content active" id="bitacora">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="date">22/10/2026 · 08:30</div>
+                                    <div class="title">Visita comercial programada</div>
+                                    <div class="desc">Se programa visita a Finca La Sabana para evaluar necesidades de mantenimiento. Responsable: J. Pérez</div>
+                                    <span class="badge badge-nuevo" style="margin-top: 0.5rem;"><span class="badge-dot"></span> Nuevo</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="date">21/10/2026 · 14:15</div>
+                                    <div class="title">Primer contacto por WhatsApp</div>
+                                    <div class="desc">Se contactó al cliente para confirmar detalles de la cotización. Cliente confirma interés en repuestos y fertilizantes. Se envía lista de precios.</div>
+                                    <span class="badge badge-contactado" style="margin-top: 0.5rem;"><span class="badge-dot"></span> Contactado</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="date">20/10/2026 · 09:45</div>
+                                    <div class="title">Lead ingresado al sistema</div>
+                                    <div class="desc">Consulta recibida por WhatsApp. Se registra lead automáticamente. Asignado a Jorge Pérez por línea Agrícola.</div>
+                                    <span class="badge badge-nuevo" style="margin-top: 0.5rem;"><span class="badge-dot"></span> Nuevo</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Historial de Estados -->
+                        <div class="tab-content" id="historial">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="date">21/10/2026 · 14:15 · J. Pérez</div>
+                                    <div class="title">Nuevo → Contactado</div>
+                                    <div class="desc">Se realizó primer contacto con el cliente. Se envió cotización de repuestos y fertilizantes.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="date">20/10/2026 · 09:45 · Sistema</div>
+                                    <div class="title">Lead creado</div>
+                                    <div class="desc">Estado inicial: Nuevo. Ingresado automáticamente por WhatsApp.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Archivos -->
+                        <div class="tab-content" id="archivos">
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(15, 27, 58, 0.4); border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor='var(--border-light)'">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--craisa-accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; font-size: 0.875rem;">Cotización_Repuestos_2026.pdf</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-tertiary);">2.4 MB · Subido 21/10/2026</div>
+                                    </div>
+                                    <button class="btn btn-ghost" style="padding: 0.375rem; width: 32px; height: 32px; justify-content: center;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </button>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(15, 27, 58, 0.4); border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor='var(--border-light)'">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--line-carga)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; font-size: 0.875rem;">Finca_Fotos.jpg</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-tertiary);">1.8 MB · Subido 21/10/2026</div>
+                                    </div>
+                                    <button class="btn btn-ghost" style="padding: 0.375rem; width: 32px; height: 32px; justify-content: center;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" style="margin-top: 1rem; width: 100%; justify-content: center;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Subir archivo
+                            </button>
+                        </div>
+
+                        <!-- Notas Internas -->
+                        <div class="tab-content" id="notas">
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div style="padding: 1rem; background: rgba(15, 27, 58, 0.4); border: 1px solid var(--border-light); border-radius: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--line-agricola), #C73E3E); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white;">JP</div>
+                                        <div>
+                                            <div style="font-weight: 600; font-size: 0.875rem;">Jorge Pérez</div>
+                                            <div style="font-size: 0.7rem; color: var(--text-tertiary);">21/10/2026 · 14:30</div>
+                                        </div>
+                                    </div>
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
+                                        Cliente mencionó que la finca tiene 3 tractores más que necesitan mantenimiento. Oportunidad de venta adicional en Q4. 
+                                        Se deben preparar paquetes de mantenimiento preventivo.
+                                    </p>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(15, 27, 58, 0.4); border: 1px solid var(--border-light); border-radius: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--line-construccion), #E89E2E); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white;">MR</div>
+                                        <div>
+                                            <div style="font-weight: 600; font-size: 0.875rem;">María Rojas</div>
+                                            <div style="font-size: 0.7rem; color: var(--text-tertiary);">20/10/2026 · 10:15</div>
+                                        </div>
+                                    </div>
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
+                                        Se asignó lead a Jorge Pérez por ser el responsable de línea Agrícola. 
+                                        Cliente solicitó cotización urgente por temporada de cosecha.
+                                    </p>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1.5rem;">
+                                <textarea placeholder="Escribir una nota interna..." style="width: 100%; min-height: 80px; padding: 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; resize: vertical; transition: all 0.3s ease;" onfocus="this.style.borderColor='var(--craisa-accent)'" onblur="this.style.borderColor='var(--border-subtle)'"></textarea>
+                                <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem;">
+                                    <button class="btn btn-primary" style="padding: 0.625rem 1.5rem;">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                        Guardar nota
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna lateral -->
+                <div>
+                    <!-- Estado actual -->
+                    <div class="detail-card" style="margin-bottom: 1.5rem;">
+                        <h3>Estado Actual</h3>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                            <span class="badge badge-contactado" style="padding: 0.5rem 1rem; font-size: 0.875rem;"><span class="badge-dot"></span> Contactado</span>
+                            <span style="font-size: 0.8rem; color: var(--text-tertiary);">Actualizado 21/10/2026</span>
+                        </div>
+                        <div class="status-change-btn">
+                            <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;" data-status="asignado">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--estado-asignado);"></span>
+                                Asignado
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;" data-status="contactado">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--estado-contactado);"></span>
+                                Contactado
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;" data-status="seguimiento">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--estado-seguimiento);"></span>
+                                En seguimiento
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;" data-status="oportunidad">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--estado-oportunidad);"></span>
+                                Oportunidad
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;" data-status="ganado">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--estado-ganado);"></span>
+                                Ganado
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;" data-status="perdido">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--estado-perdido);"></span>
+                                Perdido
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div class="detail-card" style="margin-bottom: 1.5rem;">
+                        <h3>Información Adicional</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Fuente de ingreso</span>
+                            <span class="detail-value">WhatsApp</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Prioridad</span>
+                            <span class="detail-value" style="color: var(--line-construccion);">Alta</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Última actividad</span>
+                            <span class="detail-value">21/10/2026 · 14:15</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tiempo en estado actual</span>
+                            <span class="detail-value">1 día</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Creado por</span>
+                            <span class="detail-value">Sistema (WhatsApp)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Asignado por</span>
+                            <span class="detail-value">María Rojas</span>
+                        </div>
+                    </div>
+
+                    <!-- Acciones rápidas -->
+                    <div class="detail-card">
+                        <h3>Acciones Rápidas</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <button class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                Llamar al cliente
+                            </button>
+                            <button class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                Enviar correo
+                            </button>
+                            <button class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Exportar lead
+                            </button>
+                            <button class="btn btn-secondary" style="width: 100%; justify-content: flex-start; color: var(--line-agricola);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                Eliminar lead
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer style="margin-top: 3rem; padding: 1.5rem 0; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="assets/logo-craisa.png" alt="CRAISA" style="height: 28px;">
+                    <span style="color: var(--text-tertiary); font-size: 0.8rem;">Última actualización: 22/10/2026 09:14 · Datos de prototipo</span>
+                </div>
+                <div style="color: var(--text-tertiary); font-size: 0.75rem;">
+                    CRAISA 2026 · Sistema de Gestión de Leads
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <!-- Modal Cambiar Estado -->
+    <div class="modal-overlay" id="stateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cambiar Estado del Lead</h3>
+                <button class="modal-close" id="closeStateModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Nuevo estado</label>
+                <select style="width: 100%; padding: 0.75rem 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"16\\\" height=\\\"16\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"%23B8C5D6\\\" stroke-width=\\\"2\\\"><polyline points=\\\"6 9 12 15 18 9\\\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center;">
+                    <option value="nuevo">Nuevo</option>
+                    <option value="asignado">Asignado</option>
+                    <option value="contactado" selected>Contactado</option>
+                    <option value="seguimiento">En seguimiento</option>
+                    <option value="oportunidad">Oportunidad comercial</option>
+                    <option value="ganado">Ganado</option>
+                    <option value="perdido">Perdido</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Motivo del cambio</label>
+                <textarea placeholder="Describa el motivo del cambio de estado..." style="width: 100%; min-height: 80px; padding: 0.75rem 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; resize: vertical;" onfocus="this.style.borderColor='var(--craisa-accent)'" onblur="this.style.borderColor='var(--border-subtle)'"></textarea>
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" id="cancelStateChange">Cancelar</button>
+                <button class="btn btn-primary" id="confirmStateChange">Confirmar cambio</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Tab functionality
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            tab.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+        });
+    });
+
+    // Modal functionality
+    const stateModal = document.getElementById('stateModal');
+    const changeStateBtn = document.getElementById('changeStateBtn');
+    const closeStateModal = document.getElementById('closeStateModal');
+    const cancelStateChange = document.getElementById('cancelStateChange');
+    const confirmStateChange = document.getElementById('confirmStateChange');
+
+    function openModal() {
+        stateModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        stateModal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    changeStateBtn.addEventListener('click', openModal);
+    closeStateModal.addEventListener('click', closeModal);
+    cancelStateChange.addEventListener('click', closeModal);
+    
+    stateModal.addEventListener('click', (e) => {
+        if (e.target === stateModal) closeModal();
+    });
+
+    confirmStateChange.addEventListener('click', () => {
+        closeModal();
+        if (window.CRAISA) {
+            window.CRAISA.showNotification('Estado actualizado correctamente', 'success');
+        }
+    });
+
+    // Status change buttons
+    document.querySelectorAll('[data-status]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const status = btn.dataset.status;
+            if (window.CRAISA) {
+                window.CRAISA.showNotification('Estado cambiado a ' + status, 'success');
+            }
+        });
+    });
+
+    // Complete action button
+    document.getElementById('completeActionBtn').addEventListener('click', () => {
+        if (window.CRAISA) {
+            window.CRAISA.showNotification('Acción marcada como completada', 'success');
+        }
+        document.getElementById('nextActionCard').style.opacity = '0.5';
+        setTimeout(() => {
+            document.getElementById('nextActionCard').style.opacity = '1';
+        }, 1000);
+    });
+
+    // Edit action button
+    document.getElementById('editActionBtn').addEventListener('click', () => {
+        if (window.CRAISA) {
+            window.CRAISA.showNotification('Reprogramación de acción', 'info');
+        }
+    });
+
+    // Lead data from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const leadCode = urlParams.get('code');
+    if (leadCode) {
+        document.getElementById('leadTitle').textContent = leadCode;
+    }
+
+    // ESC key to close modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && stateModal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+    </script>
+    <script src="js/app.js"></script>
+</body>
+</html>
