@@ -9,11 +9,196 @@
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <style>
+        /* Dashboard-specific improvements */
+        .quick-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .quick-actions .btn {
+            flex: 1;
+            min-width: 140px;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .alert-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+            background: #FFFFFF;
+            border: 1px solid var(--border-default);
+            border-left-width: 4px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .alert-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(2px);
+        }
+        .alert-card.warning { border-left-color: var(--line-construccion); }
+        .alert-card.danger { border-left-color: var(--line-agricola); }
+        .alert-card.info { border-left-color: var(--craisa-primary); }
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .alert-content { flex: 1; min-width: 0; }
+        .alert-title { font-weight: 700; font-size: 0.875rem; color: var(--text-primary); }
+        .alert-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.125rem; }
+        .alert-action { font-size: 0.75rem; font-weight: 600; color: var(--craisa-primary); white-space: nowrap; }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--craisa-primary);
+            border-radius: 2px;
+        }
+        .chart-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.625rem;
+        }
+        .chart-bar-label {
+            width: 100px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .chart-bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-subtle);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .chart-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding-left: 0.625rem;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: width 0.8s ease;
+        }
+        .chart-bar-value {
+            width: 36px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .kpi-card-compact {
+            background: #FFFFFF;
+            border: 1px solid var(--border-default);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-card);
+        }
+        .kpi-card-compact:hover {
+            border-color: var(--craisa-primary);
+            box-shadow: var(--shadow-md);
+        }
+        .kpi-icon-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .kpi-icon-sm svg { width: 20px; height: 20px; }
+        .kpi-value-sm {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
+            font-family: var(--font-display);
+            color: var(--text-primary);
+        }
+        .kpi-label-sm { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.125rem; }
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+        }
+        .activity-item:hover { background: var(--bg-subtle); }
+        .activity-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .activity-text { flex: 1; min-width: 0; }
+        .activity-name { font-weight: 600; font-size: 0.8rem; color: var(--text-primary); }
+        .activity-desc { font-size: 0.75rem; color: var(--text-secondary); }
+        .activity-time { font-size: 0.7rem; color: var(--text-tertiary); white-space: nowrap; }
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-size: 0.8rem;
+        }
+        .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+        .legend-label { flex: 1; color: var(--text-secondary); }
+        .legend-value { font-weight: 700; color: var(--text-primary); }
+        .legend-pct { font-size: 0.7rem; color: var(--text-tertiary); width: 36px; text-align: right; }
+        @media (max-width: 768px) {
+            .quick-actions .btn { min-width: 100%; }
+        }
+    </style>
 </head>
 <body>
-    
-    
-
     <header class="header">
         <div class="container header-content">
             <div class="logo-section">
@@ -55,424 +240,385 @@
 
     <main class="main">
         <div class="container">
+            <!-- Page Header -->
             <div class="page-header">
                 <div class="page-title-section">
                     <h1>Dashboard Comercial</h1>
-                    <p class="page-subtitle">Resumen de la gestión de leads · Período: Últimos 30 días</p>
+                    <p class="page-subtitle">Resumen de la gestión de leads · Últimos 30 días</p>
                 </div>
                 <div class="page-actions">
-                    <select class="btn btn-secondary" style="padding: 0.625rem 2rem 0.625rem 1rem; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23B8C5D6\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center;">
+                    <select class="btn btn-secondary" style="padding: 0.625rem 1rem; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%236B7280\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; font-size: 0.8rem;">
                         <option>Últimos 30 días</option>
                         <option>Últimos 7 días</option>
                         <option>Este mes</option>
                         <option>Trimestre actual</option>
                     </select>
-                    <a href="leads.html?export=csv" class="btn btn-secondary">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Exportar CSV
+                    <a href="leads.html" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nuevo Lead
                     </a>
                 </div>
             </div>
 
-            <!-- KPIs -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon" style="background: linear-gradient(135deg, rgba(31, 123, 255, 0.2) 0%, rgba(31, 123, 255, 0.1) 100%);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--craisa-accent)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        </div>
-                        <span class="kpi-trend">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                            +12 vs. mes anterior
-                        </span>
-                    </div>
-                    <div class="kpi-value">184</div>
-                    <div class="kpi-label">Leads Totales</div>
-                    <div class="kpi-sublabel">Activos en el período seleccionado</div>
-                </div>
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <a href="leads.html" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+                    Ver todos los leads
+                </a>
+                <a href="leads.html?filter=sin-asignar" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Leads sin asignar (2)
+                </a>
+                <a href="leads.html?filter=vencidas" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Acciones vencidas (3)
+                </a>
+                <a href="leads.html?filter=sin-accion" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Sin próxima acción (6)
+                </a>
+            </div>
 
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon" style="background: linear-gradient(135deg, rgba(212, 126, 0, 0.2) 0%, rgba(212, 126, 0, 0.1) 100%);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-construccion)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                        </div>
-                        <span class="kpi-trend">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                            +8%
-                        </span>
+            <!-- KPIs - Compact Row -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="kpi-card-compact">
+                    <div class="kpi-icon-sm" style="background: rgba(20, 63, 127, 0.08);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--craisa-primary)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </div>
-                    <div class="kpi-value">143</div>
-                    <div class="kpi-label">En Gestión Activa</div>
-                    <div class="kpi-sublabel">78% del total · 9 requieren acción</div>
+                    <div>
+                        <div class="kpi-value-sm">184</div>
+                        <div class="kpi-label-sm">Leads Totales</div>
+                    </div>
                 </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon" style="background: linear-gradient(135deg, rgba(61, 174, 43, 0.2) 0%, rgba(61, 174, 43, 0.1) 100%);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-carga)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                        </div>
-                        <span class="kpi-trend">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                            +11.4% tasa
-                        </span>
+                <div class="kpi-card-compact">
+                    <div class="kpi-icon-sm" style="background: rgba(212, 126, 0, 0.08);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-construccion)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                     </div>
-                    <div class="kpi-value">21</div>
-                    <div class="kpi-label">Leads Ganados</div>
-                    <div class="kpi-sublabel">Tasa de cierre 11.4%</div>
+                    <div>
+                        <div class="kpi-value-sm">143</div>
+                        <div class="kpi-label-sm">En Gestión Activa</div>
+                    </div>
                 </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon" style="background: linear-gradient(135deg, rgba(170, 24, 44, 0.2) 0%, rgba(170, 24, 44, 0.1) 100%);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-agricola)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        </div>
-                        <span class="kpi-trend" style="background: rgba(170, 24, 44, 0.15); color: var(--line-agricola); border-color: rgba(170, 24, 44, 0.3);">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 18 12 13 7 18"/><polyline points="7 6 12 11 17 6"/></svg>
-                            3 vencidas
-                        </span>
+                <div class="kpi-card-compact">
+                    <div class="kpi-icon-sm" style="background: rgba(61, 174, 43, 0.08);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-carga)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <div class="kpi-value">9</div>
-                    <div class="kpi-label">Requieren Acción</div>
-                    <div class="kpi-sublabel">3 acciones vencidas · 6 sin próxima acción</div>
+                    <div>
+                        <div class="kpi-value-sm">21</div>
+                        <div class="kpi-label-sm">Leads Ganados</div>
+                    </div>
+                </div>
+                <div class="kpi-card-compact">
+                    <div class="kpi-icon-sm" style="background: rgba(170, 24, 44, 0.08);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--line-agricola)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <div>
+                        <div class="kpi-value-sm">9</div>
+                        <div class="kpi-label-sm">Requieren Acción</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Charts Row 1 -->
-            <div class="charts-grid">
-                <!-- Distribución por Estado -->
-                <div class="card chart-card">
+            <!-- Main Content Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+                <!-- Estado de Leads -->
+                <div class="card">
                     <div class="card-header">
-                        <div class="card-title-group">
-                            <h3>Distribución por Estado</h3>
-                            <p class="card-subtitle">Total de leads del período</p>
-                        </div>
+                        <div class="section-title">Estado de Leads</div>
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">184 total</span>
                     </div>
                     <div class="card-body">
-                        <div style="display: flex; gap: 2rem; align-items: flex-end; height: 260px;">
-                            <!-- Donut Chart SVG -->
-                            <div style="flex: 0 0 220px; display: flex; align-items: center; justify-content: center;">
-                                <svg width="220" height="220" viewBox="0 0 220 220" style="transform: rotate(-90deg);">
-                                    <circle cx="110" cy="110" r="90" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="55"/>
-                                    <!-- Nuevo 15% -->
-                                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--estado-nuevo)" stroke-width="55" stroke-dasharray="565.5" stroke-dashoffset="0" stroke-linecap="round" style="stroke-dasharray: 84.8 480.7;">
-                                    </circle>
-                                    <!-- Asignado 12% -->
-                                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--estado-asignado)" stroke-width="55" stroke-dasharray="565.5" stroke-dashoffset="-84.8" stroke-linecap="round" style="stroke-dasharray: 67.8 497.7;">
-                                    </circle>
-                                    <!-- Contactado 22% -->
-                                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--estado-contactado)" stroke-width="55" stroke-dasharray="565.5" stroke-dashoffset="-152.6" stroke-linecap="round" style="stroke-dasharray: 124.4 441.1;">
-                                    </circle>
-                                    <!-- En seguimiento 24% -->
-                                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--estado-seguimiento)" stroke-width="55" stroke-dasharray="565.5" stroke-dashoffset="-277" stroke-linecap="round" style="stroke-dasharray: 135.7 429.8;">
-                                    </circle>
-                                    <!-- Oportunidad 13% -->
-                                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--estado-oportunidad)" stroke-width="55" stroke-dasharray="565.5" stroke-dashoffset="-412.7" stroke-linecap="round" style="stroke-dasharray: 73.5 492;">
-                                    </circle>
-                                    <!-- Ganado 8% -->
-                                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--estado-ganado)" stroke-width="55" stroke-dasharray="565.5" stroke-dashoffset="-486.2" stroke-linecap="round" style="stroke-dasharray: 45.2 520.3;">
-                                    </circle>
-                                    <!-- Perdido 6% -->
-                                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--estado-perdido)" stroke-width="55" stroke-dasharray="565.5" stroke-dashoffset="-531.4" stroke-linecap="round" style="stroke-dasharray: 33.9 531.6;">
-                                    </circle>
-                                </svg>
-                                <div style="position: absolute; text-align: center; pointer-events: none;">
-                                    <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #111418 0%, #4B5563 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">184</div>
-                                    <div style="color: var(--text-tertiary); font-size: 0.875rem;">leads</div>
-                                </div>
+                        <div class="donut-legend">
+                            <div class="legend-item">
+                                <span class="legend-dot" style="background: var(--estado-nuevo);"></span>
+                                <span class="legend-label">Nuevo</span>
+                                <span class="legend-pct">15%</span>
+                                <span class="legend-value">27</span>
                             </div>
-                            
-                            <!-- Leyenda -->
-                            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 0.75rem;">
-                                <div style="display: flex; align-items: center; gap: 0.75rem;"><span class="badge badge-nuevo"><span class="badge-dot"></span> Nuevo (15%)</span><span style="font-weight: 700; color: var(--text-primary);">27</span></div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;"><span class="badge badge-asignado"><span class="badge-dot"></span> Asignado (12%)</span><span style="font-weight: 700; color: var(--text-primary);">22</span></div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;"><span class="badge badge-contactado"><span class="badge-dot"></span> Contactado (22%)</span><span style="font-weight: 700; color: var(--text-primary);">40</span></div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;"><span class="badge badge-seguimiento"><span class="badge-dot"></span> En seguimiento (24%)</span><span style="font-weight: 700; color: var(--text-primary);">44</span></div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;"><span class="badge badge-oportunidad"><span class="badge-dot"></span> Oportunidad (13%)</span><span style="font-weight: 700; color: var(--text-primary);">24</span></div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;"><span class="badge badge-ganado"><span class="badge-dot"></span> Ganado (8%)</span><span style="font-weight: 700; color: var(--text-primary);">21</span></div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;"><span class="badge badge-perdido"><span class="badge-dot"></span> Perdido (6%)</span><span style="font-weight: 700; color: var(--text-primary);">16</span></div>
+                            <div class="legend-item">
+                                <span class="legend-dot" style="background: var(--estado-asignado);"></span>
+                                <span class="legend-label">Asignado</span>
+                                <span class="legend-pct">12%</span>
+                                <span class="legend-value">22</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Leads por Canal -->
-                <div class="card chart-card">
-                    <div class="card-header">
-                        <div class="card-title-group">
-                            <h3>Leads por Canal de Origen</h3>
-                            <p class="card-subtitle">Período seleccionado</p>
-                        </div>
-                    </div>
-                    <div class="card-body" style="height: 260px; display: flex; flex-direction: column; justify-content: center;">
-                        <div style="display: flex; flex-direction: column; gap: 0.875rem;">
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 110px; font-size: 0.875rem; color: var(--text-secondary);">Sitio web</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden; position: relative;">
-                                    <div style="width: 100%; height: 100%; background: linear-gradient(90deg, var(--craisa-primary), var(--craisa-accent)); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">42</span>
+                            <div class="legend-item">
+                                <span class="legend-dot" style="background: var(--estado-contactado);"></span>
+                                <span class="legend-label">Contactado</span>
+                                <span class="legend-pct">22%</span>
+                                <span class="legend-value">40</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 110px; font-size: 0.875rem; color: var(--text-secondary);">WhatsApp</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 73.8%; height: 100%; background: linear-gradient(90deg, var(--carbon-green), var(--carbon-blue)); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.1s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">31</span>
+                            <div class="legend-item">
+                                <span class="legend-dot" style="background: var(--estado-seguimiento);"></span>
+                                <span class="legend-label">En seguimiento</span>
+                                <span class="legend-pct">24%</span>
+                                <span class="legend-value">44</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 110px; font-size: 0.875rem; color: var(--text-secondary);">Facebook</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 45.2%; height: 100%; background: linear-gradient(90deg, var(--line-agricola), var(--line-construccion)); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.2s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">19</span>
+                            <div class="legend-item">
+                                <span class="legend-dot" style="background: var(--estado-oportunidad);"></span>
+                                <span class="legend-label">Oportunidad</span>
+                                <span class="legend-pct">13%</span>
+                                <span class="legend-value">24</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 110px; font-size: 0.875rem; color: var(--text-secondary);">Instagram</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 33.3%; height: 100%; background: linear-gradient(90deg, var(--carbon-blue), var(--line-carga)); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.3s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">14</span>
+                            <div class="legend-item">
+                                <span class="legend-dot" style="background: var(--estado-ganado);"></span>
+                                <span class="legend-label">Ganado</span>
+                                <span class="legend-pct">8%</span>
+                                <span class="legend-value">21</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 110px; font-size: 0.875rem; color: var(--text-secondary);">Feria</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 28.6%; height: 100%; background: linear-gradient(90deg, var(--line-precision), var(--line-agricola)); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.4s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">12</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 110px; font-size: 0.875rem; color: var(--text-secondary);">Llamada</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 23.8%; height: 100%; background: linear-gradient(90deg, var(--carbon-gray), var(--carbon-blue)); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.5s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">10</span>
+                            <div class="legend-item">
+                                <span class="legend-dot" style="background: var(--estado-perdido);"></span>
+                                <span class="legend-label">Perdido</span>
+                                <span class="legend-pct">6%</span>
+                                <span class="legend-value">16</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Por Línea de Negocio -->
-                <div class="card chart-card">
+                <div class="card">
                     <div class="card-header">
-                        <div class="card-title-group">
-                            <h3>Por Línea de Negocio</h3>
-                            <p class="card-subtitle">Estrategia Paraguas CRAISA</p>
-                        </div>
+                        <div class="section-title">Por Línea de Negocio</div>
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">Estrategia Paraguas</span>
                     </div>
-                    <div class="card-body" style="height: 260px; display: flex; flex-direction: column; justify-content: center;">
-                        <div style="display: flex; flex-direction: column; gap: 0.875rem;">
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--line-agricola); box-shadow: none;"></span>
-                                <span style="width: 120px; font-size: 0.875rem; color: var(--text-secondary);">Agrícola</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 100%; height: 100%; background: linear-gradient(90deg, var(--line-agricola), #C73E3E); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">62</span>
+                    <div class="card-body">
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Agrícola</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 100%; background: var(--line-agricola);">62</div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--line-construccion); box-shadow: none;"></span>
-                                <span style="width: 120px; font-size: 0.875rem; color: var(--text-secondary);">Construcción</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 71%; height: 100%; background: linear-gradient(90deg, var(--line-construccion), #E89E2E); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.1s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">44</span>
+                            <span class="chart-bar-value">62</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Construcción</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 71%; background: var(--line-construccion);">44</div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--line-carga); box-shadow: none;"></span>
-                                <span style="width: 120px; font-size: 0.875rem; color: var(--text-secondary);">Mov. de Carga</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 50%; height: 100%; background: linear-gradient(90deg, var(--line-carga), #5BD942); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.2s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">31</span>
+                            <span class="chart-bar-value">44</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Mov. de Carga</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 50%; background: var(--line-carga);">31</div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--line-precision); box-shadow: none;"></span>
-                                <span style="width: 120px; font-size: 0.875rem; color: var(--text-secondary);">Agr. Precisión</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 43.5%; height: 100%; background: linear-gradient(90deg, var(--line-precision), #006BA6); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.3s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">27</span>
+                            <span class="chart-bar-value">31</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Agr. Precisión</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 43.5%; background: var(--line-precision);">27</div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--line-postventa); box-shadow: none;"></span>
-                                <span style="width: 120px; font-size: 0.875rem; color: var(--text-secondary);">Postventa</span>
-                                <div style="flex: 1; height: 16px; background: var(--bg-subtle); border-radius: 8px; overflow: hidden;">
-                                    <div style="width: 32.3%; height: 100%; background: linear-gradient(90deg, var(--line-postventa), #7A7B7D); border-radius: 8px; transform-origin: left; animation: growBar 1.5s ease-out 0.4s both;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right;">20</span>
+                            <span class="chart-bar-value">27</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Postventa</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 32.3%; background: var(--line-postventa);">20</div>
                             </div>
+                            <span class="chart-bar-value">20</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Charts Row 2 + Alertas -->
-            <div class="charts-grid">
-                <!-- Timeline / Tendencia -->
-                <div class="card chart-card large">
+            <!-- Second Row: Canal + Actividad -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+                <!-- Por Canal -->
+                <div class="card">
                     <div class="card-header">
-                        <div class="card-title-group">
-                            <h3>Tendencia de Leads (30 días)</h3>
-                            <p class="card-subtitle">Ingresos diarios vs. conversiones</p>
-                        </div>
+                        <div class="section-title">Leads por Canal de Origen</div>
+                        <span style="font-size: 0.75rem; color: var(--text-tertiary);">9 canales</span>
                     </div>
-                    <div class="card-body" style="height: 280px;">
-                        <svg width="100%" height="280" viewBox="0 0 700 280" preserveAspectRatio="none">
-                            <!-- Grid -->
-                            <g stroke="rgba(100, 149, 237, 0.08)" stroke-width="1">
-                                <line x1="60" y1="20" x2="640" y2="20"/>
-                                <line x1="60" y1="70" x2="640" y2="70"/>
-                                <line x1="60" y1="120" x2="640" y2="120"/>
-                                <line x1="60" y1="170" x2="640" y2="170"/>
-                                <line x1="60" y1="220" x2="640" y2="220"/>
-                                <line x1="60" y1="270" x2="640" y2="270"/>
-                            </g>
-                            <!-- Ejes Y labels -->
-                            <g font-size="10" fill="var(--text-tertiary)">
-                                <text x="45" y="24" text-anchor="end">12</text>
-                                <text x="45" y="74" text-anchor="end">9</text>
-                                <text x="45" y="124" text-anchor="end">6</text>
-                                <text x="45" y="174" text-anchor="end">3</text>
-                                <text x="45" y="224" text-anchor="end">0</text>
-                            </g>
-                            <!-- Ejes X labels -->
-                            <g font-size="10" fill="var(--text-tertiary)" text-anchor="middle">
-                                <text x="100" y="260">01/10</text>
-                                <text x="180" y="260">07/10</text>
-                                <text x="260" y="260">13/10</text>
-                                <text x="340" y="260">19/10</text>
-                                <text x="420" y="260">22/10</text>
-                                <text x="500" y="260">26/10</text>
-                                <text x="580" y="260">30/10</text>
-                            </g>
-                            <!-- Area chart Leads -->
-                            <path d="M60,220 C120,180 180,140 260,100 C340,60 420,140 500,120 C580,100 640,80 640,80 L640,270 L60,270 Z" fill="rgba(31, 123, 255, 0.1)"/>
-                            <path d="M60,220 C120,180 180,140 260,100 C340,60 420,140 500,120 C580,100 640,80 640,80" fill="none" stroke="var(--craisa-accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <!-- Line chart Conversiones -->
-                            <path d="M60,190 C120,160 180,130 260,105 C340,80 420,115 500,95 C580,75 640,70 640,70" fill="none" stroke="var(--line-carga)" stroke-width="2" stroke-dasharray="8 4" stroke-linecap="round" stroke-linejoin="round"/>
-                            <!-- Puntos Leads -->
-                            <g fill="var(--craisa-accent)">
-                                <circle cx="100" cy="200" r="4"/><circle cx="180" cy="160" r="4"/><circle cx="260" cy="140" r="4"/>
-                                <circle cx="340" cy="95" r="4"/><circle cx="420" cy="135" r="4"/><circle cx="500" cy="115" r="4"/>
-                                <circle cx="580" cy="90" r="4"/><circle cx="640" cy="80" r="4"/>
-                            </g>
-                            <!-- Puntos Conversiones -->
-                            <g fill="var(--line-carga)">
-                                <circle cx="100" cy="175" r="3"/><circle cx="180" cy="145" r="3"/><circle cx="260" cy="115" r="3"/>
-                                <circle cx="340" cy="95" r="3"/><circle cx="420" cy="110" r="3"/><circle cx="500" cy="90" r="3"/>
-                                <circle cx="580" cy="70" r="3"/><circle cx="640" cy="70" r="3"/>
-                            </g>
-                            <!-- Leyenda -->
-                            <g font-size="11" fill="var(--text-secondary)">
-                                <circle cx="520" cy="40" r="5" fill="var(--craisa-accent)"/>
-                                <text x="530" y="44">Leads ingresados</text>
-                                <circle cx="520" cy="60" r="5" fill="var(--line-carga)"/>
-                                <text x="530" y="64">Convertidos a Ganado</text>
-                            </g>
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- Alertas -->
-                <div class="card chart-card small">
-                    <div class="card-header">
-                        <div class="card-title-group">
-                            <h3>Requieren Atención</h3>
-                            <p class="card-subtitle">Alertas operativas</p>
-                        </div>
-                    </div>
-                    <div class="card-body" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div style="padding: 1rem; background: rgba(212, 126, 0, 0.1); border: 1px solid rgba(212, 126, 0, 0.2); border-radius: 10px; border-left: 3px solid var(--line-construccion);">
-                            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--line-construccion)" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">3 acciones vencidas</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-tertiary); margin-top: 0.25rem;">Leads con próxima acción antes de hoy</div>
-                                </div>
+                    <div class="card-body">
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Sitio web</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 100%; background: var(--craisa-primary);">42</div>
                             </div>
-                            <a href="leads.html?filter=vencidas" style="display: inline-block; margin-top: 0.75rem; font-size: 0.8rem; font-weight: 600; color: var(--line-construccion);">Ver leads →</a>
+                            <span class="chart-bar-value">42</span>
                         </div>
-                        <div style="padding: 1rem; background: rgba(170, 24, 44, 0.1); border: 1px solid rgba(170, 24, 44, 0.2); border-radius: 10px; border-left: 3px solid var(--line-agricola);">
-                            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--line-agricola)" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">6 leads sin próxima acción</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-tertiary); margin-top: 0.25rem;">Asignados hace más de 5 días</div>
-                                </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">WhatsApp</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 73.8%; background: var(--line-carga);">31</div>
                             </div>
-                            <a href="leads.html?filter=sin-accion" style="display: inline-block; margin-top: 0.75rem; font-size: 0.8rem; font-weight: 600; color: var(--line-agricola);">Ver leads →</a>
+                            <span class="chart-bar-value">31</span>
                         </div>
-                        <div style="padding: 1rem; background: rgba(31, 123, 255, 0.1); border: 1px solid rgba(31, 123, 255, 0.2); border-radius: 10px; border-left: 3px solid var(--craisa-accent);">
-                            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--craisa-accent)" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">2 leads sin asignar</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-tertiary); margin-top: 0.25rem;">Ingresaron por el sitio web</div>
-                                </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Facebook</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 45.2%; background: var(--line-agricola);">19</div>
                             </div>
-                            <a href="leads.html?filter=sin-asignar" style="display: inline-block; margin-top: 0.75rem; font-size: 0.8rem; font-weight: 600; color: var(--craisa-accent);">Asignar →</a>
+                            <span class="chart-bar-value">19</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Instagram</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 33.3%; background: var(--line-precision);">14</div>
+                            </div>
+                            <span class="chart-bar-value">14</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Feria</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 28.6%; background: var(--line-construccion);">12</div>
+                            </div>
+                            <span class="chart-bar-value">12</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-bar-label">Llamada</span>
+                            <div class="chart-bar-track">
+                                <div class="chart-bar-fill" style="width: 23.8%; background: var(--carbon-gray);">10</div>
+                            </div>
+                            <span class="chart-bar-value">10</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Actividad Reciente -->
-                <div class="card chart-card small">
+                <div class="card">
                     <div class="card-header">
-                        <div class="card-title-group">
-                            <h3>Actividad Reciente</h3>
-                            <p class="card-subtitle">Últimas gestiones del equipo</p>
-                        </div>
+                        <div class="section-title">Actividad Reciente</div>
+                        <a href="#" style="font-size: 0.75rem; color: var(--craisa-primary); text-decoration: none; font-weight: 600;">Ver todo →</a>
                     </div>
-                    <div class="card-body" style="display: flex; flex-direction: column; gap: 0.875rem;">
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: var(--bg-subtle); border-radius: 10px; border: 1px solid var(--border-light); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor='var(--border-light)'">
-                            <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--line-agricola), #C73E3E); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: white;">JP</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 600; font-size: 0.875rem;">Jorge Pérez</div>
-                                <div style="font-size: 0.75rem; color: var(--text-tertiary);">Cambió LEAD-2026-0142 a "Oportunidad comercial"</div>
+                    <div class="card-body" style="padding: 0.75rem 1.25rem 1.25rem;">
+                        <div class="activity-item">
+                            <div class="activity-avatar" style="background: var(--line-agricola);">JP</div>
+                            <div class="activity-text">
+                                <div class="activity-name">Jorge Pérez</div>
+                                <div class="activity-desc">Cambió LEAD-2026-0142 a "Oportunidad"</div>
                             </div>
-                            <div style="font-size: 0.7rem; color: var(--text-tertiary); white-space: nowrap;">Hace 15 min</div>
+                            <div class="activity-time">Hace 15 min</div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: var(--bg-subtle); border-radius: 10px; border: 1px solid var(--border-light);">
-                            <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--line-construccion), #E89E2E); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: white;">MR</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 600; font-size: 0.875rem;">María Rojas</div>
-                                <div style="font-size: 0.75rem; color: var(--text-tertiary);">Registró visita a Finca La Sabana (LEAD-2026-0142)</div>
+                        <div class="activity-item">
+                            <div class="activity-avatar" style="background: var(--line-construccion);">MR</div>
+                            <div class="activity-text">
+                                <div class="activity-name">María Rojas</div>
+                                <div class="activity-desc">Registró visita a Finca La Sabana</div>
                             </div>
-                            <div style="font-size: 0.7rem; color: var(--text-tertiary); white-space: nowrap;">Hace 1 h</div>
+                            <div class="activity-time">Hace 1 h</div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: var(--bg-subtle); border-radius: 10px; border: 1px solid var(--border-light);">
-                            <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--line-carga), #5BD942); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: white;">SM</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 600; font-size: 0.875rem;">Sergio Mora</div>
-                                <div style="font-size: 0.75rem; color: var(--text-tertiary);">Cerró LEAD-2026-0136 como Ganado</div>
+                        <div class="activity-item">
+                            <div class="activity-avatar" style="background: var(--line-carga);">SM</div>
+                            <div class="activity-text">
+                                <div class="activity-name">Sergio Mora</div>
+                                <div class="activity-desc">Cerró LEAD-2026-0136 como Ganado</div>
                             </div>
-                            <div style="font-size: 0.7rem; color: var(--text-tertiary); white-space: nowrap;">Hace 3 h</div>
+                            <div class="activity-time">Hace 3 h</div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: var(--bg-subtle); border-radius: 10px; border: 1px solid var(--border-light);">
-                            <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--carbon-blue), var(--craisa-accent)); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: white;">RB</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 600; font-size: 0.875rem;">Rebeca Blandón</div>
-                                <div style="font-size: 0.75rem; color: var(--text-tertiary);">Exportó reporte mensual de Agrícola (54 leads)</div>
+                        <div class="activity-item">
+                            <div class="activity-avatar" style="background: var(--carbon-blue);">RB</div>
+                            <div class="activity-text">
+                                <div class="activity-name">Rebeca Blandón</div>
+                                <div class="activity-desc">Exportó reporte mensual de Agrícola</div>
                             </div>
-                            <div style="font-size: 0.7rem; color: var(--text-tertiary); white-space: nowrap;">Hace 5 h</div>
+                            <div class="activity-time">Hace 5 h</div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: var(--bg-subtle); border-radius: 10px; border: 1px solid var(--border-light);">
-                            <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--line-precision), #006BA6); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: white;">AL</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 600; font-size: 0.875rem;">Andrea López</div>
-                                <div style="font-size: 0.75rem; color: var(--text-tertiary);">Asignó 4 leads nuevos de Agricultura de Precisión</div>
+                        <div class="activity-item">
+                            <div class="activity-avatar" style="background: var(--line-precision);">AL</div>
+                            <div class="activity-text">
+                                <div class="activity-name">Andrea López</div>
+                                <div class="activity-desc">Asignó 4 leads de Precisión</div>
                             </div>
-                            <div style="font-size: 0.7rem; color: var(--text-tertiary); white-space: nowrap;">Hace 8 h</div>
+                            <div class="activity-time">Hace 8 h</div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Alerts Section - Prominent -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="alert-card warning" onclick="window.location.href='leads.html?filter=vencidas'">
+                    <div class="alert-icon" style="background: rgba(212, 126, 0, 0.1);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--line-construccion)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">3 acciones vencidas</div>
+                        <div class="alert-desc">Leads con próxima acción antes de hoy</div>
+                    </div>
+                    <div class="alert-action">Ver →</div>
+                </div>
+                <div class="alert-card danger" onclick="window.location.href='leads.html?filter=sin-accion'">
+                    <div class="alert-icon" style="background: rgba(170, 24, 44, 0.1);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--line-agricola)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">6 leads sin próxima acción</div>
+                        <div class="alert-desc">Asignados hace más de 5 días</div>
+                    </div>
+                    <div class="alert-action">Ver →</div>
+                </div>
+                <div class="alert-card info" onclick="window.location.href='leads.html?filter=sin-asignar'">
+                    <div class="alert-icon" style="background: rgba(20, 63, 127, 0.1);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--craisa-primary)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">2 leads sin asignar</div>
+                        <div class="alert-desc">Ingresaron por el sitio web</div>
+                    </div>
+                    <div class="alert-action">Asignar →</div>
+                </div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <div class="section-title">Tendencia de Leads (30 días)</div>
+                    <div style="display: flex; gap: 1.25rem; font-size: 0.75rem; color: var(--text-secondary);">
+                        <span style="display: flex; align-items: center; gap: 0.375rem;">
+                            <span style="width: 12px; height: 3px; background: var(--craisa-primary); border-radius: 2px;"></span>
+                            Leads ingresados
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 0.375rem;">
+                            <span style="width: 12px; height: 3px; background: var(--line-carga); border-radius: 2px; border: 1px dashed var(--line-carga);"></span>
+                            Convertidos a Ganado
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body" style="padding: 1rem 1.5rem 1.25rem;">
+                    <svg width="100%" height="180" viewBox="0 0 900 180" preserveAspectRatio="none" style="display: block;">
+                        <!-- Grid -->
+                        <g stroke="var(--border-light)" stroke-width="1">
+                            <line x1="0" y1="0" x2="900" y2="0"/>
+                            <line x1="0" y1="45" x2="900" y2="45"/>
+                            <line x1="0" y1="90" x2="900" y2="90"/>
+                            <line x1="0" y1="135" x2="900" y2="135"/>
+                            <line x1="0" y1="180" x2="900" y2="180"/>
+                        </g>
+                        <!-- Y labels -->
+                        <g font-size="10" fill="var(--text-tertiary)">
+                            <text x="-5" y="4" text-anchor="end">12</text>
+                            <text x="-5" y="49" text-anchor="end">9</text>
+                            <text x="-5" y="94" text-anchor="end">6</text>
+                            <text x="-5" y="139" text-anchor="end">3</text>
+                            <text x="-5" y="184" text-anchor="end">0</text>
+                        </g>
+                        <!-- Area chart Leads -->
+                        <path d="M0,135 C75,105 150,75 225,60 C300,45 375,90 450,75 C525,60 600,45 675,52 C750,60 825,45 900,37 L900,180 L0,180 Z" fill="rgba(20, 63, 127, 0.08)"/>
+                        <path d="M0,135 C75,105 150,75 225,60 C300,45 375,90 450,75 C525,60 600,45 675,52 C750,60 825,45 900,37" fill="none" stroke="var(--craisa-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- Line chart Conversiones -->
+                        <path d="M0,157 C75,135 150,112 225,97 C300,82 375,97 450,82 C525,67 600,52 675,60 C750,67 825,52 900,45" fill="none" stroke="var(--line-carga)" stroke-width="2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- X labels -->
+                        <g font-size="10" fill="var(--text-tertiary)" text-anchor="middle">
+                            <text x="0" y="198">01/10</text>
+                            <text x="128" y="198">07/10</text>
+                            <text x="257" y="198">13/10</text>
+                            <text x="385" y="198">19/10</text>
+                            <text x="514" y="198">22/10</text>
+                            <text x="642" y="198">26/10</text>
+                            <text x="771" y="198">30/10</text>
+                            <text x="900" y="198">01/11</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
             <!-- Footer -->
-            <footer style="margin-top: 3rem; padding: 1.5rem 0; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <footer style="margin-top: 1rem; padding: 1rem 0; border-top: 1px solid var(--border-default); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <img src="assets/logo-craisa.png" alt="CRAISA" style="height: 28px;">
-                    <span style="color: var(--text-tertiary); font-size: 0.8rem;">Actualizado: 22/10/2026 09:14 · Datos de prototipo</span>
+                    <img src="assets/logo-craisa.png" alt="CRAISA" style="height: 24px;">
+                    <span style="color: var(--text-tertiary); font-size: 0.75rem;">Última actualización: 22/10/2026 09:14 · Datos de prototipo</span>
                 </div>
                 <div style="color: var(--text-tertiary); font-size: 0.75rem;">
                     CRAISA 2026 · Sistema de Gestión de Leads
@@ -482,32 +628,22 @@
     </main>
 
     <script>
-    // Animación de barras
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes growBar {
-            from { width: 0; }
-            to { width: var(--target-width); }
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Animar barras al hacer scroll
+    // Animación de barras al hacer scroll
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.querySelectorAll('[style*="transform-origin"]').forEach(bar => {
+                entry.target.querySelectorAll('.chart-bar-fill').forEach(bar => {
                     const width = bar.style.width;
-                    bar.style.setProperty('--target-width', width);
                     bar.style.width = '0';
-                    bar.style.animation = 'growBar 1s ease-out forwards';
+                    setTimeout(() => { bar.style.width = width; }, 100);
                 });
                 observer.unobserve(entry.target);
             }
         });
     }, { threshold: 0.2 });
 
-    document.querySelectorAll('.chart-card').forEach(card => observer.observe(card));
+    document.querySelectorAll('.card').forEach(card => observer.observe(card));
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
