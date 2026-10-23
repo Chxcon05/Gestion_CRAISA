@@ -355,61 +355,61 @@
                         <div class="info-grid">
                             <div class="info-block">
                                 <div class="info-block-label">Código</div>
-                                <div class="info-block-value" style="color: var(--craisa-primary);">LEAD-2026-0142</div>
+                                <div class="info-block-value" id="infoCode" style="color: var(--craisa-primary);">LEAD-2026-0142</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Fecha de ingreso</div>
-                                <div class="info-block-value">20/10/2026 · 09:45</div>
+                                <div class="info-block-value" id="infoDate">20/10/2026 · 09:45</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Cliente</div>
-                                <div class="info-block-value">Ana Rodríguez</div>
+                                <div class="info-block-value" id="infoClient">Ana Rodríguez</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Empresa</div>
-                                <div class="info-block-value">Finca La Sabana S.A.</div>
+                                <div class="info-block-value" id="infoCompany">Finca La Sabana S.A.</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Teléfono</div>
-                                <div class="info-block-value">+506 8812-4477</div>
+                                <div class="info-block-value" id="infoPhone">+506 8812-4477</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Correo</div>
-                                <div class="info-block-value">ana.rodriguez@fincalasabana.cr</div>
+                                <div class="info-block-value" id="infoEmail">ana.rodriguez@fincalasabana.cr</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Canal de origen</div>
-                                <div class="info-block-value">WhatsApp</div>
+                                <div class="info-block-value" id="infoChannel">WhatsApp</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Línea de negocio</div>
-                                <div class="info-block-value">
+                                <div class="info-block-value" id="infoLine">
                                     <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
-                                        <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--line-agricola); box-shadow: none;"></span>
-                                        Agrícola
+                                        <span id="infoLineDot" style="width: 10px; height: 10px; border-radius: 50%; background: var(--line-agricola); box-shadow: none;"></span>
+                                        <span id="infoLineText">Agrícola</span>
                                     </span>
                                 </div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Producto de interés</div>
-                                <div class="info-block-value">Fertilizantes y repuestos agrícolas</div>
+                                <div class="info-block-value" id="infoProduct">Fertilizantes y repuestos agrícolas</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Responsable</div>
-                                <div class="info-block-value">Jorge Pérez</div>
+                                <div class="info-block-value" id="infoOwner">Jorge Pérez</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Score de prioridad</div>
-                                <div class="info-block-value" style="color: var(--line-construccion);">★★★★☆ (4/5)</div>
+                                <div class="info-block-value" id="infoScore" style="color: var(--line-construccion);">★★★★☆ (4/5)</div>
                             </div>
                             <div class="info-block">
                                 <div class="info-block-label">Valor estimado</div>
-                                <div class="info-block-value" style="color: var(--line-carga);">$45,000</div>
+                                <div class="info-block-value" id="infoValue" style="color: var(--line-carga);">$45,000</div>
                             </div>
                         </div>
                         <div style="margin-top: 1.5rem;">
                             <div class="info-block-label">Descripción de la consulta</div>
-                            <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.7; margin-top: 0.5rem;">
+                            <p id="infoDescription" style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.7; margin-top: 0.5rem;">
                                 Cliente interesado en adquirir repuestos para maquinaria agrícola John Deere. 
                                 Solicita cotización de filtros, correas y rodamientos para mantenimiento preventivo de tractor 6420. 
                                 También pregunta por disponibilidad de fertilizantes para 15 hectáreas de maíz.
@@ -546,8 +546,8 @@
                     <div class="detail-card" style="margin-bottom: 1.5rem;">
                         <h3>Estado Actual</h3>
                         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                            <span class="badge badge-contactado" style="padding: 0.5rem 1rem; font-size: 0.875rem;"><span class="badge-dot"></span> Contactado</span>
-                            <span style="font-size: 0.8rem; color: var(--text-tertiary);">Actualizado 21/10/2026</span>
+                            <span id="currentStateBadge" class="badge badge-contactado" style="padding: 0.5rem 1rem; font-size: 0.875rem;"><span class="badge-dot"></span> Contactado</span>
+                            <span id="currentStateDate" style="font-size: 0.8rem; color: var(--text-tertiary);">Actualizado 21/10/2026</span>
                         </div>
                         <div class="status-change-btn">
                             <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;" data-status="asignado">
@@ -582,31 +582,31 @@
                         <h3>Información Adicional</h3>
                         <div class="detail-row">
                             <span class="detail-label">Fuente de ingreso</span>
-                            <span class="detail-value">WhatsApp</span>
+                            <span class="detail-value" id="addSource">WhatsApp</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Prioridad</span>
-                            <span class="detail-value" style="color: var(--line-construccion);">Alta</span>
+                            <span class="detail-value" id="addPriority" style="color: var(--line-construccion);">Alta</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Última actividad</span>
-                            <span class="detail-value">21/10/2026 · 14:15</span>
+                            <span class="detail-value" id="addLastActivity">21/10/2026 · 14:15</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Tiempo en estado actual</span>
-                            <span class="detail-value">1 día</span>
+                            <span class="detail-value" id="addTimeInState">1 día</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Creado por</span>
-                            <span class="detail-value">Sistema (WhatsApp)</span>
+                            <span class="detail-value" id="addCreatedBy">Sistema (WhatsApp)</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Asignado por</span>
-                            <span class="detail-value">María Rojas</span>
+                            <span class="detail-value" id="addAssignedBy">María Rojas</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Motivo de pérdida</span>
-                            <span class="detail-value" style="color: var(--line-agricola);">—</span>
+                            <span class="detail-value" id="addLossReason" style="color: var(--line-agricola);">—</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Re-contactar</span>
@@ -683,7 +683,7 @@
             </div>
             <div style="margin-bottom: 1.5rem;">
                 <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Nuevo estado</label>
-                <select style="width: 100%; padding: 0.75rem 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"16\\\" height=\\\"16\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"%236B7280\\\" stroke-width=\\\"2\\\"><polyline points=\\\"6 9 12 15 18 9\\\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center;">
+                <select id="newStateSelect" style="width: 100%; padding: 0.75rem 1rem; font-size: 0.875rem; font-family: inherit; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"16\\\" height=\\\"16\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"%236B7280\\\" stroke-width=\\\"2\\\"><polyline points=\\\"6 9 12 15 18 9\\\"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center;">
                     <option value="nuevo">Nuevo</option>
                     <option value="asignado">Asignado</option>
                     <option value="contactado" selected>Contactado</option>
@@ -704,6 +704,7 @@
         </div>
     </div>
 
+    <script src="js/leads-data.js"></script>
     <script>
     // Tab functionality
     const tabs = document.querySelectorAll('.tab');
@@ -747,6 +748,8 @@
     });
 
     confirmStateChange.addEventListener('click', () => {
+        const select = document.getElementById('newStateSelect');
+        if (select) setStateBadge(select.value);
         closeModal();
         if (window.CRAISA) {
             window.CRAISA.showNotification('Estado actualizado correctamente', 'success');
@@ -757,6 +760,7 @@
     document.querySelectorAll('[data-status]').forEach(btn => {
         btn.addEventListener('click', () => {
             const status = btn.dataset.status;
+            setStateBadge(status);
             if (window.CRAISA) {
                 window.CRAISA.showNotification('Estado cambiado a ' + status, 'success');
             }
@@ -782,10 +786,118 @@
     });
 
     // Lead data from URL params
+    const ESTADO_LABELS = {
+        nuevo: 'Nuevo', asignado: 'Asignado', contactado: 'Contactado',
+        seguimiento: 'En seguimiento', oportunidad: 'Oportunidad comercial',
+        ganado: 'Ganado', perdido: 'Perdido'
+    };
+    const OWNER_FULL = {
+        'J. Pérez': 'Jorge Pérez', 'M. Rojas': 'María Rojas', 'S. Mora': 'Sergio Mora',
+        'R. Blandón': 'Rebeca Blandón', 'A. López': 'Andrea López'
+    };
+    const LINEA_META = {
+        'Agrícola': 'var(--line-agricola)',
+        'Construcción': 'var(--line-construccion)',
+        'Movimiento de Carga': 'var(--line-carga)',
+        'Agricultura de Precisión': 'var(--line-precision)',
+        'Postventa': 'var(--line-postventa)',
+        'Institucional': 'var(--line-institucional)'
+    };
+
+    function setStateBadge(status) {
+        const badge = document.getElementById('currentStateBadge');
+        if (!badge) return;
+        badge.className = 'badge badge-' + status;
+        badge.innerHTML = '<span class="badge-dot"></span> ' + (ESTADO_LABELS[status] || status);
+    }
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const leadCode = urlParams.get('code');
-    if (leadCode) {
-        document.getElementById('leadTitle').textContent = leadCode;
+    const allLeads = window.CRAISA_LEADS || [];
+    const lead = allLeads.find(l => l.code === leadCode) || allLeads[0];
+
+    if (lead) {
+        const owner = OWNER_FULL[lead.responsable] || lead.responsable;
+        const lineColor = LINEA_META[lead.linea] || 'var(--craisa-primary)';
+        const scoreColor = lead.score >= 4 ? 'var(--line-construccion)' : lead.score >= 3 ? 'var(--craisa-primary)' : 'var(--text-tertiary)';
+        const isClosed = lead.estado === 'ganado' || lead.estado === 'perdido';
+
+        document.title = lead.code + ' · CRAISA Leads';
+        document.getElementById('leadTitle').textContent = lead.code;
+        document.getElementById('leadSubtitle').textContent = lead.client + ' · ' + lead.company + ' · ' + lead.linea;
+
+        document.getElementById('infoCode').textContent = lead.code;
+        document.getElementById('infoDate').textContent = lead.date + ' · 09:45';
+        document.getElementById('infoClient').textContent = lead.client;
+        document.getElementById('infoCompany').textContent = lead.company;
+        document.getElementById('infoPhone').textContent = lead.phone;
+        document.getElementById('infoEmail').textContent = lead.email;
+        document.getElementById('infoChannel').textContent = lead.canal;
+        document.getElementById('infoLineText').textContent = lead.linea;
+        document.getElementById('infoLineDot').style.background = lineColor;
+        document.getElementById('infoProduct').textContent = lead.product;
+        document.getElementById('infoOwner').textContent = owner;
+        document.getElementById('infoScore').textContent = '★'.repeat(lead.score) + '☆'.repeat(5 - lead.score) + ' (' + lead.score + '/5)';
+        document.getElementById('infoScore').style.color = scoreColor;
+        document.getElementById('infoValue').textContent = lead.valorEstimado || '—';
+        document.getElementById('infoDescription').textContent = lead.description;
+
+        setStateBadge(lead.estado);
+        document.getElementById('currentStateDate').textContent = 'Actualizado ' + lead.date;
+        document.getElementById('addSource').textContent = lead.canal;
+        document.getElementById('addPriority').textContent = lead.score >= 4 ? 'Alta' : lead.score >= 3 ? 'Media' : 'Baja';
+        document.getElementById('addPriority').style.color = scoreColor;
+        document.getElementById('addLastActivity').textContent = lead.date + ' · 09:45';
+        document.getElementById('addTimeInState').textContent = isClosed ? 'Cerrado' : '1 día';
+        document.getElementById('addCreatedBy').textContent = 'Sistema (' + lead.canal + ')';
+        document.getElementById('addAssignedBy').textContent = owner;
+        document.getElementById('addLossReason').textContent = lead.lossReason || '—';
+
+        document.getElementById('nextActionText').textContent = isClosed
+            ? 'Sin acción pendiente'
+            : 'Dar seguimiento a ' + lead.client;
+        document.getElementById('nextActionDetail').textContent = isClosed
+            ? 'Lead ' + ESTADO_LABELS[lead.estado].toLowerCase() + ' · ' + lead.date
+            : 'Programada para ' + (lead.proxAccion || 'definir') + ' · Responsable: ' + owner;
+
+        const badgeFor = (estado) => '<span class="badge badge-' + estado + '" style="margin-top: 0.5rem;"><span class="badge-dot"></span> ' + ESTADO_LABELS[estado] + '</span>';
+        document.querySelector('#bitacora .timeline').innerHTML =
+            '<div class="timeline-item">' +
+                '<div class="date">' + escapeHtml(lead.proxFecha || lead.date) + ' · 08:30</div>' +
+                '<div class="title">Próxima acción programada</div>' +
+                '<div class="desc">Seguimiento con ' + escapeHtml(lead.client) + ' (' + escapeHtml(lead.company) + ') sobre ' + escapeHtml(lead.product) + '.</div>' +
+                badgeFor(lead.estado) +
+            '</div>' +
+            '<div class="timeline-item">' +
+                '<div class="date">' + escapeHtml(lead.date) + ' · 14:15</div>' +
+                '<div class="title">Contacto por ' + escapeHtml(lead.canal) + '</div>' +
+                '<div class="desc">Se registró la conversación con ' + escapeHtml(lead.client) + ' y se confirmó el interés en ' + escapeHtml(lead.product) + '.</div>' +
+                badgeFor(lead.estado === 'nuevo' ? 'contactado' : lead.estado) +
+            '</div>' +
+            '<div class="timeline-item">' +
+                '<div class="date">' + escapeHtml(lead.date) + ' · 09:45</div>' +
+                '<div class="title">Lead ingresado al sistema</div>' +
+                '<div class="desc">Consulta recibida por ' + escapeHtml(lead.canal) + '. Asignado a ' + escapeHtml(owner) + ' por línea ' + escapeHtml(lead.linea) + '.</div>' +
+                badgeFor('nuevo') +
+            '</div>';
+
+        document.querySelector('#historial .timeline').innerHTML =
+            '<div class="timeline-item">' +
+                '<div class="date">' + escapeHtml(lead.date) + ' · 09:45 · ' + escapeHtml(lead.responsable) + '</div>' +
+                '<div class="title">Estado actual: ' + ESTADO_LABELS[lead.estado] + '</div>' +
+                '<div class="desc">Última actualización registrada para ' + escapeHtml(lead.company) + '.</div>' +
+            '</div>' +
+            '<div class="timeline-item">' +
+                '<div class="date">' + escapeHtml(lead.date) + ' · 09:45 · Sistema</div>' +
+                '<div class="title">Lead creado</div>' +
+                '<div class="desc">Estado inicial: Nuevo. Ingresado por ' + escapeHtml(lead.canal) + '.</div>' +
+            '</div>';
     }
 
     // ESC key to close modal

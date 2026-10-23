@@ -186,7 +186,7 @@
                             <thead>
                                 <tr>
                                     <th style="width: 40px;"><input type="checkbox" id="selectAll" style="width: 16px; height: 16px; accent-color: var(--craisa-primary); cursor: pointer;"></th>
-                                    <th style="width: 150px;">Código</th>
+                                    <th style="width: 165px;">Código</th>
                                     <th style="width: 100px;">Fecha</th>
                                     <th style="width: 160px;">Cliente</th>
                                     <th style="min-width: 180px;">Empresa</th>
@@ -245,38 +245,10 @@
         </div>
     </main>
 
+    <script src="js/leads-data.js"></script>
     <script>
-    // Datos de leads ficticios
-    const LEADS_DATA = [
-        { code: 'LEAD-2026-0142', date: '20/10/2026', client: 'Ana Rodríguez', company: 'Finca La Sabana', canal: 'WhatsApp', linea: 'Agrícola', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0141', date: '19/10/2026', client: 'Luis Miranda', company: 'Constructora Hidalgo', canal: 'Sitio web', linea: 'Construcción', estado: 'seguimiento', responsable: 'M. Rojas', proxAccion: '22/10', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0140', date: '19/10/2026', client: 'Banacol S.A.', company: 'Banacol', canal: 'Feria', linea: 'Agrícola', estado: 'oportunidad', responsable: 'J. Pérez', proxAccion: '23/10', proxFecha: '23/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0139', date: '18/10/2026', client: 'Denis Vargas', company: 'Materiales Ciudad Neyly', canal: 'Instagram', linea: 'Movimiento de Carga', estado: 'contactado', responsable: 'S. Mora', proxAccion: '24/10', proxFecha: '24/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0138', date: '18/10/2026', client: 'Carlos Quesada', company: 'Del Monte', canal: 'Visita comercial', linea: 'Agricultura de Precisión', estado: 'asignado', responsable: 'M. Rojas', proxAccion: '21/10', proxFecha: '21/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0137', date: '17/10/2026', client: 'Gonar Costa Rica', company: 'Gonar', canal: 'Correo', linea: 'Postventa', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0136', date: '17/10/2026', client: 'Wilber Rojas', company: 'Plásticos WR', canal: 'Facebook', linea: 'Construcción', estado: 'ganado', responsable: 'J. Pérez', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
-        { code: 'LEAD-2026-0135', date: '16/10/2026', client: 'Mainor Alfaro', company: 'Transportes Alfaro', canal: 'Llamada', linea: 'Movimiento de Carga', estado: 'perdido', responsable: 'S. Mora', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
-        { code: 'LEAD-2026-0134', date: '16/10/2026', client: 'Tornillos del Valle', company: 'Tornillos CR', canal: 'Sitio web', linea: 'Institucional', estado: 'contactado', responsable: 'M. Rojas', proxAccion: '23/10', proxFecha: '23/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0133', date: '15/10/2026', client: 'El Viejo Comercial', company: 'El Viejo', canal: 'Otro', linea: 'Construcción', estado: 'asignado', responsable: 'J. Pérez', proxAccion: '21/10', proxFecha: '21/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0132', date: '15/10/2026', client: 'María Solís', company: 'AgroSol', canal: 'WhatsApp', linea: 'Agrícola', estado: 'nuevo', responsable: 'M. Rojas', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0131', date: '14/10/2026', client: 'Roberto Castro', company: 'Castro y Asociados', canal: 'Sitio web', linea: 'Construcción', estado: 'oportunidad', responsable: 'J. Pérez', proxAccion: '23/10', proxFecha: '23/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0130', date: '14/10/2026', client: 'Logística Sur', company: 'Logística Sur S.A.', canal: 'Llamada', linea: 'Movimiento de Carga', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0129', date: '13/10/2026', client: 'Precisión Tech', company: 'Precisión Tech CR', canal: 'Correo', linea: 'Agricultura de Precisión', estado: 'nuevo', responsable: 'A. López', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0128', date: '12/10/2026', client: 'Fertilizantes del Norte', company: 'Fertinorte', canal: 'Feria', linea: 'Agrícola', estado: 'contactado', responsable: 'M. Rojas', proxAccion: '24/10', proxFecha: '24/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0127', date: '11/10/2026', client: 'Constructora M&V', company: 'M&V Construcciones', canal: 'Visita comercial', linea: 'Construcción', estado: 'asignado', responsable: 'J. Pérez', proxAccion: '21/10', proxFecha: '21/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0126', date: '11/10/2026', client: 'Carga Pesada SA', company: 'Carga Pesada', canal: 'WhatsApp', linea: 'Movimiento de Carga', estado: 'ganado', responsable: 'S. Mora', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
-        { code: 'LEAD-2026-0125', date: '10/10/2026', client: 'Postventa Norte', company: 'Servicios Postventa', canal: 'Correo', linea: 'Postventa', estado: 'perdido', responsable: 'M. Rojas', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
-        { code: 'LEAD-2026-0124', date: '09/10/2026', client: 'Drones Agro', company: 'Drones Agro CR', canal: 'Instagram', linea: 'Agricultura de Precisión', estado: 'oportunidad', responsable: 'A. López', proxAccion: '24/10', proxFecha: '24/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0123', date: '08/10/2026', client: 'Hacienda San Juan', company: 'Hacienda San Juan', canal: 'Sitio web', linea: 'Agrícola', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        // ... más datos para paginación
-        { code: 'LEAD-2026-0122', date: '07/10/2026', client: 'Cliente 22', company: 'Empresa 22', canal: 'Facebook', linea: 'Construcción', estado: 'seguimiento', responsable: 'S. Mora', proxAccion: '23/10', proxFecha: '23/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0121', date: '06/10/2026', client: 'Cliente 21', company: 'Empresa 21', canal: 'Llamada', linea: 'Institucional', estado: 'asignado', responsable: 'M. Rojas', proxAccion: '21/10', proxFecha: '21/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0120', date: '05/10/2026', client: 'Cliente 20', company: 'Empresa 20', canal: 'Otro', linea: 'Postventa', estado: 'nuevo', responsable: 'J. Pérez', proxAccion: 'Hoy', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0119', date: '04/10/2026', client: 'Cliente 19', company: 'Empresa 19', canal: 'Sitio web', linea: 'Agrícola', estado: 'contactado', responsable: 'A. López', proxAccion: '24/10', proxFecha: '24/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0118', date: '03/10/2026', client: 'Cliente 18', company: 'Empresa 18', canal: 'WhatsApp', linea: 'Construcción', estado: 'oportunidad', responsable: 'S. Mora', proxAccion: '22/10', proxFecha: '22/10/2026', score: 3, valorEstimado: '$30K' },
-        { code: 'LEAD-2026-0117', date: '02/10/2026', client: 'Cliente 17', company: 'Empresa 17', canal: 'Feria', linea: 'Movimiento de Carga', estado: 'ganado', responsable: 'M. Rojas', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' },
-        { code: 'LEAD-2026-0116', date: '01/10/2026', client: 'Cliente 16', company: 'Empresa 16', canal: 'Visita comercial', linea: 'Agricultura de Precisión', estado: 'perdido', responsable: 'J. Pérez', proxAccion: '—', proxFecha: null, score: 2, valorEstimado: '$20K' }
-    ];
+    // Datos compartidos con la ficha del lead
+    const LEADS_DATA = window.CRAISA_LEADS;
 
     // Mapeos
     const CANAL_LABELS = {

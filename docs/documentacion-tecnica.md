@@ -59,6 +59,7 @@ flowchart LR
 | `nuevo-lead.html` | Formulario, validación, detección de duplicados, confirmación |
 | `css/styles.css` | Tokens de marca, layout, componentes y responsive |
 | `js/app.js` | Notificaciones, animaciones de entrada, utilidades compartidas |
+| `js/leads-data.js` | Fuente única de los 27 leads ficticios para listado y ficha |
 | `server.js` | Servidor estático con resolución de rutas |
 
 ### 3.2 Flujo de navegación

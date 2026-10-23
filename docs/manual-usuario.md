@@ -177,10 +177,11 @@ Los campos marcados con asterisco son obligatorios.
 ### 4.2 Validaciones
 
 - Nombre: mínimo 2 caracteres.
+- Empresa: obligatoria, mínimo 2 caracteres.
 - Teléfono: 8 dígitos; se acepta el prefijo `+506` y guiones.
-- Correo: formato válido; obligatorio para canales sitio web y correo.
+- Correo: formato válido; opcional en el formulario, obligatorio para canales sitio web y correo.
 - Fecha de ingreso: no puede ser futura.
-- Descripción: máximo 1 000 caracteres.
+- Descripción: obligatoria, máximo 1 000 caracteres.
 - Valor estimado: número positivo si se completa.
 
 Los errores aparecen debajo del campo y el formulario desplaza el foco al primer problema.
@@ -245,7 +246,7 @@ El flujo de recontacto está previsto en el modelo de datos (`recontactAt`). En 
 ## 6. Preguntas frecuentes
 
 **¿Por qué no veo todos los leads?**
-Porque el rol Vendedor solo muestra la cartera propia. Un Administrador ve el total.
+En la versión productiva, el rol Vendedor solo muestra la cartera propia y un Administrador ve el total. En el prototipo la tabla muestra los datos de demostración para poder recorrer todos los flujos.
 
 **¿Puedo cambiar el responsable de un lead ganado?**
 Sí, pero queda registrado en el historial. Se recomienda hacerlo solo para efectos de comisión o postventa.

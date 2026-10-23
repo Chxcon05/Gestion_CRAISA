@@ -23,11 +23,11 @@ La verificación automatizada carga cada página con sus scripts, ejecuta evento
 | Tablero | 5 | 5 | Filtros en página y cierre de resultados |
 | Listado de leads | 9 | 9 | Búsqueda, filtros, paginación, selección |
 | Registro de lead | 5 | 5 | Validaciones y confirmación |
-| Ficha del lead | 5 | 5 | Cambio de estado, bitácora, pestañas |
+| Ficha del lead | 6 | 6 | Cambio de estado, bitácora, pestañas |
 | Exportación CSV | 3 | 3 | BOM, escape y filtros |
 | Calidad técnica | 4 | 4 | Sintaxis, codificación, consola |
 
-Total: **35 casos ejecutados, 35 aprobados**.
+Total: **36 casos ejecutados, 36 aprobados**.
 
 ## 3. Casos detallados
 
@@ -83,6 +83,7 @@ Total: **35 casos ejecutados, 35 aprobados**.
 | DT-03 | Abrir modal de estado | Modal visible y foco en el primer control | Aprobado |
 | DT-04 | Confirmar estado | Notificación y actualización de la etiqueta | Aprobado |
 | DT-05 | Agregar nota | La nota aparece en la bitácora con fecha | Aprobado |
+| DT-06 | Abrir un código distinto | Cliente, empresa, línea, estado y bitácora corresponden al lead | Aprobado (`LEAD-2026-0141` → Luis Miranda) |
 
 ### 3.6 Exportación y calidad
 
@@ -110,7 +111,7 @@ Total: **35 casos ejecutados, 35 aprobados**.
 ## 5. Limitaciones conocidas
 
 1. **Sin persistencia.** Al recargar, los cambios vuelven al estado inicial. Las acciones masivas y los cambios de estado solo confirman con una notificación.
-2. **Datos duplicados.** `LEADS_DATA` (listado) y `DASH_LEADS` (tablero) son arreglos independientes; pueden desincronizarse. En producción habrá una sola fuente.
+2. **Datos duplicados.** El tablero (`DASH_LEADS`) mantiene su propio arreglo agregado de 184 registros. El listado y la ficha ya comparten `js/leads-data.js`, pero el tablero puede desincronizarse. En producción habrá una sola fuente.
 3. **Autenticación simulada.** Las credenciales viven en el JavaScript del cliente y no hay sesión de servidor.
 4. **Permisos visuales.** El rol se muestra en la interfaz, pero el filtrado por cartera se aplicará en el servidor en la fase Next.js.
 5. **Fechas relativas.** El tablero usa fechas fijas de octubre de 2026; no recalcula "hoy" al cambiar el día.

@@ -690,6 +690,10 @@ input[type="date"]:focus {
     color: var(--text-primary);
 }
 
+#leadsBody td:nth-child(2) {
+    white-space: nowrap;
+}
+
 .table-link {
     color: var(--craisa-primary);
     text-decoration: none;

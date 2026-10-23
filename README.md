@@ -13,6 +13,7 @@ Prototipo funcional del sistema interno de leads de **CRAISA** (Centro de Repues
 ├── nuevo-lead.html       Registro con validación y detección de duplicados
 ├── css/styles.css        Design system CRAISA 2025
 ├── js/app.js             Utilidades de interfaz y notificaciones
+├── js/leads-data.js      Datos ficticios compartidos (listado y ficha)
 ├── assets/               Logotipo, favicon e imágenes de marca
 ├── server.js             Servidor estático local (puerto 8081)
 ├── prisma/schema.prisma  Modelo de datos propuesto (SQLite / PostgreSQL)
