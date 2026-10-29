@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@layer base {
+  body { font-family: 'Inter', system-ui, sans-serif; background: #F0F2F5; color: #111827; }
+  h1,h2,h3,h4 { font-family: 'Archivo', system-ui, sans-serif; letter-spacing: -0.02em; }
+}

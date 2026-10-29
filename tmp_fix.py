@@ -1,0 +1,6 @@
+with open('src/pages/Dashboard.jsx','r',encoding='utf-8') as f: s=f.read()
+s=s.replace("l.estado === 'ganado'", "(l.estado || l.status) === 'ganado'")
+s=s.replace("l.estado === 'perdido'", "(l.estado || l.status) === 'perdido'")
+s=s.replace("l.estado === estado", "(l.estado || l.status) === estado")
+with open('src/pages/Dashboard.jsx','w',encoding='utf-8') as f: f.write(s)
+print('Dashboard ok')

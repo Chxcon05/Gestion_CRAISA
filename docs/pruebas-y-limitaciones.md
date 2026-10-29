@@ -1,6 +1,6 @@
 # Pruebas y limitaciones · CRAISA Leads
 
-Versión evaluada: prototipo estático · Octubre 2026
+Versión evaluada: prototipo funcional con `prisma` + PostgreSQL (`craisa`) · Octubre 2026
 
 ## 1. Entorno de prueba
 
@@ -11,7 +11,7 @@ Versión evaluada: prototipo estático · Octubre 2026
 | Navegador de referencia | Chrome / Edge actuales |
 | Servidor | `node server.js` en `http://localhost:8081` |
 | Automatización | jsdom sobre el DOM y los scripts de cada página |
-| Datos | 27 leads ficticios en `leads.html`; 184 agregados en el tablero |
+| Datos | Base PostgreSQL `craisa` (`prisma` activo); datos reales sin nombres ficticios (`Admin CRAISA`, responsables mapeados); respaldo en `leads-db.json` |
 
 La verificación automatizada carga cada página con sus scripts, ejecuta eventos reales (`change`, `input`, `submit`) y comprueba el DOM resultante. La revisión visual final debe realizarse con CRAISA en la demo.
 

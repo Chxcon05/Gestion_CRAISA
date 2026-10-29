@@ -1,6 +1,6 @@
 # Modelo de datos · CRAISA Leads
 
-Documento de referencia del modelo relacional implementado en `prisma/schema.prisma`. Se mantiene portable entre SQLite (desarrollo y demo) y PostgreSQL (producción): los campos enumerados usan `String` y se validan en la aplicación.
+Documento de referencia del modelo relacional implementado en `prisma/schema.prisma`. Se mantiene portable entre SQLite (desarrollo y demo) y PostgreSQL (producción): los campos enumerados usan `String` y se validan en la aplicación. **Estado actual**: PostgreSQL (`craisa`) con `prisma` activo; datos reales, sin ficticios.
 
 ## 1. Diagrama de entidades
 
@@ -171,7 +171,7 @@ Cualquier transición no listada se rechaza en la capa de servidor y se registra
 1. **Código consecutivo.** `LEAD-{año}-{secuencia:4}`. La secuencia se reinicia el 1 de enero y se genera en una transacción para evitar duplicados.
 2. **Duplicados.** Antes de crear, se compara teléfono normalizado y correo en minúsculas contra leads de los últimos 90 días. La interfaz advierte y permite continuar dejando constancia.
 3. **Asignación.** Solo `ADMIN` puede asignar a cualquier vendedor. Un `VENDEDOR` solo puede tomar leads sin responsable o reasignarse los propios.
-4. **Visibilidad.** `VENDEDOR` ve únicamente sus leads; `MERCADEO` ve todos en modo lectura y exporta; `ADMIN` ve y edita todo.
+4. **Visibilidad.** `VENDEDOR` ve únicamente sus leads; `ADMIN` ve y edita todo, incluye analítica y exportación.
 5. **Score.** Se sugiere con la fórmula `2 + (canal prioritario) + (valor > umbral) + (empresa conocida)`, acotado a 1–5. El vendedor puede ajustarlo y el cambio queda en bitácora.
 6. **Cierre.** `ganado` exige valor estimado mayor que cero. `perdido` exige motivo. Ambos cierran las tareas abiertas.
 7. **Recontacto.** Un lead `perdido` con `recontactAt` reaparece en la agenda y puede volver a `seguimiento`.
@@ -190,11 +190,23 @@ Cualquier transición no listada se rechaza en la capa de servidor y se registra
 | Ticket promedio | `SUM(estimatedValue) / COUNT(ganados)` |
 | Leads sin acción | Sin `Task` abierta o `updatedAt` > 7 días |
 | Acciones vencidas | `Task.dueDate < hoy AND completed = false` |
+| Equipo por responsable | `groupBy { name { name } }`, `responsableId`; datos reales |
 
-## 6. Migración a PostgreSQL
+## 6. Configuración actual (estado real)
 
-1. Cambiar `provider` a `postgresql` en `prisma/schema.prisma`.
-2. `DATABASE_URL="postgresql://usuario:clave@host:5432/craisa_leads?schema=public"`.
-3. `npx prisma migrate dev --name init` en desarrollo y `prisma migrate deploy` en producción.
-4. Opcional: convertir los catálogos `String` a enums nativos de PostgreSQL y agregar restricciones `CHECK` equivalentes.
-5. Programar respaldo diario y retención de 30 días antes de la puesta en marcha.
+PostgreSQL `craisa` con `prisma` activo (`routes/api.js` usa `PrismaClient`), migration `20261027200935_init`, `pg_hba.conf` en `trust` (local), `.env` con `DATABASE_URL` y `JWT_SECRET`. Datos reales sin nombres ficticios (`admin@craisa.com` → `Admin CRAISA`). `sessionStorage.clear()` + `F5` al cambiar configuraciones.
+
+### Migración / puesta en marcha
+```bash
+npx prisma migrate deploy
+node server.js
+```
+- Prisma schema actualizado: `provider = postgresql`; los campos enumérase con `String` para mantener el mismo esquema en SQLite y PostgreSQL.
+- DATABASE_URL: `postgresql://...@localhost:5432/craisa?schema=public` (o el rol que se configure).
+
+### Notas técnicas de la versión funcional
+- `Dashboard.jsx` y `Reports.jsx` usan leads reales para pérdidas, línea, canal, equipo y perfil; todos los datos se muestran dinámicamente sin inventar nombres.
+- Detalle del lead en `Reports.jsx` carga datos directos del lead (sin llamada a endpoint problemático); muestra descripción, interacciones, tareas y auditoría.
+- Responsable se lee en campo y muestra nombre real; valor estimado se lee de `valorEstimado` / `estimatedValue`.
+- Antes de cualquierCambio de rol o datos se limpia sessionStorage para evitar tokens obsoletos (401).
+- Revisar el log de servidor (`server.log`) si hay errores 500/ECONNRESET; consolidar el endpoint `/api/leads/:id` con includes seleccionados si la base crece.

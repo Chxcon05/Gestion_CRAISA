@@ -869,8 +869,8 @@ input[type="date"]:focus {
 .info-block {
     background: var(--bg-subtle);
     border: 1px solid var(--border-light);
-    border-radius: 6px;
-    padding: 0.625rem 0.75rem;
+    border-radius: 10px;
+    padding: 1rem;
 }
 
 .info-block-label {
@@ -883,9 +883,16 @@ input[type="date"]:focus {
 }
 
 .info-block-value {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.8125rem;
+    font-weight: 800;
+    color: var(--craisa-primary);
+    font-size: 1.5rem;
+    margin: 0.25rem 0;
+}
+
+.info-block-meta {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.25rem;
 }
 
 /* Timeline */

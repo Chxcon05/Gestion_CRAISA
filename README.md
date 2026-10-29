@@ -1,66 +1,71 @@
 # CRAISA · Sistema de Gestión y Seguimiento de Leads Comerciales
 
-Prototipo funcional del sistema interno de leads de **CRAISA** (Centro de Repuestos Agrícolas e Industriales). Esta primera entrega es una aplicación web estática —HTML, CSS y JavaScript sin dependencias— que reproduce la identidad visual del Libro de Marca 2025 y valida los flujos comerciales antes de la migración a Next.js.
+Estado actual: prototipo funcional con `prisma` + PostgreSQL (`craisa`) y datos reales. No se usan nombres ficticios (`Jorge Pérez`, `Sergio Mora`, etc. eliminados); todos los datos (`responsable`, `valorEstimado`, `pérdidas`) provienen de la base. El frontend usa React (`Dashboard`, `Leads`, `LeadDetail`, `NewLead`, `Reports`, `Agenda`). El detalle de cada lead muestra datos reales, notas de gestión (interacciones), tareas y auditoría.
 
 ## Contenido del repositorio
 
 ```
 .
-├── index.html            Inicio de sesión (3 roles demo)
-├── dashboard.html        Panel comercial con KPIs y filtros en página
-├── leads.html            Listado, búsqueda, filtros, acciones masivas y CSV
-├── detalle-lead.html     Ficha del lead, bitácora, tareas y cambio de estado
-├── nuevo-lead.html       Registro con validación y detección de duplicados
-├── reportes.html         Reportes: resumen, funnel, pipeline, canal, equipo y pérdidas
-├── css/styles.css        Design system CRAISA 2025
-├── js/app.js             Utilidades de interfaz y notificaciones
-├── js/leads-data.js      Datos ficticios compartidos (listado y ficha)
-├── assets/               Logotipo, favicon e imágenes de marca
-├── server.js             Servidor estático local (puerto 8081)
-├── prisma/schema.prisma  Modelo de datos propuesto (SQLite / PostgreSQL)
-└── docs/                 Manual, documentación técnica, pruebas y demo
+├── src/pages/            Páginas React (Dashboard, Leads, LeadDetail, Reports, etc.)
+├── routes/api.js         API con PrismaClient (auth, leads, detalle, exportación CSV)
+├── server.js             Express + Prisma (puerto 8081); proxy Vite en desarrollo
+├── prisma/               Schema (`postgresql`), migraciones (`20261027200935_init`)
+├── docs/                 Manual actualizado, documentación técnica, modelo de datos, pruebas
+├── docs/manual-usuario.md    Guía de uso actualizada (responsable real, detalle dinámico)
+├── .env                  DATABASE_URL, JWT_SECRET, PORT
+├── leads-db.json         Respaldo de datos (no reemplaza PostgreSQL)
+└── README.md            Este archivo (actualizado con configuración real)
 ```
 
-## Ejecutar el prototipo
+## Ejecutar con base real (`prisma`)
 
-Requisitos: Node.js 18 o superior.
+Requisitos: Node.js 18+, PostgreSQL corriendo, base `craisa` creada.
 
 ```bash
+# Configurar base y secreto
+cp .env.example .env   # editar DATABASE_URL y JWT_SECRET
+
+# Aplicar migraciones
+npx prisma migrate deploy
+
+# Iniciar servidor
 node server.js
 ```
 
-Abrir <http://localhost:8081/>. El servidor sirve archivos estáticos y descarta los query strings (`?code=...`, `?filter=...`) para resolver la ruta.
-
-También es posible abrir `index.html` directamente en el navegador; el servidor solo es necesario para probar la navegación con parámetros.
+Abrir `http://localhost:8081/` (o el proxy Vite). La autenticación es real con JWT (`authMiddleware`); el token se guarda en `sessionStorage`. Si aparece `401` tras cambios, limpiar con `sessionStorage.clear()` + `F5`.
 
 ## Usuarios de demostración
 
 | Correo | Contraseña | Rol | Alcance |
 | --- | --- | --- | --- |
-| `admin@craisa.com` | `demo123` | Administrador | Todos los leads y la configuración |
-| `mrojas@craisa.com` | `demo123` | Vendedora · Agrícola | Leads de su línea y cartera |
-| `rblandon@craisa.com` | `demo123` | Mercadeo | Lectura, analítica y exportación |
+| `admin@craisa.com` | `demo123` | Administrador (`ADMIN`) | Todos los leads, analítica, exportación, detalle real |
 
-La autenticación es simulada en el cliente: **no usar credenciales reales en el prototipo**. La versión Next.js incorpora Auth.js v5 con hash de contraseña y sesiones en servidor.
+- El responsable (`responsable`) se convierte de email a nombre real (`Admin CRAISA`) en todos los paneles (`Dashboard`, `Leads`, `Reports`).
+- No existen datos ficticios. `Reports.jsx` usa datos reales para equipo, pérdidas (`lossReason`) y detalle por lead.
 
-## Documentación
+## Documentación (actualizada)
 
-| Documento | Contenido |
+| Documento | Contenido actualizado |
 | --- | --- |
-| [docs/manual-usuario.md](docs/manual-usuario.md) | Guía paso a paso por rol y por pantalla |
-| [docs/documentacion-tecnica.md](docs/documentacion-tecnica.md) | Arquitectura, modelo de datos, rutas y migración |
-| [docs/modelo-datos.md](docs/modelo-datos.md) | Diccionario de datos, relaciones y reglas de negocio |
-| [docs/pruebas-y-limitaciones.md](docs/pruebas-y-limitaciones.md) | Casos de prueba, resultados y alcance |
-| [docs/presentacion-demo.md](docs/presentacion-demo.md) | Guion de la demo y diapositivas sugeridas |
+| `docs/manual-usuario.md` | Configuración (`prisma` + PostgreSQL `craisa`), flujo por rol, detalle dinámico, responsable real, limpieza de token (`sessionStorage.clear()` + `F5`) |
+| `docs/documentacion-tecnica.md` | Estado funcional (`prisma` + PostgreSQL activo), `routes/api.js`, `Dashboard.jsx`, `Reports.jsx` (equipo real, pérdidas dinámicas), `Leads.jsx` |
+| `docs/modelo-datos.md` | Modelo `prisma` con `postgresql`; índices; vistas derivadas; nota técnica de `prisma` (`migrate deploy`) |
+| `docs/pruebas-y-limitaciones.md` | Datos reales (`PostgreSQL`); resultados con datos reales; configuración y limpieza de sesiones |
 
-## Alcance de esta entrega
+## Estado actual vs prototipo anterior
 
-Incluye registro, asignación, seguimiento, bitácora, tareas, tablero, filtros, exportación CSV compatible con Excel y control de acceso por rol simulado. No incluye integraciones reales (WhatsApp, Meta, ERP), envío de correo ni persistencia: los datos son ficticios y viven en el código de cada página.
+- **Base**: de datos ficticios en memoria (`leads-db.json`) a PostgreSQL (`prisma`) con datos reales (`leads` en base `craisa`).
+- **Dashboard**: títulos grandes (`2.5rem` / `1.25rem`), pérdidas dinámicas (`lossReason`), colores por estado, equipo real (`responsable` convertido).
+- **Detalle del lead**: panel/modal con datos básicos (`responsable` real, `valorEstimado` limpio), descripción, interacciones, tareas, auditoría. Sin datos inventados.
+- **Equipo**: `Reports.jsx` calcula por `responsable` real; sin `Jorge Pérez`, `Sergio Mora` ni estadísticas inventadas.
+- **Responsable**: leído del campo `responsable` / `responsableId`; convertido si es email (`admin@craisa.com` → `Admin CRAISA`).
+- **Valor estimado**: leído de `valorEstimado` / `estimatedValue`; muestra `₡...` sin descartar valores por `||`.
 
 ## Próxima fase
-
-Migración a **Next.js 15 + TypeScript + Tailwind + shadcn/ui + Prisma + Auth.js v5**, con SQLite en desarrollo y PostgreSQL en producción. El detalle de la ruta de migración está en `docs/documentacion-tecnica.md`.
+- Consolidar `prisma` en producción (`prisma migrate deploy` con respaldo).
+- Considerar `AuditLog` con `include` una vez verificado que no genere `ECONNRESET` (actualmente `routes/api.js` usa `findUnique` básico para estabilidad).
+- Integración real con canales externos (WhatsApp, Meta, ERP) pendiente.
 
 ---
 
-CRAISA 2026 · Documento de prototipo. Datos ficticios de uso exclusivamente demostrativo.
+CRAISA 2026 · Datos reales, sin ficticios. `prisma` + PostgreSQL (`craisa`).

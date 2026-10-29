@@ -11,11 +11,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite" // cambiar a "postgresql" en producción
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-/// Usuarios internos de CRAISA. Roles: ADMIN | VENDEDOR | MERCADEO
+/// Usuarios internos de CRAISA. Roles: ADMIN | VENDEDOR
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -23,7 +23,7 @@ model User {
   passwordHash String
   role         String   @default("VENDEDOR")
   /// Línea de negocio principal del vendedor (clave de LineaNegocio)
-  line         String?
+  line         String
   phone        String?
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
