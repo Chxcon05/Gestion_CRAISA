@@ -19,3 +19,8 @@
 6. Abrir navegador en `http://localhost` (puerto que indique `server.js`).
 
 Nota: no se copia `.env` de la máquina original porque contiene datos locales.
+Para pasar con datos, usar:
+  pg_dump -U postgres -h localhost -d nombre_base -F c -f backup.dump
+Y en la otra máquina:
+  pg_restore -U postgres -h localhost -d nombre_base backup.dump
+Después configurar `.env` y correr `node server.js`.
