@@ -42,9 +42,9 @@ export default function Reports() {
         {/* Header */}
         <div className="page-header" style={{ marginBottom: '1.5rem' }}>
           <div>
-            <div className="eyebrow">Reportes · Actualizado hoy</div>
+            <div className="eyebrow">Reportes  -  Actualizado hoy</div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)', textTransform: 'uppercase', lineHeight: 1.1, marginBottom: '.25rem' }}>Reportes</h1>
-            <p className="page-subtitle">Resumen ejecutivo · Funnel · Pipeline · Canal · Equipo · Pérdidas</p>
+            <p className="page-subtitle">Resumen ejecutivo  -  Funnel  -  Pipeline  -  Canal  -  Equipo  -  Pérdidas</p>
           </div>
           <div className="page-actions">
             <Link to="/dashboard" className="btn btn-secondary">Volver al Dashboard</Link>
@@ -169,7 +169,7 @@ export default function Reports() {
                       <div key={n} style={{ padding: '.875rem', border: '1px solid var(--border-subtle)', borderRadius: 6, background: '#FAFBFC' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.25rem' }}>
                           <div style={{ fontWeight: 700, fontSize: '.875rem', color: 'var(--text-primary)' }}>{n}</div>
-                          <div style={{ fontSize: '.75rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>{x.total} leads · {x.ganados} ganados · {w}% cierre</div>
+                          <div style={{ fontSize: '.75rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>{x.total} leads  -  {x.ganados} ganados  -  {w}% cierre</div>
                         </div>
                         <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-subtle)', overflow: 'hidden' }}>
                           <div style={{ height: '100%', borderRadius: 3, background: 'linear-gradient(to right, var(--craisa-primary), var(--line-carga))', width: (x.ganados / x.total * 100) + '%' }} />
@@ -243,7 +243,7 @@ export default function Reports() {
                     return (
                       <tr key={l.id || l.code} style={{ borderBottom: '1px solid var(--border-light)', background: '#fff' }}>
                         <td style={{ padding: '.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>{l.code || l.id}</td>
-                        <td style={{ padding: '.5rem', color: 'var(--text-secondary)' }}>{l.client || l.firstName || '—'}{l.company ? ` · ${l.company}` : ''}</td>
+                        <td style={{ padding: '.5rem', color: 'var(--text-secondary)' }}>{l.client || l.firstName || '—'}{l.company ? `  -  ${l.company}` : ''}</td>
                         <td style={{ padding: '.5rem', textTransform: 'capitalize', color: 'var(--text-secondary)' }}>{(l.estado || l.status || '—').toLowerCase()}</td>
                         <td style={{ padding: '.5rem', color: 'var(--text-secondary)' }}>{l.canal || l.channel || '—'}{l.linea || l.businessLine ? ` / ${(l.linea || l.businessLine || '').toUpperCase()}` : ''}</td>
                         <td style={{ padding: '.5rem', color: 'var(--text-tertiary)', fontSize: '.75rem' }}>{resp || '—'}</td>
@@ -297,7 +297,6 @@ export default function Reports() {
                         const s = String(v).replace(/\$/g, '').trim();
                         return s ? `₡${s}` : '—';
                       })()}</div></div>
-                      <div><strong style={{ fontSize: '.6875rem', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>Prioridad (Score)</strong><div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{detail.score || 3}</div></div>
                     </div>
 
                     {detail.description && (
@@ -349,7 +348,7 @@ export default function Reports() {
                               <div style={{ fontWeight: 700, fontSize: '.8rem', color: 'var(--text-primary)' }}>{t.title || '—'}</div>
                               {t.notes && <div style={{ fontSize: '.8rem', color: 'var(--text-secondary)' }}>{t.notes}</div>}
                               <div style={{ fontSize: '.6875rem', color: 'var(--text-tertiary)', marginTop: '.25rem' }}>
-                                Fecha límite: {t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '—'} · Completado: {t.completed ? 'Sí' : 'No'}
+                                Fecha límite: {t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '—'}  -  Completado: {t.completed ? 'Sí' : 'No'}
                               </div>
                             </div>
                           ))}
@@ -358,16 +357,14 @@ export default function Reports() {
                     </div>
 
                     <div>
-                      <h3 style={{ fontSize: '.75rem', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '.04em', color: 'var(--text-primary)', marginBottom: '.5rem' }}>Auditoría</h3>
-                      {(!detail.auditLogs || detail.auditLogs.length === 0) ? <div style={{ fontSize: '.8rem', color: 'var(--text-tertiary)' }}>Sin registros de auditoría.</div> : (
+                      <h3 style={{ fontSize: '.75rem', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '.04em', color: 'var(--text-primary)', marginBottom: '.5rem' }}>Bitácora</h3>
+                      {(!detail.auditLogs || detail.auditLogs.filter(a => a.action !== 'personalizado' && a.action !== 'nota_manual').length === 0) ? <div style={{ fontSize: '.8rem', color: 'var(--text-tertiary)' }}>Sin registros.</div> : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
-                          {detail.auditLogs.map(a => (
-                            <div key={a.id} style={{ padding: '.6rem', border: '1px solid var(--border-subtle)', borderRadius: 6, background: '#fff' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.25rem' }}>
-                                <span style={{ fontWeight: 700, fontSize: '.75rem', color: 'var(--text-primary)' }}>{a.action || '—'}</span>
-                                <span style={{ fontSize: '.6875rem', color: 'var(--text-tertiary)' }}>{a.createdAt ? new Date(a.createdAt).toLocaleString() : '—'}</span>
-                              </div>
-                              <div style={{ fontSize: '.8rem', color: 'var(--text-secondary)' }}>{a.details ? String(a.details) : '—'}</div>
+                          {detail.auditLogs.filter(a => a.action !== 'personalizado' && a.action !== 'nota_manual').map(a => (
+                            <div key={a.id || a.createdAt} style={{ padding: '.6rem', border: '1px solid #e5e7eb', borderRadius: 6, background: '#FAFBFC' }}>
+                              <div style={{ fontWeight: 700, fontSize: '.75rem', color: '#111827', marginBottom: '.25rem' }}>{a.action || 'Actualización'}</div>
+                              <div style={{ fontSize: '.8rem', color: '#374151' }}>{a.details || ''}</div>
+                              <div style={{ fontSize: '.6875rem', color: '#9ca3af', marginTop: '.25rem' }}>{a.createdAt ? new Date(a.createdAt).toLocaleString('es-CR') : ''}</div>
                             </div>
                           ))}
                         </div>

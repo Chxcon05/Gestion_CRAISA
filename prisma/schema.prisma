@@ -66,6 +66,7 @@ model Lead {
   lossReason     String?
   /// Fecha para volver a contactar un lead perdido o en pausa
   recontactAt    DateTime?
+  nextAction     String?
   sourceDetail   String?
   responsableId  String?
   createdAt      DateTime @default(now())
@@ -76,6 +77,7 @@ model Lead {
   tasks        Task[]
   tags         LeadTag[]
   auditLogs    AuditLog[]
+  leadActions  LeadAction[]
 
   @@index([status, updatedAt])
   @@index([responsableId, status])
@@ -122,6 +124,18 @@ model Task {
   @@index([dueDate, completed])
   @@index([assignedToId, completed])
   @@map("tasks")
+}
+
+/// Acciones programadas por lead (múltiples por lead).
+model LeadAction {
+  id        String   @id @default(cuid())
+  leadId    String
+  action    String
+  actionDate DateTime?
+  createdAt DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  @@map("lead_actions")
 }
 
 /// Etiquetas libres para segmentar leads (feria, cliente estratégico, etc.).

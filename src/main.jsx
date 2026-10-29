@@ -9,6 +9,7 @@ import Leads from './pages/Leads.jsx'
 import LeadDetail from './pages/LeadDetail.jsx'
 import Reports from './pages/Reports.jsx'
 import Agenda from './pages/Agenda.jsx'
+import AgendaAction from './pages/AgendaAction.jsx'
 import Profile from './pages/Profile.jsx'
 import NewLead from './pages/NewLead.jsx'
 import Users from './pages/Users.jsx'
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/users" element={<App><Users /></App>} />
       <Route path="/profile" element={<App><Profile /></App>} />
       <Route path="/agenda" element={<App><Agenda /></App>} />
+      <Route path="/agenda/action/:code" element={<App><AgendaAction /></App>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   </BrowserRouter>,

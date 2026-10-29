@@ -93,12 +93,15 @@ export default function Leads() {
                     <span className={`badge badge-${(l.estado || l.status || 'nuevo')}`} style={{ fontSize: 11 }}>{(l.estado || l.status || 'nuevo')}</span>
                   </td>
                   <td style={{ padding: '.625rem .875rem', color: 'var(--text-secondary)' }}>{l.canal || '—'}</td>
-                  <td style={{ padding: '.625rem .875rem', color: 'var(--text-secondary)' }}>{l.linea || l.businessLine || '—'}</td>
+                  <td style={{ padding: '.625rem .875rem', color: 'var(--text-secondary)' }}>{(l.linea || l.businessLine || '').replace('Agrícola', 'Agricola').replace('Construcción', 'Construccion').replace('Precisión', 'Precision').replace('Postventa', 'Postventa').replace('Institucional', 'Institucional') || '—'}</td>
                   <td style={{ padding: '.625rem .875rem', color: 'var(--text-secondary)' }}>{l.responsable || '—'}</td>
                   <td style={{ padding: '.625rem .875rem', fontWeight: 700, color: 'var(--text-primary)' }}>{l.valorEstimado || '—'}</td>
                   <td style={{ padding: '.625rem .875rem', fontSize: '.75rem', color: 'var(--text-tertiary)' }}>{l.lossReason || '—'}</td>
                   <td style={{ padding: '.625rem .875rem', whiteSpace: 'nowrap' }}>
-                    <Link to={`/leads/${l.code || l.id}`} className="btn btn-secondary" style={{ fontSize: '.75rem', padding: '.25rem .5rem', textDecoration: 'none' }}>Editar</Link>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <Link to={`/leads/${l.code || l.id}`} className="btn btn-secondary" style={{ fontSize: '.75rem', padding: '.25rem .5rem', textDecoration: 'none' }}>Editar</Link>
+                      <button onClick={async (e) => { e.preventDefault(); if (!confirm('¿Borrar lead ' + (l.code || l.id) + '?')) return; try { let t = sessionStorage.getItem('token'); await fetch(`/api/leads/${l.code || l.id || ''}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + (t || '') } }); window.location.reload(); } catch (err) { alert('No se pudo borrar'); } }} className="btn btn-secondary" style={{ fontSize: '.75rem', padding: '.25rem .5rem', background: '#c0392b', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Borrar</button>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { api } from '../hooks/useApi.js'
 
@@ -12,6 +12,8 @@ export default function LeadDetail() {
   const [auditNote, setAuditNote] = useState('')
   const [saved, setSaved] = useState(false)
   const [activeTab, setActiveTab] = useState('interacciones')
+  const originalLeadRef = useRef(null)
+  const initialLeadRef = useRef(null)
 
   useEffect(() => {
     let token = sessionStorage.getItem('token')
@@ -26,7 +28,7 @@ export default function LeadDetail() {
         const list = Array.isArray(d) ? d : []
         setLeads(list)
         const found = list.find(l => (l.code || l.id) === code || (l.id || l.code) === code)
-        if (found) setLead(found)
+        if (found) { setLead(found); originalLeadRef.current = found; if (!initialLeadRef.current) initialLeadRef.current = found }
       })
       .catch(() => setLeads([]))
   }, [code])
@@ -36,7 +38,26 @@ export default function LeadDetail() {
     const token = sessionStorage.getItem('token')
     const id = lead.code || lead.id || code
     console.log('Saving lead', id, 'with token?', !!token)
-    const payload = { ...lead, bitacora: note || lead?.bitacora || '', tareas: tareasNote || '', auditLogs: auditNote || '' }
+    const orig = initialLeadRef.current || lead
+    const payloadBase = { ...lead, bitacora: note || lead?.bitacora || '', tareas: tareasNote || '', auditLogs: '' }
+    const cambios = []
+    if (payloadBase.estado !== orig?.estado) cambios.push('Estado actualizado: ' + (orig?.estado || '-') + ' -> ' + payloadBase.estado)
+    if (payloadBase.proxAccion !== orig?.proxAccion) cambios.push('Accion programada: ' + (orig?.proxAccion || '-') + ' -> ' + payloadBase.proxAccion)
+    if (payloadBase.proxFecha !== orig?.proxFecha) cambios.push('Fecha contacto: ' + (orig?.proxFecha || '-') + ' -> ' + payloadBase.proxFecha)
+    if (payloadBase.responsable !== orig?.responsable) cambios.push('Responsable: ' + (orig?.responsable || '-') + ' -> ' + payloadBase.responsable)
+    if (payloadBase.linea !== orig?.linea) cambios.push('Linea: ' + (orig?.linea || '-') + ' -> ' + payloadBase.linea)
+    if (payloadBase.company !== orig?.company) cambios.push('Empresa: ' + (orig?.company || '-') + ' -> ' + payloadBase.company)
+    if (payloadBase.canal !== orig?.canal) cambios.push('Canal: ' + (orig?.canal || '-') + ' -> ' + payloadBase.canal)
+    if (payloadBase.client !== orig?.client) cambios.push('Cliente actualizado: ' + (orig?.client || '-') + ' -> ' + payloadBase.client)
+    if (payloadBase.phone !== orig?.phone) cambios.push('Telefono actualizado: ' + (orig?.phone || '-') + ' -> ' + payloadBase.phone)
+    if (payloadBase.email !== orig?.email) cambios.push('Correo actualizado: ' + (orig?.email || '-') + ' -> ' + payloadBase.email)
+    if (payloadBase.product !== orig?.product) cambios.push('Producto actualizado: ' + (orig?.product || '-') + ' -> ' + payloadBase.product)
+    if (payloadBase.description !== orig?.description) cambios.push('Descripcion actualizada: ' + (orig?.description || '-') + ' -> ' + payloadBase.description)
+    if (payloadBase.valorEstimado !== orig?.valorEstimado && payloadBase.valorEstimado !== undefined) cambios.push('Valor actualizado: ' + (orig?.valorEstimado || '-') + ' -> ' + payloadBase.valorEstimado)
+    if (payloadBase.lossReason !== orig?.lossReason) cambios.push('Motivo perdida actualizado: ' + (orig?.lossReason || '-') + ' -> ' + payloadBase.lossReason)
+    if (note && note.trim() !== '') cambios.push(`Nota agregada: "${note.trim().length > 40 ? note.trim().slice(0, 40) + '...' : note.trim()}"`)
+    const auditMsg = cambios.length ? cambios.join('  -  ') : `Estado: ${payloadBase.estado || '—'}  -  Acción: ${payloadBase.proxAccion || '—'}  -  Línea: ${payloadBase.linea || '—'}  -  Canal: ${payloadBase.canal || '—'}`
+    const payload = { ...payloadBase, auditLogs: auditMsg }
     fetch('/api/leads/' + id, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (token || '') },
@@ -45,18 +66,12 @@ export default function LeadDetail() {
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(() => {
         // PATCH exitoso: recargar el lead completo desde /api/leads
-        api('/api/leads', { headers: { Authorization: 'Bearer ' + (token || '') } })
+        api('/api/leads/' + id, { headers: { Authorization: 'Bearer ' + (token || '') } })
           .then(r => r.json())
-          .then(d => {
-            const list = Array.isArray(d) ? d : []
-            const found = list.find(l => (l.code || l.id) === id || (l.id || l.code) === id)
-            if (found) setLead(found)
-            else setLead(payload)
-          })
-          .catch(() => setLead(payload))
-        setSaved(true)
+          .then(d => { setLead(d); setSaved(true); window.location.href = '/leads' })
+          .catch(() => { setLead(payload); setSaved(true); window.location.href = '/leads' })
       })
-      .catch(() => { setLead(payload); setSaved(true); })
+      .catch(() => { setLead(payload); setSaved(true); window.location.href = '/leads' })
   }
 
   const estados = ['nuevo','asignado','contactado','seguimiento','oportunidad','ganado','perdido']
@@ -85,7 +100,7 @@ export default function LeadDetail() {
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.625rem', fontWeight: 800, letterSpacing: '-0.02em', textTransform: 'uppercase', color: 'var(--text-primary)', lineHeight: 1.1 }}>{lead?.code || code}</h1>
           </div>
           <div className="page-actions">
-            <Link to="/leads" className="btn btn-secondary">← Listado</Link>
+            <Link to="/leads" className="btn btn-secondary">Volver al listado</Link>
           </div>
         </div>
 
@@ -150,12 +165,12 @@ export default function LeadDetail() {
             </div>
 
             <button onClick={handleSave} className="btn btn-primary" style={{ width: '100%' }}>Guardar cambios</button>
-            {saved && <div style={{ marginTop: '.5rem', fontSize: '.75rem', color: 'var(--line-carga)', fontWeight: 600 }}>✓ Cambios guardados</div>}
+            {saved && <div style={{ marginTop: '.5rem', fontSize: '.75rem', color: 'var(--line-carga)', fontWeight: 600 }}>âœ“ Cambios guardados</div>}
 
             <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 6, padding: '.75rem', background: '#fff', marginTop: '.75rem' }}>
               <div style={{ display: 'flex', gap: '.25rem', marginBottom: '.75rem' }}>
-                {['interacciones','tareas','audit'].map(t => (
-                  <button key={t} onClick={() => setActiveTab(t)} style={{ padding: '.35rem .6rem', border: '1px solid var(--border-default)', borderRadius: 6, background: activeTab === t ? '#003087' : '#fff', color: activeTab === t ? '#fff' : 'var(--text-primary)', fontSize: '.75rem', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>{t === 'interacciones' ? 'Interacciones' : t === 'tareas' ? 'Tareas' : 'Auditoría'}</button>
+                {['interacciones','tareas','bitacora'].map(t => (
+                  <button key={t} onClick={() => setActiveTab(t)} style={{ padding: '.35rem .6rem', border: '1px solid var(--border-default)', borderRadius: 6, background: activeTab === t ? '#003087' : '#fff', color: activeTab === t ? '#fff' : 'var(--text-primary)', fontSize: '.75rem', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>{t === 'interacciones' ? 'Interacciones' : t === 'tareas' ? 'Tareas' : 'Bitácora'}</button>
                 ))}
               </div>
               {activeTab === 'interacciones' && (
@@ -181,22 +196,25 @@ export default function LeadDetail() {
                       {lead.tareas.slice(0, 3).map((t, idx) => (
                         <div key={idx} style={{ padding: '.375rem', border: '1px solid var(--border-subtle)', borderRadius: 4, background: '#fff', fontSize: '.75rem' }}>
                           <div style={{ fontWeight: 600 }}>{t.title || '—'}</div>
-                          <div style={{ color: 'var(--text-secondary)', fontSize: '.6875rem' }}>{t.completed ? '✓ Completado' : 'Pendiente'}</div>
+                          <div style={{ color: 'var(--text-secondary)', fontSize: '.6875rem' }}>{t.completed ? 'âœ“ Completado' : 'Pendiente'}</div>
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
               )}
-              {activeTab === 'audit' && (
+              {activeTab === 'bitacora' && (
                 <div>
-                  <textarea value={auditNote} onChange={e => setAuditNote(e.target.value)} rows={2} placeholder="Registro de auditoría..." style={{ width: '100%', padding: '.5rem', border: '1px solid var(--border-default)', borderRadius: 4, fontSize: '.75rem', resize: 'vertical', fontFamily: 'inherit', background: '#FAFBFC', marginBottom: '.5rem' }} />
-                  {!lead?.auditLogs || lead.auditLogs.length === 0 ? <div style={{ fontSize: '.75rem', color: 'var(--text-tertiary)' }}>Sin registros.</div> : (
+                  <div style={{ fontSize: '.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '.5rem' }}>Cambios automáticos</div>
+                  {!lead?.auditLogs || lead.auditLogs.length === 0 ? <div style={{ fontSize: '.75rem', color: 'var(--text-tertiary)' }}>Sin registros de bitácora.</div> : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '.25rem' }}>
-                      {lead.auditLogs.slice(0, 3).map((a, idx) => (
-                        <div key={idx} style={{ padding: '.375rem', border: '1px solid var(--border-subtle)', borderRadius: 4, background: '#fff', fontSize: '.75rem' }}>
-                          <div style={{ fontWeight: 600 }}>{a.action || '—'}</div>
-                          <div style={{ color: 'var(--text-secondary)', fontSize: '.6875rem' }}>{a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '—'}</div>
+                      {lead.auditLogs.filter(a => a.action !== 'personalizado' && a.action !== 'nota_manual').slice(0, 8).map((a, idx) => (
+                        <div key={idx} style={{ padding: '.5rem', border: '1px solid #e5e7eb', borderRadius: 6, background: '#FAFBFC', fontSize: '.75rem', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div>
+                            <div style={{ fontWeight: 700, color: '#111827', fontSize: '.8125rem' }}>{a.action || 'Actualización'}</div>
+                            <div style={{ color: '#6b7280', fontSize: '.625rem' }}>{a.details || ''}</div>
+                          </div>
+                          <div style={{ fontSize: '.625rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>{a.createdAt ? new Date(a.createdAt).toLocaleString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</div>
                         </div>
                       ))}
                     </div>
@@ -233,3 +251,4 @@ function EditableField({ label, value, onChange }) {
     </div>
   )
 }
+

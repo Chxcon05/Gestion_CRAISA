@@ -44,7 +44,7 @@ app.get('/api/leads', authMiddleware, async (req, res) => {
       where: req.user.role === 'ADMIN' ? {} : { responsableId: req.user.id },
       orderBy: { entryDate: 'desc' },
       take: 200,
-      include: { responsable: true, interactions: { orderBy: { createdAt: 'desc' }, take: 10 }, tasks: { orderBy: { dueDate: 'asc' }, take: 5 }, auditLogs: { orderBy: { createdAt: 'desc' }, take: 5 } }
+      include: { responsable: true, interactions: { orderBy: { createdAt: 'desc' }, take: 10 }, tasks: { orderBy: { dueDate: 'asc' }, take: 5 }, auditLogs: { orderBy: { createdAt: 'desc' }, take: 5 }, leadActions: true }
     });
   } catch (e) { console.error('GET leads error:', e); }
   res.json(items.map(lead => ({
@@ -55,7 +55,8 @@ app.get('/api/leads', authMiddleware, async (req, res) => {
     valorEstimado: lead.estimatedValue ? '$' + lead.estimatedValue : '$0', date: lead.createdAt ? lead.createdAt.toLocaleDateString('es-CR') : '', lossReason: lead.lossReason || '',
     interanes: lead.interactions ? lead.interactions.map(i => ({ type: i.type || 'nota', createdAt: i.createdAt ? i.createdAt.toISOString() : '', content: i.content, previousStatus: i.previousStatus, newStatus: i.newStatus })) : [],
     tareas: lead.tasks ? lead.tasks.map(t => ({ title: t.title, notes: t.notes, dueDate: t.dueDate ? t.dueDate.toISOString() : '', completed: !!t.completed })) : [],
-    auditLogs: lead.auditLogs ? lead.auditLogs.map(a => ({ action: a.action, createdAt: a.createdAt ? a.createdAt.toISOString() : '', details: a.details })) : []
+    auditLogs: lead.auditLogs ? lead.auditLogs.map(a => ({ action: a.action, createdAt: a.createdAt ? a.createdAt.toISOString() : '', details: a.details })) : [],
+    actions: lead.leadActions ? lead.leadActions.map(a => ({ action: a.action, date: a.actionDate ? a.actionDate.toLocaleDateString('es-CR') : '', createdAt: a.createdAt ? a.createdAt.toISOString() : '' })) : []
   })));
 });
 
@@ -67,8 +68,9 @@ app.get('/api/leads/:code', authMiddleware, async (req, res) => {
     code: lead.code, client: lead.clientName, company: lead.companyName, phone: lead.phone, email: lead.email,
     canal: lead.channel, linea: lead.lineName, product: lead.productDesc, description: lead.description,
     estado: lead.state, responsable: lead.responsibleEmail,
-    proxAccion: lead.nextAction, proxFecha: lead.nextActionDate, score: lead.score,
+    proxAccion: lead.nextAction, proxFecha: lead.recontactAt ? lead.recontactAt.toLocaleDateString('es-CR') : '', score: lead.score,
     valorEstimado: lead.estimatedValue, date: lead.createdAt.toLocaleDateString('es-CR'),
+    auditLogs: lead.auditLogs ? lead.auditLogs.map(a => ({ action: a.action, createdAt: a.createdAt ? a.createdAt.toISOString() : '', details: a.detail || '' })) : [],
     bitacora: lead.notes.map(n => ({ user: n.userEmail, when: n.when.toLocaleString(), text: n.text })),
     lossReason: lead.lossReason
   });
@@ -120,6 +122,8 @@ app.patch('/api/leads/:code', authMiddleware, async (req, res) => {
     data.estimatedValue = clean ? parseInt(clean, 10) : null;
   }
   if (b.lossReason !== undefined) data.lossReason = b.lossReason;
+  if (b.proxAccion !== undefined || b.nextAction !== undefined) data.nextAction = b.proxAccion || b.nextAction || '';
+  if (b.proxFecha !== undefined) data.recontactAt = b.proxFecha ? new Date(b.proxFecha.split('/').reverse().join('-')) : null;
   if (b.responsable !== undefined && !b.responsable.includes('@')) data.responsableId = b.responsable;
   try {
     const leadRef = await prisma.lead.findUnique({ where: { code: req.params.code }, select: { id: true } });
@@ -131,7 +135,12 @@ app.patch('/api/leads/:code', authMiddleware, async (req, res) => {
       await prisma.task.create({ data: { leadId, title: b.tareas, notes: b.tareas, dueDate: new Date(Date.now() + 7 * 86400000), completed: false } }).catch(e => console.error('Task error:', e.message));
     }
     if (b.auditLogs !== undefined && b.auditLogs.trim() !== '' && leadId) {
-      await prisma.auditLog.create({ data: { leadId, userId: req.user?.id, action: 'personalizado', detail: b.auditLogs, createdAt: new Date() } }).catch(e => console.error('AuditLog error:', e.message));
+      const newLog = await prisma.auditLog.create({ data: { leadId, userId: req.user?.id, action: b.auditLogs || 'Actualización', detail: '', createdAt: new Date() } }).catch(e => console.error('AuditLog error:', e.message));
+      if (newLog && newLog.id) {
+        const recent = await prisma.auditLog.findMany({ where: { leadId }, orderBy: { createdAt: 'desc' }, take: 3, select: { id: true } }).catch(() => []);
+        const keepIds = recent.map(r => r.id).filter(Boolean);
+        await prisma.auditLog.deleteMany({ where: { leadId, NOT: { id: { in: keepIds } } } }).catch(() => {});
+      }
     }
   } catch (e) { console.error('Relation creation error:', e.message); }
   try {
@@ -139,6 +148,32 @@ app.patch('/api/leads/:code', authMiddleware, async (req, res) => {
     return res.json({ message: 'Actualizado', code: lead.code, estado: lead.status });
   } catch (e) { console.error('PATCH error:', e.message); }
   res.json({ message: 'Actualizado' });
+});
+
+app.post('/api/leads/:code/actions', authMiddleware, async (req, res) => {
+  try {
+    const lead = await prisma.lead.findUnique({ where: { code: req.params.code } })
+    if (!lead) return res.status(404).json({ error: 'Lead no encontrado' })
+    const act = await prisma.leadAction.create({
+      data: { leadId: lead.id, action: req.body.action || '', actionDate: req.body.actionDate ? new Date(req.body.actionDate.split('/').reverse().join('-')) : null }
+    })
+    res.json(act)
+  } catch (e) { console.error('POST action error:', e.message); res.status(500).json({ error: 'Error al guardar acción' }) }
+})
+
+app.get('/api/leads/:code/actions', authMiddleware, async (req, res) => {
+  try {
+    const lead = await prisma.lead.findUnique({ where: { code: req.params.code }, include: { leadActions: true } })
+    if (!lead) return res.status(404).json({ error: 'Lead no encontrado' })
+    res.json(lead.leadActions || [])
+  } catch (e) { console.error('GET actions error:', e.message); res.status(500).json({ error: 'Error' }) }
+})
+
+app.delete('/api/leads/:code', authMiddleware, async (req, res) => {
+  try {
+    await prisma.lead.delete({ where: { code: req.params.code } });
+    res.json({ message: 'Lead eliminado' });
+  } catch (e) { console.error('DELETE lead error:', e.message); res.status(500).json({ error: 'No se pudo eliminar' }); }
 });
 
 app.get('/api/users', authMiddleware, async (req, res) => {
