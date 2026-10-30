@@ -171,6 +171,8 @@ app.get('/api/leads/:code/actions', authMiddleware, async (req, res) => {
 
 app.delete('/api/leads/:code', authMiddleware, async (req, res) => {
   try {
+    const lead = await prisma.lead.findUnique({ where: { code: req.params.code } })
+    if (lead) await prisma.auditLog.create({ data: { leadId: lead.id, userId: req.user?.id || '', action: 'Lead eliminado: ' + req.params.code, detail: (lead.firstName || '') + ' / ' + (lead.company || ''), createdAt: new Date() } })
     await prisma.lead.delete({ where: { code: req.params.code } });
     res.json({ message: 'Lead eliminado' });
   } catch (e) { console.error('DELETE lead error:', e.message); res.status(500).json({ error: 'No se pudo eliminar' }); }
