@@ -255,9 +255,10 @@ export default function Dashboard() {
               {[...new Set(leads.map(l => l.canal || 'otro'))].map(c => {
                 const count = leads.filter(l => (l.canal || 'otro') === c).length
                 return (
-                  <div key={c} style={{ background: '#fff', border: '1px solid var(--border-default)', borderRadius: 6, padding: '.5rem .75rem', boxShadow: 'var(--shadow-xs)', transition: 'transform .15s ease, box-shadow .15s ease', cursor: 'pointer' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,.08)' }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow-xs)' }}>
-                    <div style={{ fontSize: '.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>{c}</div>
-                    <div style={{ fontSize: '.6875rem', color: 'var(--text-tertiary)' }}>{count}</div>
+                  <div key={c} style={{ background: 'linear-gradient(135deg, #fff 0%, #F6F8FB 100%)', border: '1px solid #E2E8F0', borderRadius: 12, padding: '1rem 1.25rem', boxShadow: '0 2px 8px rgba(0,68,187,.08)', minWidth: 110, transition: 'transform .15s ease, box-shadow .15s ease', cursor: 'pointer' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,68,187,.12)' }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,68,187,.08)' }}>
+                    <div style={{ fontSize: '.7rem', fontWeight: 600, color: '#6B7280', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: '.25rem' }}>{c}</div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0044BB', lineHeight: 1, fontFamily: 'var(--font-display)' }}>{count}</div>
+                    <div style={{ fontSize: '.65rem', fontWeight: 500, color: '#9CA3AF', marginTop: '.35rem' }}>{Math.round(count / (leads.length || 1) * 100)}% de leads</div>
                   </div>
                 )
               })}
@@ -274,7 +275,9 @@ export default function Dashboard() {
             return r
           }
           const eventos = []
-          ;(leads || []).forEach(l => {
+          const leadsArr = Array.isArray(leads) ? leads : []
+          const auditArr = Array.isArray(auditRecent) ? auditRecent : []
+          leadsArr.forEach(l => {
             const code = l.code || ''
             const resp = nombreResp(l.responsable || l.responsableId || '')
             if (l.createdAt) {
@@ -294,9 +297,10 @@ export default function Dashboard() {
               eventos.push({ fecha: new Date(a.createdAt), tipo: 'acción', descripcion: a.action || '', autor: resp, codigo: code })
             })
           })
-          (auditRecent || []).forEach(a => {
+          auditArr.forEach(a => {
             if (!a.createdAt) return
-            eventos.push({ fecha: new Date(a.createdAt), tipo: 'eliminado', descripcion: a.action || '', details: a.detail || '', autor: 'Admin CRAISA', codigo: a.code || '—' })
+            const tipo = (a.action || '').includes('creado') ? 'creado' : ((a.action || '').includes('eliminado') ? 'eliminado' : 'auditoría')
+            eventos.push({ fecha: new Date(a.createdAt), tipo, descripcion: a.action || '', details: a.detail || '', autor: 'Admin CRAISA', codigo: a.code || '—' })
           })
           eventos.sort((a, b) => b.fecha - a.fecha)
           return eventos.slice(0, 5).map(e => {
