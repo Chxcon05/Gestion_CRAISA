@@ -105,10 +105,10 @@ export default function Dashboard() {
   const firstLead = leads[0] || {}
 
   return (
-    <main className="main" style={{ paddingTop: 2 }}>
+    <main className="main" style={{ paddingTop: 2, background: 'linear-gradient(180deg, #F4F6FA 0%, #FAFBFC 100%)', minHeight: '100vh' }}>
       <div className="container">
         {/* Hero */}
-        <div className="card" style={{ background: '#fff', border: '1px solid var(--border-default)', borderRadius: 8, padding: '2rem', marginBottom: '1.5rem', boxShadow: 'var(--shadow-card)' }}>
+        <div className="card" style={{ background: 'linear-gradient(135deg, #fff 0%, #F8FAFC 100%)', border: '1px solid #E2E8F0', borderRadius: 16, padding: '2rem', marginBottom: '1.5rem', boxShadow: '0 10px 30px rgba(0,68,187,.08), 0 1px 3px rgba(0,0,0,.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem' }}>
             <div style={{ flex: 1, minWidth: 260 }}>
               <span className="eyebrow">Resumen comercial · Actualizado hoy</span>
