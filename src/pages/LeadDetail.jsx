@@ -135,14 +135,6 @@ export default function LeadDetail() {
               <EditableField label="Producto" value={lead?.product || ''} onChange={v => setLead({ ...lead, product: v })} />
               <EditableField label="Valor estimado" value={lead?.valorEstimado || ''} onChange={v => setLead({ ...lead, valorEstimado: v })} />
               <EditableField label="Próxima acción" value={lead?.proxAccion || lead?.nextAction || ''} onChange={v => setLead({ ...lead, proxAccion: v, nextAction: v })} />
-              <div style={{ marginTop: '.5rem', padding: '.5rem .75rem', background: '#F8FAFC', borderRadius: 6, border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: '.7rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '.25rem' }}>Descripción</div>
-                <div style={{ fontSize: '.875rem', color: 'var(--text-primary)', lineHeight: 1.4 }}>{lead?.description || '—'}</div>
-              </div>
-              <div style={{ marginTop: '.5rem', padding: '.5rem .75rem', background: '#F8FAFC', borderRadius: 6, border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: '.7rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '.25rem' }}>Próxima acción</div>
-                <div style={{ fontSize: '.875rem', fontWeight: 700, color: 'var(--craisa-primary)' }}>{lead?.proxAccion || lead?.nextAction || '—'}</div>
-              </div>
             </div>
             <div style={{ marginTop: '1rem' }}>
               <label style={{ fontSize: '.75rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '.25rem' }}>Descripción</label>
