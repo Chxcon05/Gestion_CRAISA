@@ -1,0 +1,1 @@
+Fix: valor estimado limpia simbolos antes de parseInt

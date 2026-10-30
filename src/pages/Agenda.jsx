@@ -23,7 +23,7 @@ export default function Agenda() {
   const today = new Date()
   const todayStr = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}`
 
-  const allWithInfo = leads.filter(l => l.proxFecha || l.proxAccion || l.estado || l.client)
+  const allWithInfo = leads.filter(l => (l.proxAccion || l.nextAction || !!l.proxFecha || !!l.recontactAt) && !(l.actions && l.actions.some(a => a.action === 'Concretada' || a.completed || a.completedAt)))
 
   const getCategory = (dateStr) => {
     if (!dateStr) return 'Lejano'
@@ -32,9 +32,7 @@ export default function Agenda() {
     return diffDays <= 2 ? 'Urgente' : diffDays <= 7 ? 'Cercano' : 'Lejano'
   }
 
-  const filtered = ['Todos', 'Urgente', 'Cercano', 'Lejano'].includes(filterKey)
-    ? (filterKey === 'Todos' ? allWithInfo : allWithInfo.filter(l => getCategory(l.proxFecha) === filterKey))
-    : allWithInfo
+  const filtered = filterKey === 'Todos' ? allWithInfo : allWithInfo.filter(l => getCategory(l.proxFecha || l.recontactAt || '') === filterKey)
 
   const sorted = [...filtered].sort((a, b) => {
     const da = a.proxFecha ? a.proxFecha.split('/').reverse().join('-') : (a.date ? a.date.split('/').reverse().join('-') : '9999-99-99')
@@ -93,7 +91,9 @@ export default function Agenda() {
                   </div>
                 </div>
                 <div style={{ fontSize: 14, color: '#374151', marginBottom: 8 }}>
-                  <strong style={{ color: '#111827', fontWeight: 700 }}>{(l.actions && l.actions.length ? (l.actions[l.actions.length - 1].action || '') : '').trim() || 'Sin acción programada'}</strong>
+                  <strong style={{ color: '#111827', fontWeight: 700 }}>{(l.actions && l.actions.length ? (l.actions[l.actions.length - 1].action || '') : (l.proxAccion || l.nextAction || '').trim())}</strong>
+                  <span style={{ fontSize: 11, color: '#00AA44', marginLeft: 8, fontWeight: 600 }}>{(() => { const d = l.recontactAt || l.proxFecha || ''; const f = d ? new Date(d.includes('/') ? d.split('/').reverse().join('-') : d) : null; return f ? ' • ' + f.toLocaleDateString('es-CR') : ''; })()}</span>
+                  <span style={{ fontSize: 11, color: (l.actions && l.actions.some(a => a.completed || a.completedAt)) ? '#00AA44' : '#FFB800', marginLeft: 6, fontWeight: 700 }}>{(l.actions && l.actions.some(a => a.completed || a.completedAt)) ? 'Concretado' : 'Pendiente'}</span>
                 </div>
                 <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>
                   Responsable: <strong style={{ color: '#374151' }}>{l.responsable || 'Sin asignar'}</strong>  -  Línea: <span style={{ color: '#374151' }}>{l.linea || l.businessLine || '—'}</span>
@@ -103,8 +103,13 @@ export default function Agenda() {
                   <span>Última edit: <strong style={{ color: '#374151' }}>{l.auditLogs && l.auditLogs[0] ? new Date(l.auditLogs[0].createdAt).toLocaleDateString('es-CR') : (l.interanes && l.interanes[0] ? new Date(l.interanes[0].createdAt).toLocaleDateString('es-CR') : '—')}</strong></span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
-                  <input type="date" value={actionDates[l.code || l.client] || new Date().toISOString().split('T')[0]} onChange={e => setActionDates(prev => ({ ...prev, [l.code || l.client]: e.target.value }))} style={{ padding: '5px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12 }} />
-                  <Link to={`/agenda/action/${l.code || ''}`} style={{ padding: '5px 14px', background: '#111827', color: '#fff', borderRadius: 6, textDecoration: 'none', fontWeight: 700, fontSize: 11, display: 'inline-block' }}>Asignar acción</Link>
+                  <input type="date" min={new Date().toISOString().split('T')[0]} value={actionDates[l.code || l.client] || new Date().toISOString().split('T')[0]} onChange={e => setActionDates(prev => ({ ...prev, [l.code || l.client]: e.target.value }))} style={{ padding: '5px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12 }} />
+                  <button onClick={() => {
+                    const token = sessionStorage.getItem('token') || ''
+                    const code = l.code || ''
+                    const clear = () => fetch('/api/leads/' + code, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ proxAccion: '', nextAction: '', proxFecha: '', recontactAt: null }) }).then(() => fetch('/api/leads/' + code + '/actions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ action: 'Concretada', actionDate: new Date().toISOString().split('T')[0].split('-').reverse().join('/') }) }).then(() => window.location.reload()))
+                    clear()
+                  }} style={{ padding: '5px 14px', background: '#00AA44', color: '#fff', borderRadius: 6, border: 'none', fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>Concretada</button>
                 </div>
                 <Link to={`/leads/${l.code}`} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,

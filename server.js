@@ -91,6 +91,8 @@ app.post('/api/leads', authMiddleware, async (req, res) => {
       product: b.product || null,
       description: b.descripcion || null,
       status: b.estado || 'nuevo',
+      nextAction: b.proxAccion || b.nextAction || '',
+      recontactAt: b.proxFecha ? new Date(b.proxFecha.split('/').reverse().join('-')) : null,
       score: parseInt(b.score) || 3,
       estimatedValue: parseInt(String(b.valor || '').replace(/[^0-9]/g, '')) || null,
       responsableId: req.user.id,

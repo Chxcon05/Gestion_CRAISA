@@ -135,6 +135,9 @@ export default function LeadDetail() {
               <EditableField label="Producto" value={lead?.product || ''} onChange={v => setLead({ ...lead, product: v })} />
               <EditableField label="Valor estimado" value={lead?.valorEstimado || ''} onChange={v => setLead({ ...lead, valorEstimado: v })} />
               <EditableField label="Próxima acción" value={lead?.proxAccion || lead?.nextAction || ''} onChange={v => setLead({ ...lead, proxAccion: v, nextAction: v })} />
+              <div style={{ marginTop: '.25rem', display: 'flex', gap: '.5rem' }}>
+                <input type="date" min={new Date().toISOString().split('T')[0]} value={lead?.proxFecha || lead?.recontactAt ? (lead?.recontactAt || lead?.proxFecha || '').split('T')[0] : new Date().toISOString().split('T')[0]} onChange={e => setLead({ ...lead, proxFecha: e.target.value, recontactAt: e.target.value })} style={{ width: '100%', padding: '.5rem', border: '1px solid var(--border-default)', borderRadius: 6, fontSize: '.875rem', background: '#fff' }} />
+              </div>
             </div>
             <div style={{ marginTop: '1rem' }}>
               <label style={{ fontSize: '.75rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '.25rem' }}>Descripción</label>

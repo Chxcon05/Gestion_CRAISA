@@ -1,0 +1,1 @@
+LeadDetail: mostrar descripcion y proxima accion en ficha; guardar cambios en bitacora

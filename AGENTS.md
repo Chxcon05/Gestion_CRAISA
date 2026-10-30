@@ -59,3 +59,5 @@ Los comentarios explican por qué, no qué hace el código, y son cortos: de 2 a
 Sin caracteres CJK ni basura de otro idioma en el código: se coló un 若有 en un comentario y hubo que barrer src/ entero.
 Ojo con el Preflight de Tailwind: pone font-size: inherit en h1..h6. Un título con solo md:text-6xl se renderiza a 16px por debajo del breakpoint, más pequeño que su propio párrafo.
 Lo que hay dentro de public/ se sirve desde la raíz: /categorias/x.jpeg, nunca /public/categorias/x.jpeg.
+5. No commitear ni pushear sin confirmacion del usuario  
+Nunca hagas git commit ni git push por tu cuenta. Acumula los cambios y espera a que el usuario diga que commitee. Si el usuario lo pide, haz un solo commit con todo lo acumulado. 

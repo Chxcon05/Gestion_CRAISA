@@ -36,7 +36,7 @@ export default function AgendaAction() {
       const d = date.split('-')
       const fmt = `${d[2]}/${d[1]}`
       await fetch('/api/leads/' + code + '/actions', {
-        method: 'PATCH',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (token || '') },
         body: JSON.stringify({ action: trimmed, actionDate: fmt })
       })
