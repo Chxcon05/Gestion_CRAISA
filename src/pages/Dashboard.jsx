@@ -281,7 +281,8 @@ export default function Dashboard() {
           eventos.sort((a, b) => b.fecha - a.fecha)
           return eventos.slice(0, 5).map(e => {
             const fechaStr = e.fecha ? e.fecha.toLocaleDateString('es-CR') : '—'
-            const linea = e.codigo + ' · ' + e.tipo + ' · ' + fechaStr
+            const texto = (e.tipo === 'auditoría' && e.details ? (e.descripcion || '') + ' — ' + e.details : (e.descripcion || e.tipo))
+            const linea = e.codigo + ' · ' + texto + ' · ' + fechaStr
             let detalle = ''
             if (e.tipo === 'auditoría' && e.details) detalle = (e.descripcion || '') + ' — ' + e.details
             else if (e.descripcion) detalle = e.descripcion
