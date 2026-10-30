@@ -252,7 +252,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Actividad reciente – historial */}
+        {/* Actividad reciente – últimas 5 acciones de cualquier página */}
                 <Section title="Actividad reciente" block="" rows={(() => {
           const mapa = { 'admin@craisa.com': 'Admin CRAISA', 'admin@craisa': 'Admin CRAISA' }
           const nombreResp = (r) => {
@@ -282,24 +282,11 @@ export default function Dashboard() {
           return eventos.slice(0, 5).map(e => {
             const fechaStr = e.fecha ? e.fecha.toLocaleDateString('es-CR') : '—'
             const linea = e.codigo + ' · ' + e.tipo + ' · ' + fechaStr
-            const detalle = e.description ? e.description : (e.prev || e.nuevo ? (e.prev || '—') + ' → ' + (e.nuevo || '—') : '—')
+            const detalle = e.descripcion ? e.descripcion : (e.prev || e.nuevo ? (e.prev || '—') + ' → ' + (e.nuevo || '—') : '—')
             return [e.autor || '—', linea, detalle]
           })
         })() } />
 
-          const mapa = { 'admin@craisa.com': 'Admin CRAISA', 'admin@craisa': 'Admin CRAISA' }
-          return (leads || []).slice(0, 6).map(l => {
-            let resp = (l.responsable || l.responsableId || '').trim()
-            if (resp.includes('@')) resp = mapa[resp] || resp.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-            if (!resp || resp === 'Sin asignar') resp = 'Sin asignar'
-            const descEstado = l.estado || l.status || '—'
-            const descValor = l.valorEstimado ? `· ₡${String(l.valorEstimado).replace(/\$/g, '').trim()}` : '· —'
-            return [
-              resp || '—',
-              l.code ? `${l.code} · ${descEstado} ${descValor} · ${resp}` : `${descEstado} ${descValor}`
-            ]
-          })
-        })() } />
 
         {/* Rendimiento */}
         <div className="dash-section" style={{ marginBottom: '1.5rem', background: '#fff', border: '1px solid var(--border-default)', borderRadius: 8, boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
