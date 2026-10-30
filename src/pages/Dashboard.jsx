@@ -264,6 +264,9 @@ export default function Dashboard() {
           ;(leads || []).forEach(l => {
             const code = l.code || ''
             const resp = nombreResp(l.responsable || l.responsableId || '')
+            if (l.createdAt) {
+              eventos.push({ fecha: new Date(l.createdAt), tipo: 'nuevo lead', descripcion: (l.client || l.firstName || '') + ' — ' + (l.company || ''), autor: resp, codigo: code })
+            }
             ;(l.interanes || []).forEach(i => {
               let fecha = (i.createdAt ? new Date(i.createdAt) : null) || (l.createdAt ? new Date(l.createdAt) : new Date())
               if (isNaN(fecha)) return
