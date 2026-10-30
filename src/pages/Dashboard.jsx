@@ -253,7 +253,40 @@ export default function Dashboard() {
         </div>
 
         {/* Actividad reciente – historial */}
-        <Section title="Actividad reciente" block="" rows={(() => {
+                <Section title="Actividad reciente" block="" rows={(() => {
+          const mapa = { 'admin@craisa.com': 'Admin CRAISA', 'admin@craisa': 'Admin CRAISA' }
+          const nombreResp = (r) => {
+            if (!r || r === 'Sin asignar') return 'Sin asignar'
+            if (r.includes('@')) return mapa[r] || r.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+            return r
+          }
+          const eventos = []
+          ;(leads || []).forEach(l => {
+            const code = l.code || ''
+            const resp = nombreResp(l.responsable || l.responsableId || '')
+            ;(l.interanes || []).forEach(i => {
+              let fecha = (i.createdAt ? new Date(i.createdAt) : null) || (l.createdAt ? new Date(l.createdAt) : new Date())
+              if (isNaN(fecha)) return
+              eventos.push({ fecha, tipo: 'interacción', descripcion: i.content || '', autor: resp, codigo: code, prev: i.previousStatus, nuevo: i.newStatus })
+            })
+            ;(l.auditLogs || []).forEach(a => {
+              if (!a.createdAt) return
+              eventos.push({ fecha: new Date(a.createdAt), tipo: 'auditoría', descripcion: a.action || '', autor: resp, codigo: code })
+            })
+            ;(l.actions || []).forEach(a => {
+              if (!a.createdAt) return
+              eventos.push({ fecha: new Date(a.createdAt), tipo: 'acción', descripcion: a.action || '', autor: resp, codigo: code })
+            })
+          })
+          eventos.sort((a, b) => b.fecha - a.fecha)
+          return eventos.slice(0, 5).map(e => {
+            const fechaStr = e.fecha ? e.fecha.toLocaleDateString('es-CR') : '—'
+            const linea = e.codigo + ' · ' + e.tipo + ' · ' + fechaStr
+            const detalle = e.description ? e.description : (e.prev || e.nuevo ? (e.prev || '—') + ' → ' + (e.nuevo || '—') : '—')
+            return [e.autor || '—', linea, detalle]
+          })
+        })() } />
+
           const mapa = { 'admin@craisa.com': 'Admin CRAISA', 'admin@craisa': 'Admin CRAISA' }
           return (leads || []).slice(0, 6).map(l => {
             let resp = (l.responsable || l.responsableId || '').trim()
