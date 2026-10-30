@@ -55,7 +55,7 @@ app.get('/api/leads', authMiddleware, async (req, res) => {
     valorEstimado: lead.estimatedValue ? '$' + lead.estimatedValue : '$0', date: lead.createdAt ? lead.createdAt.toLocaleDateString('es-CR') : '', lossReason: lead.lossReason || '',
     interanes: lead.interactions ? lead.interactions.map(i => ({ type: i.type || 'nota', createdAt: i.createdAt ? i.createdAt.toISOString() : '', content: i.content, previousStatus: i.previousStatus, newStatus: i.newStatus })) : [],
     tareas: lead.tasks ? lead.tasks.map(t => ({ title: t.title, notes: t.notes, dueDate: t.dueDate ? t.dueDate.toISOString() : '', completed: !!t.completed })) : [],
-    auditLogs: lead.auditLogs ? lead.auditLogs.map(a => ({ action: a.action, createdAt: a.createdAt ? a.createdAt.toISOString() : '', details: a.details })) : [],
+    auditLogs: lead.auditLogs ? lead.auditLogs.map(a => ({ action: a.action, createdAt: a.createdAt ? a.createdAt.toISOString() : '', details: a.detail || '' })) : [],
     actions: lead.leadActions ? lead.leadActions.map(a => ({ action: a.action, date: a.actionDate ? a.actionDate.toLocaleDateString('es-CR') : '', createdAt: a.createdAt ? a.createdAt.toISOString() : '' })) : []
   })));
 });
