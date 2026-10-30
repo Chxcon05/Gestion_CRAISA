@@ -172,7 +172,7 @@ export default function Reports() {
                           <div style={{ fontSize: '.75rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>{x.total} leads  -  {x.ganados} ganados  -  {w}% cierre</div>
                         </div>
                         <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-subtle)', overflow: 'hidden' }}>
-                          <div style={{ height: '100%', borderRadius: 3, background: 'linear-gradient(to right, var(--craisa-primary), var(--line-carga))', width: (x.ganados / x.total * 100) + '%' }} />
+                          <div style={{ height: '100%', borderRadius: 3, background: '#0044BB', width: (x.ganados / x.total * 100) + '%' }} />
                         </div>
                       </div>
                     )
