@@ -28,7 +28,7 @@ export default function NewLead() {
   return (
     <main className="main" style={{ paddingTop: 2 }}>
       <div className="container">
-        <div className="page-header" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '.25rem' }}><div style={{ textAlign: 'center' }}><h1 style={{ margin: 0 }}>Nuevo Lead</h1><p className="page-subtitle" style={{ margin: 0 }}>Registra una nueva consulta comercial</p></div></div>
+        <div className="page-header" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '.5rem', padding: '2rem 0', background: 'linear-gradient(135deg, #0044BB 0%, #0033AA 100%)', borderRadius: 16, marginBottom: '1.5rem', boxShadow: '0 8px 30px rgba(0,68,187,.15)' }}><div style={{ textAlign: 'center' }}><h1 style={{ margin: 0, fontSize: '2.8rem', fontWeight: 800, letterSpacing: '-.03em', color: '#fff', fontFamily: 'var(--font-display)', textTransform: 'uppercase', lineHeight: 1.1, textShadow: '0 4px 12px rgba(0,0,0,.15)' }}>Nuevo Lead</h1><p className="page-subtitle" style={{ margin: '.25rem 0 0', color: '#D6E3F7', fontSize: '.95rem', fontWeight: 500 }}>Registra una nueva consulta comercial</p></div></div>
         <div className="card" style={{ padding: '1.5rem', maxWidth: 720, margin: '0 auto' }}>
           <form onSubmit={submit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '.75rem' }}>
             <div><label className="form-label">Cliente</label><input className="form-input" value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} required /></div>
