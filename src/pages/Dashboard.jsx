@@ -271,7 +271,7 @@ export default function Dashboard() {
             })
             ;(l.auditLogs || []).forEach(a => {
               if (!a.createdAt) return
-              eventos.push({ fecha: new Date(a.createdAt), tipo: 'auditoría', descripcion: a.action || '', autor: resp, codigo: code })
+              eventos.push({ fecha: new Date(a.createdAt), tipo: 'auditoría', descripcion: a.action || '', details: a.details || '', autor: resp, codigo: code })
             })
             ;(l.actions || []).forEach(a => {
               if (!a.createdAt) return
@@ -282,7 +282,10 @@ export default function Dashboard() {
           return eventos.slice(0, 5).map(e => {
             const fechaStr = e.fecha ? e.fecha.toLocaleDateString('es-CR') : '—'
             const linea = e.codigo + ' · ' + e.tipo + ' · ' + fechaStr
-            const detalle = e.descripcion ? e.descripcion : (e.prev || e.nuevo ? (e.prev || '—') + ' → ' + (e.nuevo || '—') : '—')
+            let detalle = ''
+            if (e.tipo === 'auditoría' && e.details) detalle = (e.descripcion || '') + ' — ' + e.details
+            else if (e.descripcion) detalle = e.descripcion
+            else detalle = (e.prev || e.nuevo ? (e.prev || '—') + ' → ' + (e.nuevo || '—') : '—')
             return [e.autor || '—', linea, detalle]
           })
         })() } />
