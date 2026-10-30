@@ -65,6 +65,7 @@ export default function Dashboard() {
     </div>
   )}
   const [leads, setLeads] = useState([])
+  const [auditRecent, setAuditRecent] = useState([])
   useEffect(() => {
     let token = sessionStorage.getItem('token')
     if (!token) {
@@ -82,6 +83,18 @@ export default function Dashboard() {
     load()
     const interval = setInterval(load, 3000)
     return () => clearInterval(interval)
+  }, [])
+  useEffect(() => {
+    let token = sessionStorage.getItem('token')
+    if (!token) {
+      fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'admin@craisa.com', password: 'demo123' }) })
+        .then(r => r.json()).then(d => { if (d.token) { token = d.token; sessionStorage.setItem('token', token); } }).catch(() => {})
+    }
+    const loadAudit = () => {
+      let token = sessionStorage.getItem('token')
+      api('/api/audit-recent', { headers: { Authorization: 'Bearer ' + (token || '') } }).then(r => r.json()).then(d => setAuditRecent(Array.isArray(d) ? d : [])).catch(() => setAuditRecent([]))
+    }
+    loadAudit()
   }, [])
 
   const total = leads.length
@@ -280,6 +293,10 @@ export default function Dashboard() {
               if (!a.createdAt) return
               eventos.push({ fecha: new Date(a.createdAt), tipo: 'acción', descripcion: a.action || '', autor: resp, codigo: code })
             })
+          })
+          (auditRecent || []).forEach(a => {
+            if (!a.createdAt) return
+            eventos.push({ fecha: new Date(a.createdAt), tipo: 'eliminado', descripcion: a.action || '', details: a.detail || '', autor: 'Admin CRAISA', codigo: a.code || '—' })
           })
           eventos.sort((a, b) => b.fecha - a.fecha)
           return eventos.slice(0, 5).map(e => {

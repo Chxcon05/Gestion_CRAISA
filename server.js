@@ -169,6 +169,13 @@ app.get('/api/leads/:code/actions', authMiddleware, async (req, res) => {
   } catch (e) { console.error('GET actions error:', e.message); res.status(500).json({ error: 'Error' }) }
 })
 
+app.get('/api/audit-recent', authMiddleware, async (req, res) => {
+  try {
+    const logs = await prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 5 });
+    res.json(logs.map(a => ({ action: a.action, detail: a.detail || '', createdAt: a.createdAt ? a.createdAt.toISOString() : '', code: a.leadId ? null : '' })));
+  } catch (e) { console.error('GET audit-recent error:', e); res.status(500).json({ error: 'Error' }); }
+});
+
 app.delete('/api/leads/:code', authMiddleware, async (req, res) => {
   try {
     const lead = await prisma.lead.findUnique({ where: { code: req.params.code } })
