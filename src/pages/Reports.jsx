@@ -110,7 +110,7 @@ export default function Reports() {
                       </div>
                       <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', minWidth: 36, textAlign: 'right' }}>{c}</div>
                       <div style={{ width: 100, height: 6, borderRadius: 3, background: 'var(--bg-subtle)', overflow: 'hidden', flexShrink: 0 }}>
-                        <div style={{ height: '100%', borderRadius: 3, background: `var(--estado-${e === 'nuevo' ? 'nuevo' : e === 'ganado' ? 'ganado' : e === 'perdido' ? 'perdido' : e === 'contactado' ? 'contactado' : 'institucional'})`, width: pct + '%' }} />
+                        <div style={{ height: '100%', borderRadius: 3, background: e === 'nuevo' ? '#0044BB' : e === 'asignado' ? '#FFB800' : e === 'contactado' ? '#00AA44' : e === 'seguimiento' ? '#9933FF' : e === 'oportunidad' ? '#FF6600' : e === 'ganado' ? '#555555' : e === 'perdido' ? '#CC0000' : '#E2E8F0', width: pct + '%' }} />
                       </div>
                     </div>
                   )
