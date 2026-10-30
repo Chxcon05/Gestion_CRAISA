@@ -134,9 +134,11 @@ export default function LeadDetail() {
               <EditableField label="Correo" value={lead?.email || ''} onChange={v => setLead({ ...lead, email: v })} />
               <EditableField label="Producto" value={lead?.product || ''} onChange={v => setLead({ ...lead, product: v })} />
               <EditableField label="Valor estimado" value={lead?.valorEstimado || ''} onChange={v => setLead({ ...lead, valorEstimado: v })} />
-              <EditableField label="Próxima acción" value={lead?.proxAccion || lead?.nextAction || ''} onChange={v => setLead({ ...lead, proxAccion: v, nextAction: v })} />
-              <div style={{ marginTop: '.25rem', display: 'flex', gap: '.5rem' }}>
-                <input type="date" min={new Date().toISOString().split('T')[0]} value={lead?.proxFecha || lead?.recontactAt ? (lead?.recontactAt || lead?.proxFecha || '').split('T')[0] : new Date().toISOString().split('T')[0]} onChange={e => setLead({ ...lead, proxFecha: e.target.value, recontactAt: e.target.value })} style={{ width: '100%', padding: '.5rem', border: '1px solid var(--border-default)', borderRadius: 6, fontSize: '.875rem', background: '#fff' }} />
+              <div style={{ marginTop: '.5rem', padding: '.75rem 1rem', border: '1px solid #0044BB30', borderRadius: 10, background: '#F5F8FF', boxShadow: '0 1px 4px rgba(0,68,187,0.08)' }}>
+                <EditableField label="Próxima acción" value={lead?.proxAccion || lead?.nextAction || ''} onChange={v => setLead({ ...lead, proxAccion: v, nextAction: v })} />
+                <div style={{ display: 'flex', gap: '.5rem', marginTop: '.25rem' }}>
+                  <input type="date" min={new Date().toISOString().split('T')[0]} value={lead?.proxFecha || lead?.recontactAt ? (lead?.recontactAt || lead?.proxFecha || '').split('T')[0] : new Date().toISOString().split('T')[0]} onChange={e => setLead({ ...lead, proxFecha: e.target.value, recontactAt: e.target.value })} style={{ width: '100%', padding: '.625rem', border: '1.5px solid #0044BB', borderRadius: 8, fontSize: '.875rem', background: '#fff', boxShadow: '0 2px 6px rgba(0,68,187,0.12)' }} />
+                </div>
               </div>
             </div>
             <div style={{ marginTop: '1rem' }}>

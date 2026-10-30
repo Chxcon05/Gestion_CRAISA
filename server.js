@@ -52,7 +52,7 @@ app.get('/api/leads', authMiddleware, async (req, res) => {
     canal: lead.channel, linea: lead.businessLine, product: lead.product,
     estado: lead.status, responsable: lead.responsable ? (lead.responsable.email || lead.responsable.name || '') : (lead.responsableId || ''),
     proxAccion: lead.nextAction || '', proxFecha: lead.recontactAt ? lead.recontactAt.toLocaleDateString('es-CR') : '', score: lead.score,
-    valorEstimado: lead.estimatedValue ? '$' + lead.estimatedValue : '$0', date: lead.entryDate ? lead.entryDate.toLocaleDateString('es-CR') : '', lossReason: lead.lossReason || '', createdAt: lead.entryDate ? lead.entryDate.toISOString() : '',
+    valorEstimado: lead.estimatedValue ? '$' + lead.estimatedValue : '$0', description: lead.description || '', date: lead.entryDate ? lead.entryDate.toLocaleDateString('es-CR') : '', lossReason: lead.lossReason || '', createdAt: lead.entryDate ? lead.entryDate.toISOString() : '',
     interanes: lead.interactions ? lead.interactions.map(i => ({ type: i.type || 'nota', createdAt: i.createdAt ? i.createdAt.toISOString() : '', content: i.content, previousStatus: i.previousStatus, newStatus: i.newStatus })) : [],
     tareas: lead.tasks ? lead.tasks.map(t => ({ title: t.title, notes: t.notes, dueDate: t.dueDate ? t.dueDate.toISOString() : '', completed: !!t.completed })) : [],
     auditLogs: lead.auditLogs ? lead.auditLogs.map(a => ({ action: a.action, createdAt: a.createdAt ? a.createdAt.toISOString() : '', details: a.detail || '' })) : [],

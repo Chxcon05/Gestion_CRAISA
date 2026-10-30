@@ -301,7 +301,7 @@ export default function Reports() {
 
                     {detail.description && (
                       <div style={{ marginBottom: '1rem', padding: '.75rem', background: '#FAFBFC', borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
-                        <div style={{ fontSize: '.6875rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: '.25rem' }}>Descripción / Notas del lead</div>
+                        <div style={{ fontSize: '.6875rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: '.25rem' }}>Descripción</div>
                         <div style={{ fontSize: '.85rem', color: 'var(--text-secondary)' }}>{detail.description}</div>
                       </div>
                     )}
