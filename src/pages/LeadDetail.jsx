@@ -134,6 +134,7 @@ export default function LeadDetail() {
               <EditableField label="Correo" value={lead?.email || ''} onChange={v => setLead({ ...lead, email: v })} />
               <EditableField label="Producto" value={lead?.product || ''} onChange={v => setLead({ ...lead, product: v })} />
               <EditableField label="Valor estimado" value={lead?.valorEstimado || ''} onChange={v => setLead({ ...lead, valorEstimado: v })} />
+              <EditableField label="Próxima acción" value={lead?.proxAccion || lead?.nextAction || ''} onChange={v => setLead({ ...lead, proxAccion: v, nextAction: v })} />
             </div>
             <div style={{ marginTop: '1rem' }}>
               <label style={{ fontSize: '.75rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '.25rem' }}>Descripción</label>
