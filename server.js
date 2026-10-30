@@ -92,7 +92,7 @@ app.post('/api/leads', authMiddleware, async (req, res) => {
       description: b.descripcion || null,
       status: b.estado || 'nuevo',
       score: parseInt(b.score) || 3,
-      estimatedValue: parseInt(b.valor) || null,
+      estimatedValue: parseInt(String(b.valor || '').replace(/[^0-9]/g, '')) || null,
       responsableId: req.user.id,
     } });
     const leadC = await prisma.lead.findUnique({ where: { code: c } })
