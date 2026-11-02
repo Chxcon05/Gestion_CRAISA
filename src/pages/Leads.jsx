@@ -8,6 +8,14 @@ export default function Leads() {
   const [filterStatus, setFilterStatus] = useState('')
   const [filterCanal, setFilterCanal] = useState('')
   const location = useLocation()
+  const currentUser = React.useMemo(() => {
+    try {
+      const t = sessionStorage.getItem('token');
+      if (!t) return null;
+      const p = JSON.parse(atob(t.split('.')[1]));
+      return { id: p.id, role: p.role, email: p.email, name: p.name };
+    } catch (e) { return null; }
+  }, []);
   useEffect(() => {
     let token = sessionStorage.getItem('token');
     if (!token) {
@@ -99,8 +107,12 @@ export default function Leads() {
                   <td style={{ padding: '.625rem .875rem', fontSize: '.75rem', color: 'var(--text-tertiary)' }}>{l.lossReason || '—'}</td>
                   <td style={{ padding: '.625rem .875rem', whiteSpace: 'nowrap' }}>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <Link to={`/leads/${l.code || l.id}`} className="btn btn-secondary" style={{ fontSize: '.75rem', padding: '.25rem .5rem', textDecoration: 'none' }}>Editar</Link>
-                      <button onClick={async (e) => { e.preventDefault(); if (!confirm('¿Borrar lead ' + (l.code || l.id) + '?')) return; try { let t = sessionStorage.getItem('token'); await fetch(`/api/leads/${l.code || l.id || ''}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + (t || '') } }); window.location.reload(); } catch (err) { alert('No se pudo borrar'); } }} className="btn btn-secondary" style={{ fontSize: '.75rem', padding: '.25rem .5rem', background: '#c0392b', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Borrar</button>
+                      {(currentUser?.role === 'ADMIN' || (l.responsable && (l.responsable === currentUser?.email || l.responsable === currentUser?.name || l.responsable === currentUser?.id))) && (
+                        <>
+                          <Link to={`/leads/${l.code || l.id}`} className="btn btn-secondary" style={{ fontSize: '.75rem', padding: '.25rem .5rem', textDecoration: 'none' }}>Editar</Link>
+                          <button onClick={async (e) => { e.preventDefault(); if (!confirm('¿Borrar lead ' + (l.code || l.id) + '?')) return; try { let t = sessionStorage.getItem('token'); await fetch(`/api/leads/${l.code || l.id || ''}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + (t || '') } }); window.location.reload(); } catch (err) { alert('No se pudo borrar'); } }} className="btn btn-secondary" style={{ fontSize: '.75rem', padding: '.25rem .5rem', background: '#c0392b', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Borrar</button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
