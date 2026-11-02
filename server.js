@@ -41,7 +41,7 @@ app.get('/api/leads', authMiddleware, async (req, res) => {
   let items = [];
   try {
     items = await prisma.lead.findMany({
-      where: req.user.role === 'ADMIN' ? {} : { responsableId: req.user.id },
+      where: {},
       orderBy: { entryDate: 'desc' },
       take: 200,
       include: { responsable: true, interactions: { orderBy: { createdAt: 'desc' }, take: 10 }, tasks: { orderBy: { dueDate: 'asc' }, take: 5 }, auditLogs: { orderBy: { createdAt: 'desc' }, take: 5 }, leadActions: true }
@@ -109,6 +109,11 @@ app.patch('/api/leads/:code', authMiddleware, async (req, res) => {
   if (b.estado && !['nuevo','asignado','contactado','seguimiento','oportunidad','ganado','perdido'].includes(b.estado)) {
     return res.status(400).json({ error: 'Estado no válido' });
   }
+  try {
+    const existing = await prisma.lead.findUnique({ where: { code: req.params.code }, select: { id: true, responsableId: true } });
+    if (!existing) return res.status(404).json({ error: 'Lead no encontrado' });
+    if (req.user.role !== 'ADMIN' && existing.responsableId !== req.user.id) return res.status(403).json({ error: 'No puedes editar leads de otros' });
+  } catch (e) {}
   const data = {};
   if (b.estado !== undefined || b.status !== undefined) data.status = b.estado || b.status;
   if (b.client !== undefined) data.firstName = b.client;
@@ -192,7 +197,9 @@ app.get('/api/me', authMiddleware, async (req, res) => {
 
 app.delete('/api/leads/:code', authMiddleware, async (req, res) => {
   try {
-    const lead = await prisma.lead.findUnique({ where: { code: req.params.code } })
+    const lead = await prisma.lead.findUnique({ where: { code: req.params.code }, select: { id: true, responsableId: true, firstName: true, company: true } })
+    if (!lead) return res.status(404).json({ error: 'Lead no encontrado' });
+    if (req.user.role !== 'ADMIN' && lead.responsableId !== req.user.id) return res.status(403).json({ error: 'No puedes eliminar leads de otros' });
     if (lead) await prisma.auditLog.create({ data: { leadId: lead.id, userId: req.user?.id || '', action: 'Lead eliminado: ' + req.params.code, detail: (lead.firstName || '') + ' / ' + (lead.company || ''), createdAt: new Date() } })
     await prisma.lead.delete({ where: { code: req.params.code } });
     res.json({ message: 'Lead eliminado' });

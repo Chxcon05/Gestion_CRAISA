@@ -1,0 +1,1 @@
+Navbar linea de usuario desde JWT y endpoint /api/me; redirigir a login si no hay token
