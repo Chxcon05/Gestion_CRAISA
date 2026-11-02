@@ -42,12 +42,6 @@ export default function Login() {
               {err && <div className="form-error">{err}</div>}
               <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '.75rem' }}>Ingresar</button>
             </form>
-            <details style={{ marginTop: '1.25rem', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>
-              <summary style={{ cursor: 'pointer' }}>Credenciales demo</summary>
-              <div style={{ marginTop: '.5rem', padding: '.75rem', background: 'var(--bg-subtle)', borderRadius: 6, fontSize: 12, color: 'var(--text-secondary)' }}>
-                Admin: <strong>admin@craisa.com</strong> / <strong>demo123</strong>
-              </div>
-            </details>
             <img src="/assets/logo-craisa.png" alt="CRAISA" style={{ height: 40, marginTop: '1.5rem', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
           </div>
         </div>

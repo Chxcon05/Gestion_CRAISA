@@ -27,7 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/profile" element={<App><Profile /></App>} />
       <Route path="/agenda" element={<App><Agenda /></App>} />
       <Route path="/agenda/action/:code" element={<App><AgendaAction /></App>} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   </BrowserRouter>,
 )

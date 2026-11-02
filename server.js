@@ -180,6 +180,16 @@ app.get('/api/audit-recent', authMiddleware, async (req, res) => {
   } catch (e) { console.error('GET audit-recent error:', e); res.status(500).json({ error: 'Error' }); }
 });
 
+app.get('/api/me', authMiddleware, async (req, res) => {
+  try {
+    const me = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, name: true, email: true, role: true, line: true, active: true }
+    });
+    res.json(me || { error: 'Usuario no encontrado' });
+  } catch (e) { console.error('GET /api/me error:', e); res.status(500).json({ error: 'Error' }); }
+});
+
 app.delete('/api/leads/:code', authMiddleware, async (req, res) => {
   try {
     const lead = await prisma.lead.findUnique({ where: { code: req.params.code } })

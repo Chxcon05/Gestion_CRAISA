@@ -1,28 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 export default function Navbar({ user, onLogout }) {
-  const [lineState, setLineState] = useState(user?.line || '')
-  console.log('Navbar user:', user?.name, user?.email)
-  console.log('Navbar user:', user?.name, user?.email, user?.role)
-  
-  React.useEffect(() => {
-    const fetchLine = async () => {
-      try {
-        const token = sessionStorage.getItem('token');
-        if (!token) return;
-        let uid = user?.id;
-        try { uid = JSON.parse(atob(token.split('.')[1])).id; } catch (e) {}
-        if (!uid) return;
-        const r = await fetch('/api/users', { headers: { Authorization: 'Bearer ' + token } });
-        const d = await r.json();
-        if (Array.isArray(d)) {
-          const me = d.find(u => u.id === uid);
-          if (me && me.line) setLineState(me.line);
-        }
-      } catch (e) {}
-    };
-    fetchLine();
-  }, [user?.id]);
   const loc = useLocation()
   const links = [
     { to: '/dashboard', label: 'Dashboard', svg: `<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>` },
@@ -58,7 +36,7 @@ export default function Navbar({ user, onLogout }) {
             <div className="user-avatar" style={{ background: '#143F7F' }}>{user?.initials || 'AD'}</div>
             <div className="user-info" style={{ textAlign: 'left' }}>
               <span className="user-name">{user?.name}</span>
-              <span className="user-role">{user?.role === 'ADMIN' ? 'Administrador' : 'Vendedor'} · {lineState || user?.line || 'Agrícola'}</span>
+              <span className="user-role">{user?.role === 'ADMIN' ? 'Administrador' : 'Vendedor'} · {user?.line || '—'}</span>
             </div>
           </button>
           {open && (

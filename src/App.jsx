@@ -1,37 +1,38 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 
 export default function App({ children }) {
   const [user, setUser] = useState(null)
   const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    sessionStorage.removeItem('craisa_user');
-    const t = sessionStorage.getItem('token');
+    const t = sessionStorage.getItem('token')
+
+    // Si no hay token y no está en login, redirigir al login
     if (!t && location.pathname !== '/login') {
-      fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'admin@craisa.com', password: 'demo123' })
-      })
-      .then(r => r.json())
-      .then(d => { if (d.token) sessionStorage.setItem('token', d.token); })
-      .catch(() => {});
+      navigate('/login', { replace: true })
+      return
     }
-    let role = 'ADMIN';
-    let name = 'Admin CRAISA';
-    let initials = 'A';
+
+    let role = 'ADMIN'
+    let name = 'Admin CRAISA'
+    let initials = 'A'
+    let line = ''
+
     if (t) {
       try {
-        const payload = JSON.parse(atob(t.split('.')[1]));
-        role = payload.role || 'ADMIN';
-        name = payload.name || 'Admin CRAISA';
-        initials = (name || 'U')[0].toUpperCase();
+        const payload = JSON.parse(atob(t.split('.')[1]))
+        role = payload.role || 'ADMIN'
+        name = payload.name || 'Admin CRAISA'
+        initials = (name || 'U')[0].toUpperCase()
+        line = payload.line || ''
       } catch (e) {}
     }
-    setUser({ name, email: 'admin@craisa.com', role, initials });
-  }, [location])
+
+    setUser({ name, email: 'admin@craisa.com', role, initials, line })
+  }, [location, navigate])
 
   if (!user) return <>{children}</>
 
