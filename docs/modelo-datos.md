@@ -1,212 +1,73 @@
-# Modelo de datos · CRAISA Leads
+# Modelo de datos
 
-Documento de referencia del modelo relacional implementado en `prisma/schema.prisma`. Se mantiene portable entre SQLite (desarrollo y demo) y PostgreSQL (producción): los campos enumerados usan `String` y se validan en la aplicación. **Estado actual**: PostgreSQL (`craisa`) con `prisma` activo; datos reales, sin ficticios.
-
-## 1. Diagrama de entidades
+PostgreSQL con Prisma. El esquema fuente es `apps/api/prisma/schema.prisma` y las migraciones estan en `apps/api/prisma/migrations/`.
 
 ```mermaid
 erDiagram
-    USER ||--o{ LEAD : "responsable"
-    USER ||--o{ INTERACTION : "registra"
-    USER ||--o{ TASK : "ejecuta"
-    USER ||--o{ AUDITLOG : "genera"
-    LEAD ||--o{ INTERACTION : "bitacora"
-    LEAD ||--o{ TASK : "proxima accion"
-    LEAD ||--o{ LEADTAG : "etiquetas"
-    TAG  ||--o{ LEADTAG : "clasifica"
-    LEAD ||--o{ AUDITLOG : "historial"
-
-    USER {
-        string id PK
-        string name
-        string email UK
-        string passwordHash
-        string role
-        string line
-        boolean active
-    }
-    LEAD {
-        string id PK
-        string code UK
-        datetime entryDate
-        string firstName
-        string company
-        string phone
-        string email
-        string channel
-        string businessLine
-        string product
-        string description
-        string status
-        int score
-        int estimatedValue
-        string lossReason
-        datetime recontactAt
-        string responsableId FK
-    }
-    INTERACTION {
-        string id PK
-        string leadId FK
-        string userId FK
-        string type
-        string content
-        string previousStatus
-        string newStatus
-        datetime createdAt
-    }
-    TASK {
-        string id PK
-        string leadId FK
-        string assignedToId FK
-        string title
-        datetime dueDate
-        boolean completed
-    }
-    TAG {
-        string id PK
-        string name UK
-        string color
-    }
-    LEADTAG {
-        string leadId PK
-        string tagId PK
-    }
-    AUDITLOG {
-        string id PK
-        string userId FK
-        string leadId FK
-        string action
-        string detail
-        datetime createdAt
-    }
+  USER ||--o{ LEAD : "responsable"
+  USER ||--o{ LEAD : "registra"
+  USER ||--o{ INTERACTION : "escribe"
+  USER ||--o{ AUDIT_LOG : "genera"
+  BUSINESS_LINE ||--o{ PRODUCT : "agrupa"
+  BUSINESS_LINE ||--o{ LEAD : "clasifica"
+  PRODUCT |o--o{ LEAD : "interes"
+  LEAD ||--o{ INTERACTION : "bitacora"
 ```
 
-## 2. Diccionario de datos · `Lead`
+## Tablas
 
-| Campo | Tipo | Obligatorio | Regla |
-| --- | --- | --- | --- |
-| `id` | cuid | Sí | Clave interna, nunca visible al usuario |
-| `code` | string | Sí | `LEAD-AAAA-####`, único, consecutivo por año |
-| `entryDate` | datetime | Sí | Fecha de ingreso; por defecto hoy, no puede ser futura |
-| `firstName` | string | Sí | 2–80 caracteres, letras y espacios |
-| `company` | string | No | 2–120 caracteres |
-| `phone` | string | Sí | Formato costarricense: 8 dígitos, `+506` opcional |
-| `email` | string | Condicional | Obligatorio si el canal es `web` o `correo`; formato válido |
-| `channel` | string | Sí | Ver catálogo de canales |
-| `businessLine` | string | Sí | Ver catálogo de líneas |
-| `product` | string | No | Producto o familia de interés |
-| `description` | string | No | Hasta 1 000 caracteres |
-| `status` | string | Sí | Por defecto `nuevo`; ver flujo de estados |
-| `score` | int | Sí | 1–5; sugerido automáticamente, editable por el vendedor |
-| `estimatedValue` | int | No | Monto en colones, mayor o igual a 0 |
-| `lossReason` | string | Condicional | Obligatorio al pasar a `perdido` |
-| `recontactAt` | datetime | No | Obligatorio al marcar `perdido` si se desea recontactar |
-| `responsableId` | FK User | No | Nulo mientras el lead está `nuevo` o `sin asignar` |
-| `createdAt` / `updatedAt` | datetime | Sí | Auditoría técnica; `updatedAt` alimenta "Última actualización" |
+| Tabla | Campos principales | Proposito |
+|---|---|---|
+| `users` | id, name, email (unico), passwordHash, role, active | Usuarios internos y su rol. Desactivar corta el acceso de inmediato. |
+| `business_lines` | id, name (unico), active | Lineas de negocio. Las define Mercadeo; el seed trae ejemplos. |
+| `products` | id, name, businessLineId, active | Productos de cada linea (unico por linea + nombre). |
+| `leads` | ver detalle abajo | Consulta comercial. |
+| `interactions` | id, leadId, userId, type, content, fromStatus, toStatus, createdAt | Bitacora: creacion, notas, cambios de estado y reasignaciones. |
+| `lead_sequences` | year, last | Ultimo numero usado por anio: los codigos nunca se repiten. |
+| `audit_logs` | id, userId, action, detail, createdAt | Ingresos, exportaciones, borrados y cambios de usuarios. |
 
-### Índices
+### `leads`
 
-- `(status, updatedAt)`: panel y listado por estado.
-- `(responsableId, status)`: cartera del vendedor.
-- `(channel)` y `(businessLine)`: gráficos y filtros.
-- `(entryDate)`: análisis por periodo.
-- `(leadId, createdAt)` en `interactions`: bitácora cronológica.
+| Campo | Tipo | Obligatorio | Nota |
+|---|---|---|---|
+| code | texto unico | si | `LEAD-AAAA-####`, secuencial por anio |
+| entryDate | fecha | si | Fecha de ingreso de la consulta |
+| contactName | texto | si | Nombre |
+| company | texto | no | Empresa |
+| phone / email | texto | al menos uno | Contacto |
+| channel | enum Channel | si | Canal de origen |
+| businessLineId | FK | si | Linea de negocio |
+| productId | FK | no | Debe pertenecer a la linea |
+| description | texto | si | Descripcion de la consulta |
+| status | enum LeadStatus | si | Por defecto NUEVO |
+| assignedToId | FK usuario | si (al registrar) | Responsable |
+| createdById | FK usuario | automatico | Quien lo registro |
+| nextAction / nextActionAt | texto / fecha | no | Proxima accion; si hay fecha, hay descripcion |
+| lossReason | texto | si es PERDIDO | Motivo de perdida |
+| autoCaptured | booleano | automatico | Verdadero si el lead entro solo por un canal digital (formulario web) |
+| createdAt / updatedAt | fecha-hora | automatico | `updatedAt` es la fecha de ultima actualizacion |
 
-## 3. Catálogos
+## Enumeraciones
 
-### Estados (`status`)
+| Enum | Valores |
+|---|---|
+| `LeadStatus` | NUEVO, ASIGNADO, CONTACTADO, EN_SEGUIMIENTO, OPORTUNIDAD, GANADO, PERDIDO (orden del embudo) |
+| `Channel` | CORREO, FACEBOOK, FERIA, INSTAGRAM, LLAMADA, OTRO, SITIO_WEB, VISITA_COMERCIAL, WHATSAPP |
+| `Role` | ADMIN, MERCADEO, VENDEDOR |
+| `InteractionType` | ASIGNACION, CAMBIO_ESTADO, CREACION, NOTA |
 
-| Clave | Etiqueta | Significado | Acciones permitidas |
-| --- | --- | --- | --- |
-| `nuevo` | Nuevo | Ingresó y aún no se asigna | Asignar responsable |
-| `asignado` | Asignado | Tiene responsable, sin contacto | Contactar, reasignar |
-| `contactado` | Contactado | Primer contacto realizado | Programar seguimiento |
-| `seguimiento` | En seguimiento | Conversación activa | Registrar nota, crear tarea |
-| `oportunidad` | Oportunidad comercial | Cotización o propuesta enviada | Cerrar, reprogramar |
-| `ganado` | Ganado | Venta concretada | Cerrar, postventa |
-| `perdido` | Perdido | Oportunidad descartada | Registrar motivo, recontactar |
+Las etiquetas visibles de cada valor estan en `packages/shared/src/enums.ts`.
 
-Transiciones válidas:
+## Reglas
 
-```mermaid
-stateDiagram-v2
-    [*] --> nuevo
-    nuevo --> asignado
-    nuevo --> perdido
-    asignado --> contactado
-    asignado --> perdido
-    contactado --> seguimiento
-    contactado --> perdido
-    seguimiento --> oportunidad
-    seguimiento --> perdido
-    oportunidad --> ganado
-    oportunidad --> perdido
-    ganado --> [*]
-    perdido --> seguimiento : recontactar
-```
+- **Validacion.** Esta en `packages/shared/src/schemas.ts` y el API la repite en el servidor.
+- **Cambios de estado.** Solo entran por `POST /leads/:code/status`. Cada cambio deja una entrada `CAMBIO_ESTADO` con el estado anterior y el nuevo.
+- **Fecha de ultima actualizacion.** `updatedAt` cambia con cualquier edicion, cambio de estado o nota.
+- **Fechas sin hora.** `entryDate` y `nextActionAt` usan columnas `date`, asi la zona horaria no las desplaza.
+- **Borrado de un lead.** Elimina tambien su bitacora (cascade).
+- **Usuarios.** No se borran: se desactivan, y sus leads conservan la referencia.
 
-Cualquier transición no listada se rechaza en la capa de servidor y se registra en `AuditLog` si se intenta por API.
+## Indices
 
-### Canales (`channel`)
-
-`web` · `facebook` · `instagram` · `whatsapp` · `llamada` · `correo` · `feria` · `visita` · `otro`
-
-### Líneas de negocio (`businessLine`)
-
-| Clave | Etiqueta | Color de marca |
-| --- | --- | --- |
-| `agricola` | Agrícola | `#AA182C` |
-| `construccion` | Construcción | `#D47E00` |
-| `carga` | Movimiento de Carga | `#3DAE2B` |
-| `precision` | Agricultura de Precisión | `#004B70` |
-| `postventa` | Postventa y Repuestos | `#58595B` |
-| `administrativo` | Administrativo | `#0D9488` |
-
-### Motivos de pérdida
-
-`precio` · `competencia` · `sin-presupuesto` · `fuera-de-zona` · `producto-no-disponible` · `sin-respuesta` · `duplicado` · `otro`
-
-## 4. Reglas de negocio
-
-1. **Código consecutivo.** `LEAD-{año}-{secuencia:4}`. La secuencia se reinicia el 1 de enero y se genera en una transacción para evitar duplicados.
-2. **Duplicados.** Antes de crear, se compara teléfono normalizado y correo en minúsculas contra leads de los últimos 90 días. La interfaz advierte y permite continuar dejando constancia.
-3. **Asignación.** Solo `ADMIN` puede asignar a cualquier vendedor. Un `VENDEDOR` solo puede tomar leads sin responsable o reasignarse los propios.
-4. **Visibilidad.** `VENDEDOR` ve únicamente sus leads; `ADMIN` ve y edita todo, incluye analítica y exportación.
-5. **Score.** Se sugiere con la fórmula `2 + (canal prioritario) + (valor > umbral) + (empresa conocida)`, acotado a 1–5. El vendedor puede ajustarlo y el cambio queda en bitácora.
-6. **Cierre.** `ganado` exige valor estimado mayor que cero. `perdido` exige motivo. Ambos cierran las tareas abiertas.
-7. **Recontacto.** Un lead `perdido` con `recontactAt` reaparece en la agenda y puede volver a `seguimiento`.
-8. **Eliminación.** Borrado lógico recomendado en producción (`deletedAt`), con bitácora y auditoría; el prototipo elimina solo en memoria.
-
-## 5. Vistas derivadas para el tablero
-
-| Indicador | Cálculo |
-| --- | --- |
-| Total de leads | `COUNT(leads)` del periodo |
-| Nuevos del periodo | `COUNT` con `entryDate` dentro del rango |
-| Oportunidades | `COUNT` con `status = oportunidad` |
-| Ganados | `COUNT` con `status = ganado` |
-| Tasa de conversión | `ganados / (ganados + perdidos)` |
-| Valor del pipeline | `SUM(estimatedValue)` de estados abiertos |
-| Ticket promedio | `SUM(estimatedValue) / COUNT(ganados)` |
-| Leads sin acción | Sin `Task` abierta o `updatedAt` > 7 días |
-| Acciones vencidas | `Task.dueDate < hoy AND completed = false` |
-| Equipo por responsable | `groupBy { name { name } }`, `responsableId`; datos reales |
-
-## 6. Configuración actual (estado real)
-
-PostgreSQL `craisa` con `prisma` activo (`routes/api.js` usa `PrismaClient`), migration `20261027200935_init`, `pg_hba.conf` en `trust` (local), `.env` con `DATABASE_URL` y `JWT_SECRET`. Datos reales sin nombres ficticios (`admin@craisa.com` → `Admin CRAISA`). `sessionStorage.clear()` + `F5` al cambiar configuraciones.
-
-### Migración / puesta en marcha
-```bash
-npx prisma migrate deploy
-node server.js
-```
-- Prisma schema actualizado: `provider = postgresql`; los campos enumérase con `String` para mantener el mismo esquema en SQLite y PostgreSQL.
-- DATABASE_URL: `postgresql://...@localhost:5432/craisa?schema=public` (o el rol que se configure).
-
-### Notas técnicas de la versión funcional
-- `Dashboard.jsx` y `Reports.jsx` usan leads reales para pérdidas, línea, canal, equipo y perfil; todos los datos se muestran dinámicamente sin inventar nombres.
-- Detalle del lead en `Reports.jsx` carga datos directos del lead (sin llamada a endpoint problemático); muestra descripción, interacciones, tareas y auditoría.
-- Responsable se lee en campo y muestra nombre real; valor estimado se lee de `valorEstimado` / `estimatedValue`.
-- Antes de cualquierCambio de rol o datos se limpia sessionStorage para evitar tokens obsoletos (401).
-- Revisar el log de servidor (`server.log`) si hay errores 500/ECONNRESET; consolidar el endpoint `/api/leads/:id` con includes seleccionados si la base crece.
+- **`leads`:** status, channel, businessLineId, assignedToId, entryDate y nextActionAt. Son los campos que usan los filtros y el dashboard.
+- **`interactions`:** (leadId, createdAt), para mostrar la bitacora.

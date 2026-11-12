@@ -48,9 +48,9 @@ Comandos de verificación
 Antes de dar cualquier cambio por terminado:
 
 npm run lint        # oxlint
-npm run test:todo   # test + test:render + test:humo
-npm run build       # vite build
-Los tres deben pasar. test:todo incluye el render de las 39 rutas y la revisión de enlaces internos.
+npm run test:todo   # typecheck + vitest (shared y api, BD craisa_test) + playwright e2e
+npm run build       # vite build de apps/web
+Los tres deben pasar. Las pruebas usan la BD craisa_test, nunca la de desarrollo.
 
 Convenciones del código
 Comentarios y textos de interfaz en español, sin tildes (es lo que usa todo el repo: escucharia, publico, seccion).

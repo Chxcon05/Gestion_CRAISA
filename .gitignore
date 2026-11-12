@@ -8,11 +8,10 @@ node_modules/
 .env.local
 .env.*.local
 
-# Next.js
-.next/
-out/
+# Build
 build/
 dist/
+*.tsbuildinfo
 
 # Prisma / base de datos
 *.db

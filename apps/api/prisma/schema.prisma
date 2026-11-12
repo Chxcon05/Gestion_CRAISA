@@ -1,0 +1,166 @@
+// CRAISA - Gestion y seguimiento de leads comerciales.
+// Solo PostgreSQL: los enums nativos dan validacion en la propia BD.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MERCADEO
+  VENDEDOR
+}
+
+enum LeadStatus {
+  NUEVO
+  ASIGNADO
+  CONTACTADO
+  EN_SEGUIMIENTO
+  OPORTUNIDAD
+  GANADO
+  PERDIDO
+}
+
+enum Channel {
+  CORREO
+  FACEBOOK
+  FERIA
+  INSTAGRAM
+  LLAMADA
+  OTRO
+  SITIO_WEB
+  VISITA_COMERCIAL
+  WHATSAPP
+}
+
+enum InteractionType {
+  ASIGNACION
+  CAMBIO_ESTADO
+  CREACION
+  NOTA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(VENDEDOR)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignedLeads Lead[]        @relation("LeadAssignedTo")
+  createdLeads  Lead[]        @relation("LeadCreatedBy")
+  interactions  Interaction[]
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+/// Catalogo editable: el documento indica que las lineas se definen con Mercadeo.
+model BusinessLine {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  active   Boolean   @default(true)
+  products Product[]
+  leads    Lead[]
+
+  @@map("business_lines")
+}
+
+model Product {
+  id             String       @id @default(cuid())
+  name           String
+  active         Boolean      @default(true)
+  businessLineId String
+  businessLine   BusinessLine @relation(fields: [businessLineId], references: [id], onDelete: Restrict)
+  leads          Lead[]
+
+  @@unique([businessLineId, name])
+  @@map("products")
+}
+
+model Lead {
+  id             String     @id @default(cuid())
+  /// Identificador visible LEAD-AAAA-#### (secuencial por anio, ver LeadSequence)
+  code           String     @unique
+  entryDate      DateTime   @db.Date
+  contactName    String
+  company        String?
+  phone          String?
+  email          String?
+  channel        Channel
+  businessLineId String
+  productId      String?
+  description    String
+  status         LeadStatus @default(NUEVO)
+  assignedToId   String?
+  createdById    String?
+  nextAction     String?
+  nextActionAt   DateTime?  @db.Date
+  lossReason     String?
+  /// Creado por un canal digital (formulario web, y despues WhatsApp o Meta), no por una persona
+  autoCaptured   Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+  /// Fecha de ultima actualizacion que pide el documento de alcance
+  updatedAt      DateTime   @updatedAt
+
+  businessLine BusinessLine  @relation(fields: [businessLineId], references: [id], onDelete: Restrict)
+  product      Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  assignedTo   User?         @relation("LeadAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy    User?         @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  interactions Interaction[]
+
+  @@index([status])
+  @@index([channel])
+  @@index([businessLineId])
+  @@index([assignedToId])
+  @@index([entryDate])
+  @@index([nextActionAt])
+  @@map("leads")
+}
+
+model LeadSequence {
+  year Int @id
+  last Int
+
+  @@map("lead_sequences")
+}
+
+/// Bitacora de gestion: notas y cambios de estado o responsable.
+model Interaction {
+  id         String          @id @default(cuid())
+  leadId     String
+  userId     String?
+  type       InteractionType
+  content    String
+  fromStatus LeadStatus?
+  toStatus   LeadStatus?
+  createdAt  DateTime        @default(now())
+
+  lead Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([leadId, createdAt])
+  @@map("interactions")
+}
+
+/// Trazabilidad de acciones sensibles: ingresos, exportaciones, borrados y cambios de usuarios.
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  detail    String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("audit_logs")
+}

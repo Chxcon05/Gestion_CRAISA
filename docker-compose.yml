@@ -1,0 +1,16 @@
+# Solo la base de datos, para quien no tenga PostgreSQL instalado localmente.
+# Uso: docker compose up -d  y en .env
+# DATABASE_URL="postgresql://craisa:craisa@localhost:5432/craisa_leads"
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: craisa
+      POSTGRES_PASSWORD: craisa
+      POSTGRES_DB: craisa_leads
+    ports:
+      - "5432:5432"
+    volumes:
+      - craisa-pg:/var/lib/postgresql/data
+volumes:
+  craisa-pg:

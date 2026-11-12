@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #eef3fb;
+  --color-brand-100: #d6e2f5;
+  --color-brand-200: #adc4ea;
+  --color-brand-500: #2d5fae;
+  --color-brand-600: #1c4c94;
+  --color-brand-700: #143f7f;
+  --color-brand-800: #0f3166;
+  --color-brand-900: #0b244b;
+  --color-brand-950: #071a38;
+  --color-accent-600: #aa182c;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+  /* El Preflight hereda el tamano en h1..h6; se fija uno base para que nunca quede menor que su parrafo. */
+  h1 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  h2 {
+    @apply text-base font-semibold;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
