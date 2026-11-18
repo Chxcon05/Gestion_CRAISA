@@ -113,7 +113,7 @@ export function UsersPage() {
     <>
       <PageHeader
         title="Usuarios"
-        description="Administrador gestiona todo; Mercadeo ve y exporta todos los leads; Vendedor solo los suyos."
+        description="Administrador (Mercadeo) gestiona todo y ve y exporta todos los leads; Vendedor solo los suyos."
         actions={
           <Button onClick={() => setOpen(true)}>
             <UserPlus />

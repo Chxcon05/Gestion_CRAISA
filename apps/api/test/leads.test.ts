@@ -1,3 +1,4 @@
+import ExcelJS from 'exceljs'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { leadInput, login, resetDb } from './helpers.ts'
 
@@ -17,7 +18,7 @@ const create = async (email: string, over: Record<string, unknown> = {}) => {
 
 describe('registro de leads', () => {
   it('crea con codigo secuencial y deja la creacion en la bitacora', async () => {
-    const { agent, res } = await create('mercadeo@t.cr')
+    const { agent, res } = await create('admin@t.cr')
     expect(res.status).toBe(201)
     expect(res.body.code).toBe('LEAD-2026-0001')
     expect(res.body.interactions[0].type).toBe('CREACION')
@@ -28,16 +29,16 @@ describe('registro de leads', () => {
   })
 
   it('valida campos obligatorios y devuelve errores por campo', async () => {
-    const { res } = await create('mercadeo@t.cr', { contactName: '', channel: 'X' })
+    const { res } = await create('admin@t.cr', { contactName: '', channel: 'X' })
     expect(res.status).toBe(400)
     expect(Object.keys(res.body.error.fields)).toEqual(expect.arrayContaining(['contactName', 'channel']))
     // La regla cruzada (telefono o correo) corre cuando el resto de campos ya es valido.
-    const { res: noContact } = await create('mercadeo@t.cr', { phone: '', email: '' })
+    const { res: noContact } = await create('admin@t.cr', { phone: '', email: '' })
     expect(noContact.body.error.fields.phone).toBe('Indique telefono o correo')
   })
 
   it('rechaza un producto que no pertenece a la linea', async () => {
-    const { res } = await create('mercadeo@t.cr', { businessLineId: ctx.carga.id, productId: ctx.tractor.id })
+    const { res } = await create('admin@t.cr', { businessLineId: ctx.carga.id, productId: ctx.tractor.id })
     expect(res.status).toBe(400)
     expect(res.body.error.fields.productId).toBeDefined()
   })
@@ -49,9 +50,9 @@ describe('registro de leads', () => {
 })
 
 describe('alcance por rol', () => {
-  it('cada vendedor ve solo sus leads; mercadeo ve todos', async () => {
-    const { agent: mercadeo } = await create('mercadeo@t.cr', { contactName: 'De Ana' })
-    await mercadeo
+  it('cada vendedor ve solo sus leads; el administrador ve todos', async () => {
+    const { agent: admin } = await create('admin@t.cr', { contactName: 'De Ana' })
+    await admin
       .post('/api/leads')
       .send(leadInput({ businessLineId: ctx.agricola.id, assignedToId: ctx.beto.id, contactName: 'De Beto' }))
 
@@ -60,7 +61,7 @@ describe('alcance por rol', () => {
     expect(list.body.total).toBe(1)
     expect(list.body.items[0].contactName).toBe('De Ana')
     expect((await ana.get('/api/leads/LEAD-2026-0002')).status).toBe(404)
-    expect((await mercadeo.get('/api/leads')).body.total).toBe(2)
+    expect((await admin.get('/api/leads')).body.total).toBe(2)
   })
 })
 
@@ -114,7 +115,7 @@ describe('seguimiento', () => {
   })
 
   it('guarda la proxima accion y la reasignacion queda en la bitacora', async () => {
-    const { agent, res } = await create('mercadeo@t.cr')
+    const { agent, res } = await create('admin@t.cr')
     const upd = await agent
       .patch(`/api/leads/${res.body.code}`)
       .send({ nextAction: 'Llamar', nextActionAt: '2026-11-20', assignedToId: ctx.beto.id })
@@ -123,9 +124,9 @@ describe('seguimiento', () => {
   })
 
   it('solo ADMIN elimina', async () => {
-    const { res } = await create('mercadeo@t.cr')
-    const mercadeo = await login('mercadeo@t.cr')
-    expect((await mercadeo.delete(`/api/leads/${res.body.code}`)).status).toBe(403)
+    // El lead es de Ana: aun siendo suyo, un vendedor no lo puede borrar.
+    const { agent: ana, res } = await create('ana@t.cr')
+    expect((await ana.delete(`/api/leads/${res.body.code}`)).status).toBe(403)
     const admin = await login('admin@t.cr')
     expect((await admin.delete(`/api/leads/${res.body.code}`)).status).toBe(204)
   })
@@ -133,7 +134,7 @@ describe('seguimiento', () => {
 
 describe('exportacion CSV', () => {
   it('respeta filtros y alcance, compatible con Excel', async () => {
-    const { agent } = await create('mercadeo@t.cr', { contactName: 'Jose Nunez', company: '=cmd' })
+    const { agent } = await create('admin@t.cr', { contactName: 'Jose Nunez', company: '=cmd' })
     await agent
       .post('/api/leads')
       .send(leadInput({ businessLineId: ctx.agricola.id, assignedToId: ctx.beto.id, contactName: 'Otro', channel: 'FERIA' }))
@@ -151,5 +152,44 @@ describe('exportacion CSV', () => {
     const ana = await login('ana@t.cr')
     const mine = await ana.get('/api/leads/export.csv').buffer(true)
     expect(mine.text.trim().split('\r\n')).toHaveLength(2)
+  })
+})
+
+const readXlsx = async (body: Buffer) => {
+  const wb = new ExcelJS.Workbook()
+  await wb.xlsx.load(body as unknown as ArrayBuffer)
+  return wb.getWorksheet('Leads')!
+}
+const binary = (res: import('supertest').Response, cb: (e: Error | null, b: Buffer) => void) => {
+  const chunks: Buffer[] = []
+  res.on('data', (c: Buffer) => chunks.push(c))
+  res.on('end', () => cb(null, Buffer.concat(chunks)))
+}
+
+describe('exportacion Excel', () => {
+  it('trae encabezado del reporte, filtros, datos tipados y respeta el alcance', async () => {
+    const { agent } = await create('admin@t.cr', { contactName: 'Jose Nunez', company: '=cmd' })
+    await agent
+      .post('/api/leads')
+      .send(leadInput({ businessLineId: ctx.agricola.id, assignedToId: ctx.beto.id, contactName: 'Otro', channel: 'FERIA' }))
+
+    const res = await agent.get('/api/leads/export.xlsx?channel=WHATSAPP').buffer(true).parse(binary)
+    expect(res.status).toBe(200)
+    expect(res.headers['content-type']).toMatch(/spreadsheetml/)
+    expect(res.headers['content-disposition']).toMatch(/filename="leads-craisa-.*\.xlsx"/)
+    const ws = await readXlsx(res.body as Buffer)
+    expect(String(ws.getCell('A2').value)).toContain('1 registro')
+    expect(String(ws.getCell('A2').value)).toContain('Canal: WhatsApp')
+    expect(ws.getRow(4).getCell(1).value).toBe('Codigo')
+    expect(ws.getRow(5).getCell(3).value).toBe('Jose Nunez')
+    // Texto, no formula: Excel no la ejecuta.
+    expect(ws.getRow(5).getCell(4).value).toBe('=cmd')
+    expect(ws.getRow(5).getCell(2).value).toBeInstanceOf(Date)
+    expect(ws.getRow(6).getCell(1).value).toBeNull()
+
+    const ana = await login('ana@t.cr')
+    const mine = await readXlsx((await ana.get('/api/leads/export.xlsx').buffer(true).parse(binary)).body as Buffer)
+    expect(mine.getRow(5).getCell(3).value).toBe('Jose Nunez')
+    expect(mine.getRow(6).getCell(1).value).toBeNull()
   })
 })

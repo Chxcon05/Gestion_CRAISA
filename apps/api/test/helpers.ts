@@ -9,6 +9,7 @@ export const PASSWORD = 'clave-de-prueba'
 
 export async function resetDb() {
   await prisma.$transaction([
+    prisma.notification.deleteMany(),
     prisma.interaction.deleteMany(),
     prisma.auditLog.deleteMany(),
     prisma.lead.deleteMany(),
@@ -19,9 +20,8 @@ export async function resetDb() {
   ])
   const passwordHash = await hash(PASSWORD, 4)
   const mk = (name: string, email: string, role: Role) => prisma.user.create({ data: { name, email, role, passwordHash } })
-  const [admin, mercadeo, ana, beto] = await Promise.all([
+  const [admin, ana, beto] = await Promise.all([
     mk('Admin', 'admin@t.cr', 'ADMIN'),
-    mk('Mercadeo', 'mercadeo@t.cr', 'MERCADEO'),
     mk('Ana Vendedora', 'ana@t.cr', 'VENDEDOR'),
     mk('Beto Vendedor', 'beto@t.cr', 'VENDEDOR'),
   ])
@@ -30,7 +30,7 @@ export async function resetDb() {
     include: { products: true },
   })
   const carga = await prisma.businessLine.create({ data: { name: 'Carga' } })
-  return { admin, mercadeo, ana, beto, agricola, carga, tractor: agricola.products[0]! }
+  return { admin, ana, beto, agricola, carga, tractor: agricola.products[0]! }
 }
 
 export async function login(email: string) {

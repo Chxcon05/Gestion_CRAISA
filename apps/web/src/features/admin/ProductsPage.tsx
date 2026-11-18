@@ -65,7 +65,7 @@ function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
   )
 }
 
-export function CatalogsPage() {
+export function ProductsPage() {
   const catalogs = useCatalogs()
   const addLine = useCatalogMutation(
     (name: string) => api('/catalogs/lines', { method: 'POST', json: { name } }),
@@ -88,8 +88,8 @@ export function CatalogsPage() {
   return (
     <>
       <PageHeader
-        title="Catalogos"
-        description="Lineas de negocio y productos del registro de leads. Desactivar oculta la opcion sin afectar los leads existentes."
+        title="Productos"
+        description="Lo que el cliente puede consultar, agrupado por linea de negocio. Es la lista que aparece al registrar o editar un lead; desactivar una opcion la oculta sin cambiar los leads que ya la tienen."
       />
       {catalogs.isPending ? (
         <div className="grid gap-6 md:grid-cols-2">
@@ -106,7 +106,7 @@ export function CatalogsPage() {
             <CardHeader>
               <div>
                 <CardTitle>Nueva linea de negocio</CardTitle>
-                <CardDescription>Las lineas definitivas se acuerdan con Mercadeo; las actuales son de ejemplo.</CardDescription>
+                <CardDescription>Agrupa productos afines, por ejemplo Agricola o Construccion. Cada linea tiene su propia tarjeta abajo.</CardDescription>
               </div>
             </CardHeader>
             <CardContent>

@@ -26,7 +26,7 @@ async function csvRows(page: Page, query: string) {
 }
 
 test('criterios de entrega de punta a punta', async ({ page, browser }) => {
-  await login(page, 'mercadeo@craisa.test')
+  await login(page, 'admin@craisa.test')
   const totalBefore = await kpi(page, 'total')
   const contactedBefore = await kpi(page, 'CONTACTADO')
 
@@ -63,7 +63,7 @@ test('criterios de entrega de punta a punta', async ({ page, browser }) => {
   await page.getByRole('link', { name: 'Inicio', exact: true }).click()
   await expect(page.getByText('Leads registrados')).toBeVisible()
 
-  // 5. Exportar registros autorizados: Mercadeo lo exporta; un vendedor ajeno no lo recibe
+  // 5. Exportar registros autorizados: el administrador lo exporta; un vendedor ajeno no lo recibe
   const mine = await csvRows(page, `q=${encodeURIComponent(NAME)}`)
   expect(mine).toHaveLength(1)
   expect(mine[0]).toContain(`${code};`)

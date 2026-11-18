@@ -10,6 +10,9 @@ const schema = z.object({
   INGEST_ASSIGNEE_EMAIL: z.string().trim().toLowerCase().email().optional(),
   INGEST_BUSINESS_LINE: z.string().trim().min(2).default('Sin clasificar'),
   INGEST_WEB_SECRET: z.string().min(32, 'INGEST_WEB_SECRET debe tener al menos 32 caracteres').optional(),
+  // WhatsApp Cloud API: el token se inventa y se pega en el panel de Meta; el secreto es el de la app de Meta.
+  WHATSAPP_APP_SECRET: z.string().min(16, 'WHATSAPP_APP_SECRET debe tener al menos 16 caracteres').optional(),
+  WHATSAPP_VERIFY_TOKEN: z.string().min(16, 'WHATSAPP_VERIFY_TOKEN debe tener al menos 16 caracteres').optional(),
 })
 
 const parsed = schema.safeParse(process.env)

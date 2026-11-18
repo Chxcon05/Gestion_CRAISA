@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Navigate, useLocation } from 'react-router'
 import type { Role, SessionUser } from '@craisa/shared'
 import { api, ApiError } from '@/lib/api'
-import { Skeleton } from '@/components/ui/skeleton'
+import { PageLoader } from '@/components/page-loader'
 
 const AuthContext = createContext<SessionUser | null>(null)
 
@@ -35,11 +35,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const me = useMe()
   const location = useLocation()
   if (me.isPending) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Skeleton className="h-8 w-40" />
-      </div>
-    )
+    return <PageLoader />
   }
   if (me.isError) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />
   return <AuthContext.Provider value={me.data}>{children}</AuthContext.Provider>

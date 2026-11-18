@@ -50,7 +50,7 @@ npm run build       # compilacion de la web
 ## Limitaciones conocidas
 
 - **Integraciones.** No hay integraciones automaticas con WhatsApp, Meta, correo, ERP ni inventarios: los leads se registran a mano. Esta fuera del alcance de esta version.
-- **Lineas y productos.** Son de ejemplo. Mercadeo debe definir los definitivos en **Catalogos**.
+- **Lineas y productos.** Son de ejemplo. Mercadeo debe definir los definitivos en **Productos**.
 - **Duplicados.** No se detectan duplicados: el mismo cliente puede registrarse dos veces.
 - **Archivos adjuntos.** No hay adjuntos (cotizaciones, fotos) en la bitacora.
 - **Contrasenas.** No hay recuperacion de contrasena por correo; la restablece un administrador. Tampoco hay inicio de sesion unico con las cuentas corporativas.

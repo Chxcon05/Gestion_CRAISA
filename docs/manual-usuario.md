@@ -6,8 +6,7 @@ Abra el sistema, escriba su correo y su contrasena, y pulse **Ingresar**. La ses
 
 Lo que puede ver y hacer depende de su rol:
 
-- **Administrador:** todo, ademas de administrar usuarios y catalogos.
-- **Mercadeo:** todos los leads, el dashboard y la exportacion.
+- **Administrador (Mercadeo):** todos los leads, el dashboard, la exportacion y la administracion de usuarios y productos.
 - **Vendedor:** solo los leads asignados a usted o registrados por usted.
 
 ## Registrar una consulta
@@ -57,12 +56,22 @@ La **Bitacora de gestion** muestra todo el historial, del mas reciente al mas an
 - **Graficos:** leads ingresados por dia, semana o mes; canal de origen y linea de negocio.
 - **Ir al detalle:** pulse una barra para abrir el listado con ese filtro aplicado.
 
+## Notificaciones
+
+La campana de la barra superior muestra un numero rojo con los avisos sin leer. Pulse la campana para ver los ultimos 20:
+
+- **Le asignaron un lead:** alguien lo registro o lo reasigno a su nombre.
+- **Lead nuevo desde Sitio web o WhatsApp:** entro solo por un canal digital y quedo a su cargo.
+- **Actividad en sus leads:** otra persona cambio el estado o agrego una nota en un lead que usted atiende.
+
+Pulse un aviso para abrir el lead; queda marcado como leido. **Marcar todas como leidas** limpia el contador. Si tiene acciones vencidas, arriba aparece un aviso rojo que abre el listado con esos leads. La campana se actualiza sola cada minuto.
+
 ## Exportar a Excel
 
-En **Leads**, aplique los filtros que necesite y pulse **Exportar a Excel**. El archivo trae exactamente los registros filtrados y se abre con doble clic en Excel, con acentos y columnas correctas.
+En **Leads**, aplique los filtros que necesite y pulse **Exportar a Excel**. El archivo es un Excel (.xlsx) con exactamente los registros filtrados: arriba indica cuantos son, con que filtros y quien lo genero; los encabezados quedan fijos, cada columna trae filtro, el estado va con su color y las acciones vencidas en rojo.
 
 ## Administracion (solo Administrador)
 
 - **Usuarios:** crear usuarios con rol y contrasena inicial, cambiar el rol, y desactivar o reactivar el acceso. Un usuario desactivado no puede ingresar, pero sus leads se conservan.
-- **Catalogos:** agregar lineas de negocio y productos, y activarlos o desactivarlos. Una opcion desactivada deja de aparecer en el formulario sin afectar los leads que ya la usan.
-- **Leads automaticos:** las consultas del formulario Contactenos del sitio web entran solas, asignadas al administrador y con la etiqueta "Automatico" junto al canal. El administrador abre el lead, elige la linea de negocio correcta y lo asigna al responsable desde Editar.
+- **Productos:** agregar lineas de negocio y productos, y activarlos o desactivarlos. Una opcion desactivada deja de aparecer en el formulario sin afectar los leads que ya la usan.
+- **Leads automaticos:** las consultas del formulario Contactenos del sitio web y los mensajes de WhatsApp entran solos (un lead por mensaje), asignadas al administrador y con la etiqueta "Automatico" junto al canal. El administrador abre el lead, elige la linea de negocio correcta y lo asigna al responsable desde Editar.

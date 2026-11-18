@@ -14,7 +14,7 @@ describe('agrupacion por periodo', () => {
 describe('dashboard', () => {
   beforeAll(async () => {
     const ctx = await resetDb()
-    const agent = await login('mercadeo@t.cr')
+    const agent = await login('admin@t.cr')
     const base = { businessLineId: ctx.agricola.id, assignedToId: ctx.ana.id }
     await agent.post('/api/leads').send(leadInput({ ...base, entryDate: '2026-11-02', channel: 'FERIA' }))
     await agent.post('/api/leads').send(leadInput({ ...base, entryDate: '2026-11-03' }))
@@ -24,7 +24,7 @@ describe('dashboard', () => {
   })
 
   it('cuenta por estado, canal, linea y periodo dentro del rango', async () => {
-    const agent = await login('mercadeo@t.cr')
+    const agent = await login('admin@t.cr')
     const d = (await agent.get('/api/dashboard?from=2026-11-01&to=2026-11-15&granularity=week')).body
     expect(d.kpis).toMatchObject({ total: 3, won: 1, open: 2, winRate: 100 })
     expect(d.byStatus.find((s: { key: string }) => s.key === 'NUEVO').count).toBe(2)
@@ -41,7 +41,7 @@ describe('dashboard', () => {
   })
 
   it('sin periodo cuenta todo el historial, igual que el listado sin filtros', async () => {
-    const agent = await login('mercadeo@t.cr')
+    const agent = await login('admin@t.cr')
     const d = (await agent.get('/api/dashboard')).body
     const list = (await agent.get('/api/leads')).body
     const nuevos = (await agent.get('/api/leads?status=NUEVO')).body

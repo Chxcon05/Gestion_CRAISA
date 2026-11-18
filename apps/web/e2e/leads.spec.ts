@@ -13,14 +13,14 @@ async function login(page: Page, email: string) {
 test('redirige al login sin sesion y rechaza credenciales malas', async ({ page }) => {
   await page.goto('/leads')
   await expect(page).toHaveURL(/\/login/)
-  await page.getByLabel('Correo').fill('mercadeo@craisa.test')
+  await page.getByLabel('Correo').fill('admin@craisa.test')
   await page.getByLabel('Contrasena').fill('incorrecta')
   await page.getByRole('button', { name: 'Ingresar' }).click()
   await expect(page.getByRole('alert')).toContainText('incorrectos')
 })
 
 test('registra un lead, cambia su estado con nota y queda en la bitacora', async ({ page }) => {
-  await login(page, 'mercadeo@craisa.test')
+  await login(page, 'admin@craisa.test')
   await page.getByRole('link', { name: 'Nuevo lead' }).first().click()
 
   // Validacion de obligatorios antes de enviar.
@@ -65,7 +65,7 @@ test('marcar como perdido exige motivo', async ({ page }) => {
 })
 
 test('filtra el listado y la exportacion CSV respeta los filtros', async ({ page }) => {
-  await login(page, 'mercadeo@craisa.test')
+  await login(page, 'admin@craisa.test')
   await page.goto('/leads')
   await page.getByRole('button', { name: 'Canal' }).click()
   const filtered = page.waitForResponse((r) => r.url().includes('/api/leads?') && r.url().includes('channel=WHATSAPP'))
@@ -83,9 +83,10 @@ test('filtra el listado y la exportacion CSV respeta los filtros', async ({ page
     page.waitForEvent('download'),
     page.getByRole('link', { name: 'Exportar a Excel' }).click(),
   ])
-  const chunks: Buffer[] = []
-  for await (const c of await download.createReadStream()) chunks.push(c as Buffer)
-  const text = Buffer.concat(chunks).toString('utf8')
+  expect(download.suggestedFilename()).toMatch(/^leads-craisa-.*\.xlsx$/)
+  // El Excel con formato y el CSV salen de la misma consulta; el CSV permite contar filas sin abrir el xlsx.
+  const exportUrl = new URL(download.url())
+  const text = await (await page.request.get(exportUrl.pathname.replace('.xlsx', '.csv') + exportUrl.search)).text()
   expect(text.charCodeAt(0)).toBe(0xfeff)
   const lines = text.slice(1).trim().split('\r\n')
   expect(lines[0]).toContain('Codigo;Fecha de ingreso;Nombre')
@@ -106,17 +107,44 @@ test('un vendedor solo ve sus leads y no administra usuarios', async ({ page }) 
   expect((await page.request.get('/api/users')).status()).toBe(403)
 })
 
+test('el vendedor recibe la notificacion del lead que le asignan y la abre', async ({ page }) => {
+  await login(page, 'admin@craisa.test')
+  const catalogs = (await (await page.request.get('/api/catalogs')).json()) as {
+    lines: { id: string; name: string }[]
+    users: { id: string; name: string }[]
+  }
+  const created = await page.request.post('/api/leads', {
+    data: {
+      entryDate: '2026-11-02',
+      contactName: 'Aviso E2E Solano',
+      phone: '8888-1212',
+      channel: 'LLAMADA',
+      description: 'Consulta para probar avisos',
+      businessLineId: catalogs.lines[0]!.id,
+      assignedToId: catalogs.users.find((u) => u.name === 'Carlos Mora')!.id,
+    },
+  })
+  const { code } = (await created.json()) as { code: string }
+
+  await page.context().clearCookies()
+  await login(page, 'carlos.mora@craisa.test')
+  await page.getByRole('button', { name: /^Notificaciones: .*sin leer/ }).click()
+  await page.getByRole('button', { name: /Admin.* le asigno un lead nuevo/ }).filter({ hasText: code }).click()
+  await expect(page).toHaveURL(new RegExp(`/leads/${code}$`))
+  await expect(page.getByRole('heading', { name: 'Aviso E2E Solano' })).toBeVisible()
+})
+
 test('el dashboard enlaza al listado filtrado', async ({ page }) => {
-  await login(page, 'mercadeo@craisa.test')
+  await login(page, 'admin@craisa.test')
   await page.getByRole('button', { name: 'Este anio' }).click()
   await expect(page.getByText('Leads en el periodo')).toBeVisible()
   await page.getByRole('link', { name: /Acciones vencidas/ }).click()
   await expect(page).toHaveURL(/overdue=1/)
-  await expect(page.getByRole('button', { name: 'Vencidas' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: 'Vencidas', exact: true })).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('las pestanas de estado muestran cuantos leads hay en cada una', async ({ page }) => {
-  await login(page, 'mercadeo@craisa.test')
+  await login(page, 'admin@craisa.test')
   await page.goto('/leads')
   const tab = page.getByRole('tab', { name: /Nuevo/ })
   await expect(tab).toHaveText(/\d/)

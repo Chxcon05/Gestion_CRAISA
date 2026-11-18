@@ -1,19 +1,19 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { AlertTriangle, ArrowRight, Briefcase, CalendarCheck, CalendarDays, Inbox, Sparkles, Trophy, type LucideIcon } from 'lucide-react'
+import { Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { ArrowDown, ArrowRight, ArrowUp, Download } from 'lucide-react'
 import { CLOSED_STATUSES, type Channel, type CountItem, type DashboardData, type LeadStatus } from '@craisa/shared'
 import { api, toSearch } from '@/lib/api'
 import { formatDate, formatNumber, shiftIso, todayIso } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/app/auth'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/states'
-import { STATUS_STYLES, StatusBadge } from '@/components/status'
-import { CHANNEL_ICONS } from '@/components/channel'
+import { StatusBadge } from '@/components/status'
 
 type Preset = 'all' | '7' | '30' | '90' | 'year' | 'custom'
 type Granularity = 'day' | 'week' | 'month'
@@ -46,6 +46,13 @@ function granularityFor({ from, to }: Range): Granularity {
   return days <= 120 ? 'week' : 'month'
 }
 
+/** Mismo largo justo antes del periodo elegido; sin limites (Todo) no hay con que comparar. */
+function previousRange({ from, to }: Range): Range | null {
+  if (!from || !to) return null
+  const days = Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000) + 1
+  return { from: shiftIso(from, -days), to: shiftIso(from, -1) }
+}
+
 function greeting() {
   const h = Number(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Costa_Rica' }).format(new Date()))
   if (h < 12) return 'Buenos dias'
@@ -53,63 +60,241 @@ function greeting() {
 }
 
 const plural = (n: number, one: string, many: string) => `${formatNumber(n)} ${n === 1 ? one : many}`
+const pctChange = (now: number, before: number | undefined) => (before === undefined || before === 0 ? null : ((now - before) / before) * 100)
+const oneDecimal = new Intl.NumberFormat('es-CR', { maximumFractionDigits: 1 })
 
-/* ---------- Tu dia ---------- */
+// Azul y verde de la marca CRAISA; el verde va oscurecido para que se lea sobre blanco.
+const BRAND = '#2d5fae'
+const LIME = '#8fae2c'
 
-const DAY_TONES = {
-  red: { card: 'hover:border-red-200', icon: 'bg-red-50 text-red-600', value: 'text-red-600' },
-  amber: { card: 'hover:border-amber-200', icon: 'bg-amber-50 text-amber-600', value: 'text-slate-900' },
-  blue: { card: 'hover:border-brand-200', icon: 'bg-brand-50 text-brand-600', value: 'text-slate-900' },
-}
-
-function DayCard(props: { to: string; label: string; hint: string; value: number; icon: typeof Inbox; tone: keyof typeof DAY_TONES }) {
-  const t = DAY_TONES[props.tone]
-  const Icon = props.icon
-  const quiet = props.value === 0
+/** Variacion contra el periodo anterior. "inverse": subir es malo (por ejemplo, leads sin atender). */
+function Delta({ value, unit = '%', inverse }: { value: number | null; unit?: string; inverse?: boolean }) {
+  if (value === null || !Number.isFinite(value)) return null
+  const up = value >= 0
+  const good = inverse ? !up : up
+  const Arrow = up ? ArrowUp : ArrowDown
   return (
-    <Link
-      to={props.to}
+    <span
       className={cn(
-        'group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.05)] transition-all hover:-translate-y-0.5 hover:shadow-md',
-        t.card,
+        'inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums',
+        good ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600',
       )}
     >
-      <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-xl', quiet ? 'bg-slate-100 text-slate-400' : t.icon)}>
-        <Icon className="size-5" />
+      <Arrow className="size-3" strokeWidth={2.75} aria-hidden />
+      {oneDecimal.format(Math.abs(value))}
+      {unit}
+    </span>
+  )
+}
+
+// En vez de un icono decorativo, cada tarjeta lleva un trazo con datos: la tendencia o la proporcion que explica la cifra.
+function KpiCard(props: { label: string; value: string; delta?: ReactNode; hint: string; visual: ReactNode }) {
+  return (
+    <Card className="flex flex-col p-4 sm:p-5">
+      <h3 className="min-w-0 text-sm leading-snug font-medium text-slate-600 sm:truncate">{props.label}</h3>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <span className="text-2xl leading-none sm:text-[1.875rem] font-semibold tracking-tight text-slate-900 tabular-nums">{props.value}</span>
+        {props.delta}
+      </div>
+      <p className="mt-2 line-clamp-2 text-xs text-slate-500 sm:truncate">{props.hint}</p>
+      <div className="mt-auto pt-4">{props.visual}</div>
+    </Card>
+  )
+}
+
+const METER_TONES = { amber: 'bg-amber-400', brand: 'bg-brand-500', emerald: 'bg-emerald-500' }
+
+function Meter({ share, tone }: { share: number; tone: keyof typeof METER_TONES }) {
+  return (
+    <span className="block h-1.5 overflow-hidden rounded-full bg-slate-100" aria-hidden>
+      <span className={cn('block h-full rounded-full', METER_TONES[tone])} style={{ width: `${Math.min(100, Math.max(0, share * 100))}%` }} />
+    </span>
+  )
+}
+
+function Sparkline({ values }: { values: number[] }) {
+  if (values.length < 2) return <Meter share={0} tone="brand" />
+  const max = Math.max(1, ...values)
+  const pts = values.map((v, i) => `${(i / (values.length - 1)) * 100},${22 - (v / max) * 20}`)
+  return (
+    <svg viewBox="0 0 100 24" preserveAspectRatio="none" className="block h-6 w-full" aria-hidden>
+      <polygon points={`0,24 ${pts.join(' ')} 100,24`} fill={BRAND} opacity={0.08} />
+      <polyline points={pts.join(' ')} fill="none" stroke={BRAND} strokeWidth={1.5} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+const DAY_TONES = {
+  amber: { bar: 'bg-amber-400', edge: 'border-amber-400' },
+  blue: { bar: 'bg-brand-500', edge: 'border-brand-500' },
+  red: { bar: 'bg-red-500', edge: 'border-red-500' },
+}
+
+function DaySegment(props: { to: string; label: string; value: number; tone: keyof typeof DAY_TONES; share: number }) {
+  const t = DAY_TONES[props.tone]
+  return (
+    <Link to={props.to} className="group flex min-w-0 flex-col justify-between gap-3 rounded-lg">
+      <span className={cn('border-l-2 pl-3', t.edge)}>
+        <span className="block text-xl font-semibold text-slate-900 tabular-nums">{formatNumber(props.value)}</span>
+        <span className="mt-0.5 flex items-center gap-1 text-xs text-slate-500 group-hover:text-slate-800">
+          {props.label}
+          <ArrowRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+        </span>
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[13px] font-medium text-slate-500">{props.label}</span>
-        <span className={cn('block text-2xl font-semibold tabular-nums', quiet ? 'text-slate-400' : t.value)}>{formatNumber(props.value)}</span>
-        <span className="block truncate text-xs text-slate-400">{props.hint}</span>
+      <span className="block h-1.5 overflow-hidden rounded-full bg-slate-100">
+        <span className={cn('block h-full rounded-full', t.bar)} style={{ width: `${Math.max(6, props.share * 100)}%` }} />
       </span>
-      <ArrowRight className="size-4 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500" />
     </Link>
   )
 }
 
-/* ---------- Indicadores ---------- */
-
-function Stat(props: { label: string; value: string; hint: string; icon: typeof Inbox }) {
-  const Icon = props.icon
+function DayStrip({ kpis }: { kpis: DashboardData['kpis'] }) {
+  const sum = Math.max(1, kpis.overdue + kpis.dueToday + kpis.dueWeek)
   return (
-    <div className="flex flex-col gap-1 px-5 py-4 sm:px-6">
-      <span className="flex items-center gap-2 text-[13px] font-medium text-slate-500">
-        <Icon className="size-4 text-slate-400" />
-        {props.label}
-      </span>
-      <span className="text-[1.75rem] leading-tight font-semibold tracking-tight text-slate-900 tabular-nums">{props.value}</span>
-      <span className="text-xs text-slate-500">{props.hint}</span>
+    <div className="grid gap-5 sm:grid-cols-3">
+      <DaySegment
+        to="/leads?overdue=1&sort=nextActionAt&dir=asc"
+        label="Acciones vencidas"
+        value={kpis.overdue}
+        tone="red"
+        share={kpis.overdue / sum}
+      />
+      <DaySegment to="/leads?due=today" label="Para hoy" value={kpis.dueToday} tone="amber" share={kpis.dueToday / sum} />
+      <DaySegment
+        to="/leads?due=week&sort=nextActionAt&dir=asc"
+        label="Proximos 7 dias"
+        value={kpis.dueWeek}
+        tone="blue"
+        share={kpis.dueWeek / sum}
+      />
     </div>
   )
 }
 
-/* ---------- Embudo ---------- */
+const monthFmt = new Intl.DateTimeFormat('es-CR', { month: 'short', year: '2-digit', timeZone: 'UTC' })
+
+function periodLabel(p: string, g: Granularity) {
+  if (g === 'month') return monthFmt.format(new Date(`${p}-01T00:00:00Z`))
+  return formatDate(p, { year: undefined })
+}
+
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number; dataKey: string }[]; label?: string }) {
+  if (active !== true || payload === undefined || payload.length === 0) return null
+  const now = payload.find((p) => p.dataKey === 'count')?.value ?? 0
+  const before = payload.find((p) => p.dataKey === 'prev')?.value
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg">
+      <p className="font-medium text-slate-900">{label}</p>
+      <p className="text-slate-600 tabular-nums">{plural(now, 'lead', 'leads')}</p>
+      {before !== undefined && <p className="text-slate-400 tabular-nums">Periodo anterior: {formatNumber(before)}</p>}
+    </div>
+  )
+}
+
+function Trend(props: { series: DashboardData['series']; previous?: DashboardData['series']; granularity: Granularity }) {
+  // El periodo anterior se alinea por posicion (dia 1 con dia 1) y se dibuja punteado detras del actual.
+  const data = props.series.map((s, i) => ({ ...s, label: periodLabel(s.period, props.granularity), prev: props.previous?.[i]?.count }))
+  const axis = { fontSize: 11, fill: '#94a3b8' }
+  return (
+    <ResponsiveContainer width="100%" height={190}>
+      <AreaChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: -24 }}>
+        <defs>
+          <linearGradient id="fillLeads" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={BRAND} stopOpacity={0.22} />
+            <stop offset="100%" stopColor={BRAND} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="4 4" />
+        <XAxis dataKey="label" tick={axis} axisLine={false} tickLine={false} minTickGap={28} />
+        <YAxis allowDecimals={false} tick={axis} axisLine={false} tickLine={false} />
+        <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#cbd5e1', strokeDasharray: 4 }} />
+        {props.previous && (
+          <Line type="monotone" dataKey="prev" stroke="#cbd5e1" strokeWidth={1.75} strokeDasharray="5 4" dot={false} activeDot={false} />
+        )}
+        <Area type="monotone" dataKey="count" stroke={BRAND} strokeWidth={2.25} fill="url(#fillLeads)" activeDot={{ r: 4, strokeWidth: 0 }} />
+      </AreaChart>
+    </ResponsiveContainer>
+  )
+}
+
+// Barras horizontales con el nombre del canal: se leen sin pasar el mouse por cada una.
+function ChannelBars({ items, onPick }: { items: CountItem<Channel>[]; onPick: (key: Channel) => void }) {
+  const max = Math.max(1, ...items.map((d) => d.count))
+  const top = items.reduce<CountItem<Channel> | null>((a, d) => (a === null || d.count > a.count ? d : a), null)
+  return (
+    <ul className="space-y-1">
+      {items.map((d) => {
+        const isTop = top !== null && d.key === top.key && d.count > 0
+        return (
+          <li key={d.key}>
+            <button
+              type="button"
+              onClick={() => onPick(d.key)}
+              aria-label={`${d.label}: ${plural(d.count, 'lead', 'leads')}`}
+              className="group grid w-full grid-cols-[6.5rem_1fr_2.25rem] items-center gap-3 rounded-md px-1 py-1 text-left text-[13px] hover:bg-slate-50"
+            >
+              <span className={cn('truncate', isTop ? 'font-semibold text-brand-700' : 'text-slate-600 group-hover:text-slate-900')}>
+                {d.label}
+              </span>
+              <span className="block h-2 overflow-hidden rounded-full bg-slate-100">
+                <span
+                  className={cn('block h-full rounded-full transition-colors', isTop ? 'bg-brand-600' : 'bg-slate-300 group-hover:bg-brand-300')}
+                  style={{ width: `${d.count === 0 ? 0 : Math.max(4, (d.count / max) * 100)}%` }}
+                />
+              </span>
+              <span className="text-right font-medium text-slate-700 tabular-nums">{formatNumber(d.count)}</span>
+            </button>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+function WinGauge({ rate, won, closed, onShow }: { rate: number; won: number; closed: number; onShow: () => void }) {
+  const ticks = 44
+  const filled = Math.round((Math.min(100, Math.max(0, rate)) / 100) * ticks)
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative w-full max-w-[17rem]">
+        <svg viewBox="0 0 240 132" className="w-full" aria-hidden>
+          {Array.from({ length: ticks }, (_, i) => {
+            const a = Math.PI - (i / (ticks - 1)) * Math.PI
+            const on = i < filled
+            return (
+              <line
+                key={i}
+                x1={120 + 84 * Math.cos(a)}
+                y1={122 - 84 * Math.sin(a)}
+                x2={120 + 112 * Math.cos(a)}
+                y2={122 - 112 * Math.sin(a)}
+                stroke={on ? LIME : '#e2e8f0'}
+                strokeOpacity={on ? 0.4 + 0.6 * (i / Math.max(1, filled - 1)) : 1}
+                strokeWidth={5}
+                strokeLinecap="round"
+              />
+            )
+          })}
+        </svg>
+        <div className="absolute inset-x-0 bottom-1 text-center">
+          <p className="text-[2rem] leading-none font-semibold tracking-tight text-slate-900 tabular-nums">{rate.toLocaleString('es-CR')} %</p>
+          <p className="mt-1.5 text-xs text-slate-500">
+            {formatNumber(won)} ganados de {formatNumber(closed)} cerrados
+          </p>
+        </div>
+      </div>
+      <Button variant="secondary" size="sm" className="mt-4" onClick={onShow}>
+        Ver ganados
+      </Button>
+    </div>
+  )
+}
 
 function Funnel({ data, onPick }: { data: CountItem<LeadStatus>[]; onPick: (s: LeadStatus) => void }) {
   const total = data.reduce((a, d) => a + d.count, 0)
   const max = Math.max(1, ...data.map((d) => d.count))
-  const open = data.filter((d) => !CLOSED_STATUSES.includes(d.key))
-  const closed = data.filter((d) => CLOSED_STATUSES.includes(d.key))
+  // Un solo tono para las etapas abiertas; el color se reserva para el resultado (ganado o perdido).
+  const color = (s: LeadStatus) => (s === 'GANADO' ? LIME : s === 'PERDIDO' ? '#cbd5e1' : BRAND)
   const row = (d: CountItem<LeadStatus>) => {
     const pct = total ? Math.round((d.count / total) * 100) : 0
     return (
@@ -117,16 +302,13 @@ function Funnel({ data, onPick }: { data: CountItem<LeadStatus>[]; onPick: (s: L
         <button
           type="button"
           onClick={() => onPick(d.key)}
-          className="group grid w-full grid-cols-[7.5rem_1fr_4.5rem] sm:grid-cols-[11rem_1fr_4.5rem] items-center gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-slate-50"
+          className="group grid w-full grid-cols-[7.5rem_1fr_4.5rem] items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-slate-50 sm:grid-cols-[10.5rem_1fr_5rem]"
         >
-          <span className="flex items-center gap-2 truncate text-sm text-slate-700">
-            <span className={cn('size-2 shrink-0 rounded-full', STATUS_STYLES[d.key].dot)} aria-hidden />
-            {d.label}
-          </span>
-          <span className="h-7 overflow-hidden rounded-md bg-slate-100">
+          <span className="truncate text-sm text-slate-700">{d.label}</span>
+          <span className="h-2.5 overflow-hidden rounded-full bg-slate-100">
             <span
-              className="block h-full rounded-md transition-[width] duration-500 group-hover:brightness-95"
-              style={{ width: `${Math.max(d.count ? 3 : 0, (d.count / max) * 100)}%`, background: STATUS_STYLES[d.key].chart }}
+              className="block h-full rounded-full transition-[width] duration-500 group-hover:brightness-110"
+              style={{ width: `${Math.max(d.count ? 3 : 0, (d.count / max) * 100)}%`, background: color(d.key) }}
             />
           </span>
           <span className="text-right text-sm tabular-nums">
@@ -138,76 +320,68 @@ function Funnel({ data, onPick }: { data: CountItem<LeadStatus>[]; onPick: (s: L
     )
   }
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <ol className="space-y-0.5" aria-label="Leads abiertos por etapa">
-        {open.map(row)}
+        {data.filter((d) => !CLOSED_STATUSES.includes(d.key)).map(row)}
       </ol>
       <div className="border-t border-dashed border-slate-200 pt-3">
         <p className="mb-1 px-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">Cerrados</p>
         <ol className="space-y-0.5" aria-label="Leads cerrados">
-          {closed.map(row)}
+          {data.filter((d) => CLOSED_STATUSES.includes(d.key)).map(row)}
         </ol>
       </div>
     </div>
   )
 }
 
-/* ---------- Barras simples (canal, linea) ---------- */
-
-function BarList({ items, onPick, iconFor }: { items: CountItem[]; onPick: (key: string) => void; iconFor?: (key: string) => LucideIcon }) {
+function LineTable({ items, onPick }: { items: CountItem[]; onPick: (key: string) => void }) {
   const sorted = [...items].sort((a, b) => b.count - a.count)
-  const max = Math.max(1, ...sorted.map((d) => d.count))
   const total = sorted.reduce((a, d) => a + d.count, 0)
+  const max = Math.max(1, ...sorted.map((d) => d.count))
   return (
-    <ul className="space-y-1">
-      {sorted.map((d) => (
-        <li key={d.key}>
-          <button
-            type="button"
-            onClick={() => onPick(d.key)}
-            className="group relative flex w-full items-center gap-2 overflow-hidden rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50"
-          >
-            <span
-              aria-hidden
-              className="absolute inset-y-0.5 left-0 rounded-lg bg-brand-100/70 transition-[width] duration-500 group-hover:bg-brand-100"
-              style={{ width: `${(d.count / max) * 100}%` }}
-            />
-            <span className="relative flex flex-1 items-center gap-2 truncate text-slate-700">
-              <BarIcon icon={iconFor?.(d.key)} />
-              {d.label}
-            </span>
-            <span className="relative font-semibold text-slate-900 tabular-nums">{formatNumber(d.count)}</span>
-            <span className="relative w-10 text-right text-xs text-slate-400 tabular-nums">
-              {total ? Math.round((d.count / total) * 100) : 0}%
-            </span>
-          </button>
-        </li>
-      ))}
-    </ul>
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="border-b border-slate-100 text-left text-[11px] tracking-wider text-slate-400 uppercase">
+          <th className="py-2.5 pl-6 font-semibold">Linea</th>
+          <th className="hidden w-2/5 py-2.5 font-semibold sm:table-cell">Participacion</th>
+          <th className="py-2.5 text-right font-semibold">Leads</th>
+          <th className="py-2.5 pr-6 text-right font-semibold">%</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-dashed divide-slate-200">
+        {sorted.map((d) => (
+          <tr key={d.key} className="hover:bg-slate-50">
+            <td className="py-3 pl-6">
+              <button type="button" onClick={() => onPick(d.key)} className="font-medium text-slate-800 hover:text-brand-700">
+                {d.label}
+              </button>
+            </td>
+            <td className="hidden py-3 pr-6 sm:table-cell" aria-label={`${total ? Math.round((d.count / total) * 100) : 0}% del total`}>
+              <span aria-hidden className="block h-1.5 overflow-hidden rounded-full bg-slate-100">
+                <span className="block h-full rounded-full bg-brand-500" style={{ width: `${(d.count / max) * 100}%` }} />
+              </span>
+            </td>
+            <td className="py-3 text-right font-semibold text-slate-900 tabular-nums">{formatNumber(d.count)}</td>
+            <td className="py-3 pr-6 text-right text-slate-500 tabular-nums">{total ? Math.round((d.count / total) * 100) : 0}%</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
-
-function BarIcon({ icon: Icon }: { icon?: LucideIcon }) {
-  return Icon ? <Icon className="size-4 text-slate-400" aria-hidden /> : null
-}
-
-/* ---------- Agenda ---------- */
 
 function Agenda({ items }: { items: DashboardData['upcoming'] }) {
   const today = todayIso()
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center px-6 py-12 text-center">
-        <span className="mb-3 rounded-2xl bg-emerald-50 p-3 text-emerald-600">
-          <CalendarCheck className="size-6" />
-        </span>
         <p className="text-sm font-medium text-slate-900">Todo al dia</p>
         <p className="mt-1 text-sm text-slate-500">No hay acciones pendientes para esta semana.</p>
       </div>
     )
   }
   return (
-    <ul className="divide-y divide-slate-100">
+    <ul className="divide-y divide-dashed divide-slate-200">
       {items.map((u) => {
         const date = u.nextActionAt ?? ''
         const overdue = date < today
@@ -218,7 +392,7 @@ function Agenda({ items }: { items: DashboardData['upcoming'] }) {
             <Link to={`/leads/${u.code}`} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 sm:px-6">
               <span
                 className={cn(
-                  'flex w-11 shrink-0 flex-col items-center rounded-lg border py-1 leading-none',
+                  'flex w-11 shrink-0 flex-col items-center rounded-xl border py-1.5 leading-none',
                   overdue ? 'border-red-200 bg-red-50 text-red-700' : isToday ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-700',
                 )}
               >
@@ -246,49 +420,6 @@ function Agenda({ items }: { items: DashboardData['upcoming'] }) {
   )
 }
 
-/* ---------- Evolucion ---------- */
-
-const monthFmt = new Intl.DateTimeFormat('es-CR', { month: 'short', year: '2-digit', timeZone: 'UTC' })
-
-function periodLabel(p: string, g: Granularity) {
-  if (g === 'month') return monthFmt.format(new Date(`${p}-01T00:00:00Z`))
-  return formatDate(p, { year: undefined })
-}
-
-function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
-  if (active !== true || payload === undefined || payload.length === 0) return null
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg">
-      <p className="font-medium text-slate-900">{label}</p>
-      <p className="text-slate-600 tabular-nums">{plural(payload[0]?.value ?? 0, 'lead', 'leads')}</p>
-    </div>
-  )
-}
-
-function Trend({ series, granularity }: { series: DashboardData['series']; granularity: Granularity }) {
-  const data = series.map((s) => ({ ...s, label: periodLabel(s.period, granularity) }))
-  const axis = { fontSize: 12, fill: '#94a3b8' }
-  return (
-    <ResponsiveContainer width="100%" height={240}>
-      <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
-        <defs>
-          <linearGradient id="fillLeads" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2d5fae" stopOpacity={0.28} />
-            <stop offset="100%" stopColor="#2d5fae" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid vertical={false} stroke="#f1f5f9" />
-        <XAxis dataKey="label" tick={axis} axisLine={false} tickLine={false} minTickGap={24} />
-        <YAxis allowDecimals={false} tick={axis} axisLine={false} tickLine={false} />
-        <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#cbd5e1', strokeDasharray: 4 }} />
-        <Area type="monotone" dataKey="count" stroke="#1c4c94" strokeWidth={2.25} fill="url(#fillLeads)" activeDot={{ r: 4 }} />
-      </AreaChart>
-    </ResponsiveContainer>
-  )
-}
-
-/* ---------- Pagina ---------- */
-
 function PeriodPicker(props: {
   preset: Preset
   setPreset: (p: Preset) => void
@@ -297,8 +428,8 @@ function PeriodPicker(props: {
 }) {
   const { preset, setPreset, custom, setCustom } = props
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <fieldset className="inline-flex flex-wrap gap-0.5 rounded-xl bg-slate-200/60 p-1">
+    <div className="flex max-w-full min-w-0 flex-wrap items-center gap-2">
+      <fieldset className="inline-flex max-w-full min-w-0 gap-0.5 overflow-x-auto rounded-full border border-slate-200 bg-white p-1 [scrollbar-width:none]">
         <legend className="sr-only">Periodo</legend>
         {PRESETS.map((p) => (
           <button
@@ -307,8 +438,8 @@ function PeriodPicker(props: {
             aria-pressed={preset === p.key}
             onClick={() => setPreset(p.key)}
             className={cn(
-              'rounded-lg px-3 py-1.5 text-[13px] font-medium transition-all',
-              preset === p.key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900',
+              'shrink-0 rounded-full px-3 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors',
+              preset === p.key ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:text-slate-900',
             )}
           >
             {p.label}
@@ -341,16 +472,15 @@ function PeriodPicker(props: {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6" aria-busy>
-      <div className="grid gap-4 md:grid-cols-3">
-        {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} className="h-24 rounded-2xl" />
+    <div className="space-y-5" aria-busy>
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <Skeleton key={i} className="h-32 rounded-[20px]" />
         ))}
       </div>
-      <Skeleton className="h-28 rounded-2xl" />
-      <div className="grid gap-6 lg:grid-cols-5">
-        <Skeleton className="h-96 rounded-2xl lg:col-span-3" />
-        <Skeleton className="h-96 rounded-2xl lg:col-span-2" />
+      <div className="grid gap-5 lg:grid-cols-3">
+        <Skeleton className="h-96 rounded-[20px] lg:col-span-2" />
+        <Skeleton className="h-96 rounded-[20px]" />
       </div>
     </div>
   )
@@ -363,36 +493,57 @@ export function DashboardPage() {
   const [custom, setCustom] = useState({ from: shiftIso(todayIso(), -29), to: todayIso() })
   const range = rangeFor(preset, custom)
   const granularity = granularityFor(range)
+  const prevRange = previousRange(range)
 
   const q = useQuery({
     queryKey: ['dashboard', range, granularity],
     queryFn: () => api<DashboardData>(`/dashboard${toSearch({ ...range, granularity })}`),
+  })
+  const prev = useQuery({
+    queryKey: ['dashboard', prevRange, granularity],
+    queryFn: () => api<DashboardData>(`/dashboard${toSearch({ ...prevRange, granularity })}`),
+    enabled: prevRange !== null,
   })
 
   // Mismo periodo que el tablero: el listado filtrado muestra exactamente los leads de cada barra.
   const toLeads = (extra: Record<string, string>) => navigate(`/leads${toSearch({ ...range, ...extra })}`)
   const firstName = user.name.split(' ')[0]
   const k = q.data?.kpis
+  const p = prevRange ? prev.data : undefined
   const periodText =
     preset === 'all'
       ? q.data
         ? `todo el historial, desde el ${formatDate(q.data.range.from)}`
         : 'todo el historial'
       : `del ${formatDate(range.from)} al ${formatDate(range.to)}`
+  const vsText = (before: number | undefined, fallback: string) =>
+    before === undefined ? fallback : `vs. ${formatNumber(before)} el periodo anterior`
+  const nuevos = (d?: DashboardData) => d?.byStatus.find((s) => s.key === 'NUEVO')?.count
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-[1.75rem]">
-          {greeting()}, {firstName}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {k
-            ? k.overdue + k.dueToday > 0
-              ? `Tiene ${plural(k.overdue, 'accion vencida', 'acciones vencidas')} y ${plural(k.dueToday, 'para hoy', 'para hoy')}. Empiece por ahi.`
-              : 'No hay seguimientos atrasados. Buen trabajo.'
-            : 'Cargando el resumen...'}
-        </p>
+      <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-[1.75rem]">
+            {greeting()}, {firstName}
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {k
+              ? k.overdue + k.dueToday > 0
+                ? `Tiene ${plural(k.overdue, 'accion vencida', 'acciones vencidas')} y ${plural(k.dueToday, 'para hoy', 'para hoy')}. Empiece por ahi.`
+                : 'No hay seguimientos atrasados. Buen trabajo.'
+              : 'Cargando el resumen...'}
+          </p>
+        </div>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <PeriodPicker preset={preset} setPreset={setPreset} custom={custom} setCustom={setCustom} />
+          <Button asChild>
+            <a href={`/api/leads/export.xlsx${toSearch(range)}`} download title="Descarga los leads del periodo para Excel">
+              <Download />
+              Exportar
+            </a>
+          </Button>
+        </div>
       </div>
 
       {q.isPending ? (
@@ -402,79 +553,72 @@ export function DashboardPage() {
           <ErrorState message={q.error.message} onRetry={() => q.refetch()} />
         </Card>
       ) : (
-        <div className="space-y-8">
-          <section aria-labelledby="tu-dia">
-            <h2 id="tu-dia" className="mb-3 text-sm font-semibold text-slate-900">
-              Tu dia
-            </h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              <DayCard
-                to="/leads?overdue=1&sort=nextActionAt&dir=asc"
-                label="Acciones vencidas"
-                hint="Seguimientos atrasados de leads abiertos"
-                value={q.data.kpis.overdue}
-                icon={AlertTriangle}
-                tone="red"
-              />
-              <DayCard
-                to="/leads?due=today"
-                label="Para hoy"
-                hint="Acciones programadas para hoy"
-                value={q.data.kpis.dueToday}
-                icon={CalendarCheck}
-                tone="amber"
-              />
-              <DayCard
-                to="/leads?due=week&sort=nextActionAt&dir=asc"
-                label="Proximos 7 dias"
-                hint="Para planificar la semana"
-                value={q.data.kpis.dueWeek}
-                icon={CalendarDays}
-                tone="blue"
-              />
-            </div>
-          </section>
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
+            <KpiCard
+              label={preset === 'all' ? 'Leads registrados' : 'Leads en el periodo'}
+              value={formatNumber(q.data.kpis.total)}
+              delta={<Delta value={pctChange(q.data.kpis.total, p?.kpis.total)} />}
+              hint={vsText(p?.kpis.total, `${formatNumber(q.data.kpis.open)} siguen abiertos`)}
+              visual={<Sparkline values={q.data.series.map((s) => s.count)} />}
+            />
+            <KpiCard
+              label="Nuevos sin atender"
+              value={formatNumber(nuevos(q.data) ?? 0)}
+              delta={<Delta value={pctChange(nuevos(q.data) ?? 0, nuevos(p))} inverse />}
+              hint={vsText(nuevos(p), 'Esperan primer contacto')}
+              visual={<Meter share={(nuevos(q.data) ?? 0) / Math.max(1, q.data.kpis.open)} tone="amber" />}
+            />
+            <KpiCard
+              label="Oportunidades"
+              value={formatNumber(q.data.kpis.opportunities)}
+              delta={<Delta value={pctChange(q.data.kpis.opportunities, p?.kpis.opportunities)} />}
+              hint={vsText(p?.kpis.opportunities, 'Negocios en curso')}
+              visual={<Meter share={q.data.kpis.opportunities / Math.max(1, q.data.kpis.open)} tone="brand" />}
+            />
+            <KpiCard
+              label="Tasa de cierre"
+              value={`${q.data.kpis.winRate.toLocaleString('es-CR')} %`}
+              visual={<Meter share={q.data.kpis.winRate / 100} tone="emerald" />}
+              delta={<Delta value={p ? q.data.kpis.winRate - p.kpis.winRate : null} unit=" pts" />}
+              hint={
+                p
+                  ? `vs. ${p.kpis.winRate.toLocaleString('es-CR')} % el periodo anterior`
+                  : `${formatNumber(q.data.kpis.won)} ganados de ${formatNumber(q.data.kpis.won + q.data.kpis.lost)} cerrados`
+              }
+            />
+          </div>
 
-          <section aria-labelledby="resultados" className="space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 id="resultados" className="text-sm font-semibold text-slate-900">
-                  Resultados
-                </h2>
-                <p className="text-[13px] text-slate-500">Leads ingresados en {periodText}.</p>
-              </div>
-              <PeriodPicker preset={preset} setPreset={setPreset} custom={custom} setCustom={setCustom} />
-            </div>
+          <div className="grid gap-5 lg:grid-cols-3">
+            <div className="min-w-0 space-y-5 lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <div>
+                    <CardTitle>Leads ingresados</CardTitle>
+                    <CardDescription>
+                      Por {GRANULARITY_LABEL[granularity]}, {periodText}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="grid items-end gap-4 md:grid-cols-[10rem_1fr]">
+                  <div className="md:pb-6">
+                    <p className="text-[2.5rem] leading-none font-semibold tracking-tight text-slate-900 tabular-nums">
+                      {formatNumber(q.data.kpis.total)}
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      <Delta value={pctChange(q.data.kpis.total, p?.kpis.total)} />
+                      {p ? 'vs. periodo anterior' : `${formatNumber(q.data.kpis.open)} abiertos`}
+                    </div>
+                  </div>
+                  <Trend series={q.data.series} previous={p?.series} granularity={granularity} />
+                </CardContent>
+                <div className="mx-5 mb-5 rounded-2xl border border-slate-200/70 px-5 pt-4 pb-5 sm:mx-6">
+                  <h2 className="mb-3 text-sm font-semibold text-slate-900">Tu dia</h2>
+                  <DayStrip kpis={q.data.kpis} />
+                </div>
+              </Card>
 
-            <Card className="grid grid-cols-2 divide-slate-100 lg:grid-cols-4 lg:divide-x [&>*:nth-child(-n+2)]:border-b [&>*:nth-child(-n+2)]:border-slate-100 lg:[&>*:nth-child(-n+2)]:border-b-0">
-              <Stat
-                label={preset === 'all' ? 'Leads registrados' : 'Leads en el periodo'}
-                value={formatNumber(q.data.kpis.total)}
-                hint={`${formatNumber(q.data.kpis.open)} siguen abiertos`}
-                icon={Inbox}
-              />
-              <Stat
-                label="Nuevos sin atender"
-                value={formatNumber(q.data.byStatus.find((s) => s.key === 'NUEVO')?.count ?? 0)}
-                hint="Esperan primer contacto"
-                icon={Sparkles}
-              />
-              <Stat
-                label="Oportunidades"
-                value={formatNumber(q.data.kpis.opportunities)}
-                hint="Negocios en curso"
-                icon={Briefcase}
-              />
-              <Stat
-                label="Tasa de cierre"
-                value={`${q.data.kpis.winRate.toLocaleString('es-CR')} %`}
-                hint={`${formatNumber(q.data.kpis.won)} ganados de ${formatNumber(q.data.kpis.won + q.data.kpis.lost)} cerrados`}
-                icon={Trophy}
-              />
-            </Card>
-
-            <div className="grid gap-6 lg:grid-cols-5">
-              <Card className="lg:col-span-3">
+              <Card>
                 <CardHeader>
                   <div>
                     <CardTitle>Embudo comercial</CardTitle>
@@ -485,8 +629,50 @@ export function DashboardPage() {
                   <Funnel data={q.data.byStatus} onPick={(s) => toLeads({ status: s })} />
                 </CardContent>
               </Card>
-              <Card className="lg:col-span-2">
+
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div>
+                    <CardTitle>Linea de negocio</CardTitle>
+                    <CardDescription>Interes de los clientes por linea</CardDescription>
+                  </div>
+                </CardHeader>
+                <LineTable items={q.data.byLine} onPick={(key) => toLeads({ businessLineId: key })} />
+              </Card>
+            </div>
+
+            <div className="min-w-0 space-y-5">
+              <Card>
                 <CardHeader>
+                  <div>
+                    <CardTitle>Canal de origen</CardTitle>
+                    <CardDescription>Por donde llegan las consultas</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <ChannelBars items={q.data.byChannel} onPick={(key) => toLeads({ channel: key })} />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <div>
+                    <CardTitle>Tasa de cierre</CardTitle>
+                    <CardDescription>Ganados sobre el total de cerrados</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="pb-6">
+                  <WinGauge
+                    rate={q.data.kpis.winRate}
+                    won={q.data.kpis.won}
+                    closed={q.data.kpis.won + q.data.kpis.lost}
+                    onShow={() => toLeads({ status: 'GANADO' })}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-3">
                   <div>
                     <CardTitle>Agenda</CardTitle>
                     <CardDescription>Vencidas y de los proximos 7 dias</CardDescription>
@@ -501,48 +687,7 @@ export function DashboardPage() {
                 <Agenda items={q.data.upcoming} />
               </Card>
             </div>
-
-            <div className="grid gap-6 lg:grid-cols-5">
-              <Card className="lg:col-span-3">
-                <CardHeader>
-                  <div>
-                    <CardTitle>Leads ingresados</CardTitle>
-                    <CardDescription>Por {GRANULARITY_LABEL[granularity]} de ingreso</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <Trend series={q.data.series} granularity={granularity} />
-                </CardContent>
-              </Card>
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <div>
-                    <CardTitle>Canal de origen</CardTitle>
-                    <CardDescription>Por donde llegan las consultas</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-3 sm:px-4">
-                  <BarList
-                    items={q.data.byChannel}
-                    onPick={(key) => toLeads({ channel: key })}
-                    iconFor={(key) => CHANNEL_ICONS[key as Channel]}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <div>
-                  <CardTitle>Linea de negocio</CardTitle>
-                  <CardDescription>Interes de los clientes por linea</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="px-3 sm:px-4">
-                <BarList items={q.data.byLine} onPick={(key) => toLeads({ businessLineId: key })} />
-              </CardContent>
-            </Card>
-          </section>
+          </div>
         </div>
       )}
     </>

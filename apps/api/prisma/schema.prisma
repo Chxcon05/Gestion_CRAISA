@@ -12,7 +12,6 @@ datasource db {
 
 enum Role {
   ADMIN
-  MERCADEO
   VENDEDOR
 }
 
@@ -45,6 +44,12 @@ enum InteractionType {
   NOTA
 }
 
+enum NotificationType {
+  ACTIVIDAD
+  ASIGNACION
+  LEAD_AUTOMATICO
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -55,10 +60,12 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  assignedLeads Lead[]        @relation("LeadAssignedTo")
-  createdLeads  Lead[]        @relation("LeadCreatedBy")
+  assignedLeads Lead[]         @relation("LeadAssignedTo")
+  createdLeads  Lead[]         @relation("LeadCreatedBy")
   interactions  Interaction[]
   auditLogs     AuditLog[]
+  notifications Notification[] @relation("NotificationRecipient")
+  notified      Notification[] @relation("NotificationActor")
 
   @@map("users")
 }
@@ -107,15 +114,18 @@ model Lead {
   lossReason     String?
   /// Creado por un canal digital (formulario web, y despues WhatsApp o Meta), no por una persona
   autoCaptured   Boolean    @default(false)
+  /// Id del mensaje en el canal de origen (wamid de WhatsApp); Meta reintenta el webhook y asi no se duplica
+  externalRef    String?    @unique
   createdAt      DateTime   @default(now())
   /// Fecha de ultima actualizacion que pide el documento de alcance
   updatedAt      DateTime   @updatedAt
 
-  businessLine BusinessLine  @relation(fields: [businessLineId], references: [id], onDelete: Restrict)
-  product      Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
-  assignedTo   User?         @relation("LeadAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
-  createdBy    User?         @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  interactions Interaction[]
+  businessLine  BusinessLine   @relation(fields: [businessLineId], references: [id], onDelete: Restrict)
+  product       Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  assignedTo    User?          @relation("LeadAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy     User?          @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  interactions  Interaction[]
+  notifications Notification[]
 
   @@index([status])
   @@index([channel])
@@ -163,4 +173,23 @@ model AuditLog {
 
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+/// Avisos por usuario de lo que paso en sus leads; las acciones vencidas se calculan aparte, no se guardan.
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  actorId   String?
+  leadId    String
+  type      NotificationType
+  message   String
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user  User  @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  lead  Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("notifications")
 }

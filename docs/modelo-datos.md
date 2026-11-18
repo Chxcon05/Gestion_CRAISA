@@ -25,6 +25,7 @@ erDiagram
 | `interactions` | id, leadId, userId, type, content, fromStatus, toStatus, createdAt | Bitacora: creacion, notas, cambios de estado y reasignaciones. |
 | `lead_sequences` | year, last | Ultimo numero usado por anio: los codigos nunca se repiten. |
 | `audit_logs` | id, userId, action, detail, createdAt | Ingresos, exportaciones, borrados y cambios de usuarios. |
+| `notifications` | id, userId, actorId, leadId, type, message, readAt, createdAt | Avisos de la campana. Nadie recibe aviso de lo que hizo el mismo; las acciones vencidas se calculan, no se guardan. |
 
 ### `leads`
 
@@ -53,8 +54,9 @@ erDiagram
 |---|---|
 | `LeadStatus` | NUEVO, ASIGNADO, CONTACTADO, EN_SEGUIMIENTO, OPORTUNIDAD, GANADO, PERDIDO (orden del embudo) |
 | `Channel` | CORREO, FACEBOOK, FERIA, INSTAGRAM, LLAMADA, OTRO, SITIO_WEB, VISITA_COMERCIAL, WHATSAPP |
-| `Role` | ADMIN, MERCADEO, VENDEDOR |
+| `Role` | ADMIN, VENDEDOR |
 | `InteractionType` | ASIGNACION, CAMBIO_ESTADO, CREACION, NOTA |
+| `NotificationType` | ACTIVIDAD, ASIGNACION, LEAD_AUTOMATICO |
 
 Las etiquetas visibles de cada valor estan en `packages/shared/src/enums.ts`.
 
@@ -64,7 +66,7 @@ Las etiquetas visibles de cada valor estan en `packages/shared/src/enums.ts`.
 - **Cambios de estado.** Solo entran por `POST /leads/:code/status`. Cada cambio deja una entrada `CAMBIO_ESTADO` con el estado anterior y el nuevo.
 - **Fecha de ultima actualizacion.** `updatedAt` cambia con cualquier edicion, cambio de estado o nota.
 - **Fechas sin hora.** `entryDate` y `nextActionAt` usan columnas `date`, asi la zona horaria no las desplaza.
-- **Borrado de un lead.** Elimina tambien su bitacora (cascade).
+- **Borrado de un lead.** Elimina tambien su bitacora y sus notificaciones (cascade).
 - **Usuarios.** No se borran: se desactivan, y sus leads conservan la referencia.
 
 ## Indices

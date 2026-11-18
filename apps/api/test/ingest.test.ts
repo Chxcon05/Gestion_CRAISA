@@ -61,13 +61,15 @@ describe('captura automatica desde el sitio web', () => {
     const admin = await login('admin@t.cr')
     const detail = await admin.get(`/api/leads/${lead.code}`)
     expect(detail.body.autoCaptured).toBe(true)
+    const notes = await admin.get('/api/notifications')
+    expect(notes.body.items[0]).toMatchObject({ type: 'LEAD_AUTOMATICO', message: 'Lead nuevo desde Sitio web', actor: null })
   })
 
   it('usa el responsable configurado y completa mensajes muy cortos', async () => {
-    env.INGEST_ASSIGNEE_EMAIL = 'mercadeo@t.cr'
+    env.INGEST_ASSIGNEE_EMAIL = 'ana@t.cr'
     const res = await send(form({ message: 'hola' }))
     const lead = await prisma.lead.findUniqueOrThrow({ where: { code: res.body.code } })
-    expect(lead.assignedToId).toBe(ctx.mercadeo.id)
+    expect(lead.assignedToId).toBe(ctx.ana.id)
     expect(lead.description).toBe('Mensaje desde Sitio web: hola')
   })
 

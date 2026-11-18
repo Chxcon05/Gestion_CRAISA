@@ -31,7 +31,7 @@ Los tres deben pasar. Las pruebas usan la base `craisa_test`; nunca tocan la de 
 
 ### Agregar o quitar lineas de negocio y productos
 
-No requiere programar: se hace desde **Administracion > Catalogos**, con un usuario Administrador.
+No requiere programar: se hace desde **Administracion > Productos**, con un usuario Administrador.
 
 ### Agregar un canal de origen
 

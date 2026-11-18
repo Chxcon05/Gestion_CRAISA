@@ -15,5 +15,5 @@ export function canEdit(u: SessionUser, lead: { assignedToId: string | null; cre
 
 export const canDelete = (u: SessionUser) => u.role === 'ADMIN'
 
-/** Un vendedor solo puede asignarse leads a si mismo; Mercadeo y Admin reparten. */
+/** Un vendedor solo puede asignarse leads a si mismo; el administrador reparte. */
 export const canAssignTo = (u: SessionUser, assigneeId: string) => hasGlobalScope(u) || assigneeId === u.id

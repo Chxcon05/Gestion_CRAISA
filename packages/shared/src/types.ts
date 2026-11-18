@@ -1,4 +1,4 @@
-import type { Channel, InteractionType, LeadStatus, Role } from './enums.ts'
+import type { Channel, InteractionType, LeadStatus, NotificationType, Role } from './enums.ts'
 
 // Contratos de respuesta del API; las fechas viajan como ISO 8601.
 
@@ -104,4 +104,21 @@ export interface Catalogs {
   lines: (CatalogRef & { active: boolean })[]
   products: (CatalogRef & { active: boolean; businessLineId: string })[]
   users: (UserRef & { role: Role })[]
+}
+
+export interface NotificationItem {
+  id: string
+  type: NotificationType
+  message: string
+  lead: { code: string; contactName: string }
+  actor: UserRef | null
+  readAt: string | null
+  createdAt: string
+}
+
+/** Avisos recientes del usuario y sus acciones vencidas, que se calculan al consultar. */
+export interface NotificationsResponse {
+  items: NotificationItem[]
+  unread: number
+  overdue: number
 }

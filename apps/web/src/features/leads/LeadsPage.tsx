@@ -378,7 +378,7 @@ export function LeadsPage() {
         actions={
           <>
             <Button variant="secondary" asChild>
-              <a href={`/api/leads/export.csv${toSearch(exportQuery)}`} download title="Descarga los leads con los filtros actuales">
+              <a href={`/api/leads/export.xlsx${toSearch(exportQuery)}`} download title="Descarga los leads con los filtros actuales">
                 <Download />
                 Exportar a Excel
               </a>

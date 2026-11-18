@@ -46,8 +46,7 @@ Todos usan la contrasena `Craisa2026!`.
 
 | Correo | Rol | Ve |
 |---|---|---|
-| admin@craisa.test | Administrador | Todo, ademas de usuarios y catalogos |
-| mercadeo@craisa.test | Mercadeo | Todos los leads, el dashboard y la exportacion |
+| admin@craisa.test | Administrador (Mercadeo) | Todo: leads, dashboard, exportacion, usuarios y productos |
 | carlos.mora@craisa.test, diego.vargas@craisa.test, laura.jimenez@craisa.test | Vendedor | Solo sus leads |
 
 ## Comandos

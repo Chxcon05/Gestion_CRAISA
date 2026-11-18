@@ -18,7 +18,6 @@ type Values = z.input<typeof loginSchema>
 // Solo en desarrollo: son las cuentas ficticias del seed. La build de produccion elimina este bloque.
 const DEMO_ACCOUNTS: { email: string; name: string; role: Role }[] = [
   { email: 'admin@craisa.test', name: 'Admin CRAISA', role: 'ADMIN' },
-  { email: 'mercadeo@craisa.test', name: 'Mariana Solis', role: 'MERCADEO' },
   { email: 'carlos.mora@craisa.test', name: 'Carlos Mora', role: 'VENDEDOR' },
 ]
 const DEMO_PASSWORD = 'Craisa2026!'

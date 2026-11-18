@@ -10,6 +10,7 @@ import { usersRouter } from './users/routes.ts'
 import { errorHandler } from './lib/http.ts'
 import { env } from './env.ts'
 import { ingestRouter } from './ingest/routes.ts'
+import { notificationsRouter } from './notifications/routes.ts'
 
 export function createApp() {
   const app = express()
@@ -18,6 +19,8 @@ export function createApp() {
   // intentos del login bloquearia a todos los usuarios a la vez.
   if (env.NODE_ENV === 'production') app.set('trust proxy', 1)
   app.use(helmet())
+  // Antes de express.json: la firma de WhatsApp se calcula sobre los bytes exactos del cuerpo.
+  app.use('/api/ingest/whatsapp', express.raw({ type: '*/*', limit: '1mb' }))
   app.use(express.json({ limit: '100kb' }))
   app.use(cookieParser())
 
@@ -32,6 +35,7 @@ export function createApp() {
   api.use('/leads', leadsRouter)
   api.use('/dashboard', dashboardRouter)
   api.use('/catalogs', catalogsRouter)
+  api.use('/notifications', notificationsRouter)
   api.use('/users', requireRole('ADMIN'), usersRouter)
   api.use((_req, res) => {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Ruta no encontrada' } })

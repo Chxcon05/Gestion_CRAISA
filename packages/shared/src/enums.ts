@@ -50,17 +50,19 @@ export const CHANNEL_LABELS: Record<Channel, string> = {
   WHATSAPP: 'WhatsApp',
 }
 
-export const ROLES = ['ADMIN', 'MERCADEO', 'VENDEDOR'] as const
+export const ROLES = ['ADMIN', 'VENDEDOR'] as const
 export type Role = (typeof ROLES)[number]
 
 export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: 'Administrador',
-  MERCADEO: 'Mercadeo',
   VENDEDOR: 'Vendedor',
 }
 
 export const INTERACTION_TYPES = ['ASIGNACION', 'CAMBIO_ESTADO', 'CREACION', 'NOTA'] as const
 export type InteractionType = (typeof INTERACTION_TYPES)[number]
 
+export const NOTIFICATION_TYPES = ['ACTIVIDAD', 'ASIGNACION', 'LEAD_AUTOMATICO'] as const
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
+
 /** Roles que ven todos los leads; VENDEDOR solo ve los asignados a el o creados por el. */
-export const ROLES_WITH_GLOBAL_SCOPE: readonly Role[] = ['ADMIN', 'MERCADEO']
+export const ROLES_WITH_GLOBAL_SCOPE: readonly Role[] = ['ADMIN']

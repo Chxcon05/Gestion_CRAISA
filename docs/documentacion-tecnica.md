@@ -48,6 +48,7 @@ apps/api/
     env.ts         variables de entorno validadas
     auth/          login, logout, me, requireAuth, requireRole
     leads/         rutas, servicio, permisos, filtros, CSV
+    notifications/ avisos de la campana y acciones vencidas
     dashboard/     agregados por estado, canal, linea y periodo
     catalogs/      lineas y productos
     users/         gestion de usuarios
@@ -56,7 +57,7 @@ apps/api/
 apps/web/src/
   app/             router, layout, sesion y guardas por rol
   components/      UI base y componentes comunes
-  features/        auth, dashboard, leads, admin
+  features/        admin, auth, dashboard, leads, notifications
   lib/             cliente HTTP y formatos es-CR
 apps/web/e2e/      pruebas Playwright
 packages/shared/   enums, esquemas y tipos de respuesta
@@ -72,7 +73,8 @@ Todas las rutas usan el prefijo `/api` y, salvo login y health, requieren sesion
 | POST /auth/logout | Publico | Cierra la sesion. |
 | GET /auth/me | Todos | Usuario actual. |
 | GET /leads | Todos | Listado paginado. Filtros: q, status, channel, businessLineId, assignedToId (none = sin asignar), from, to, overdue=1, sort, dir, page, pageSize. |
-| GET /leads/export.csv | Todos | Mismos filtros, sin paginar (maximo 10 000 filas). |
+| GET /leads/export.xlsx | Todos | Excel con formato: mismos filtros, sin paginar (maximo 10 000 filas). Lo usa el boton Exportar. |
+| GET /leads/export.csv | Todos | Mismas filas en CSV (separador ;), para integraciones. |
 | POST /leads | Todos | Registrar lead. |
 | GET /leads/:code | Todos | Detalle con bitacora y permisos (canEdit, canDelete). |
 | PATCH /leads/:code | Editor del lead | Editar datos, proxima accion o responsable. |
@@ -81,18 +83,22 @@ Todas las rutas usan el prefijo `/api` y, salvo login y health, requieren sesion
 | DELETE /leads/:code | ADMIN | Eliminar. |
 | GET /dashboard | Todos | from, to, granularity (day, week, month). |
 | GET /catalogs | Todos | Lineas, productos y usuarios activos. |
-| POST y PATCH /catalogs/lines, /catalogs/products | ADMIN | Mantener catalogos. |
+| POST y PATCH /catalogs/lines, /catalogs/products | ADMIN | Mantener lineas y productos. |
+| GET /notifications | Todos | Ultimos 20 avisos del usuario, cuantos sin leer y cuantas acciones vencidas ve. |
+| POST /notifications/:id/read, /notifications/read-all | Todos | Marcar uno o todos los avisos propios como leidos. |
 | GET, POST y PATCH /users | ADMIN | Gestion de usuarios. |
 
 ## Permisos
 
-| Accion | Admin | Mercadeo | Vendedor |
-|---|---|---|---|
-| Ver leads, dashboard y exportar | Todos | Todos | Solo asignados a el o registrados por el |
-| Registrar lead | Asigna a cualquiera | Asigna a cualquiera | Solo a si mismo |
-| Editar, cambiar estado, notas | Todos | Todos | Los suyos |
-| Eliminar lead | Si | No | No |
-| Usuarios y catalogos | Si | No | No |
+Hay dos roles. Mercadeo usa el rol Administrador.
+
+| Accion | Administrador | Vendedor |
+|---|---|---|
+| Ver leads, dashboard y exportar | Todos | Solo asignados a el o registrados por el |
+| Registrar lead | Asigna a cualquiera | Solo a si mismo |
+| Editar, cambiar estado, notas | Todos | Los suyos |
+| Eliminar lead | Si | No |
+| Usuarios y productos | Si | No |
 
 El alcance se aplica en el servidor (`apps/api/src/leads/permissions.ts`) en todas las consultas, incluidas la exportacion y el dashboard. Un lead fuera del alcance responde 404, para no confirmar que existe.
 
@@ -113,7 +119,13 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
 - **Quien lo llama:** la funcion de servidor del sitio en Vercel, nunca el navegador, para que la clave no quede expuesta.
 - **Resultado:** lead en estado Asignado, con `autoCaptured = true`, asignado a `INGEST_ASSIGNEE_EMAIL` (o al primer administrador activo) y en la linea `INGEST_BUSINESS_LINE` (por defecto "Sin clasificar", que se crea sola). Cada envio crea un lead nuevo, sin deduplicacion.
 - **Seguridad:** clave comparada en tiempo constante; sin `INGEST_WEB_SECRET` la ruta responde 404. Limite global de 60 solicitudes por minuto en produccion.
-- **Siguientes canales:** WhatsApp (Cloud API de Meta) y Facebook/Instagram (Messenger, Instagram Messaging y Lead Ads) se agregan como `/api/ingest/whatsapp` y `/api/ingest/meta`, validando la firma `X-Hub-Signature-256` y reutilizando `ingestLead()`.
+- **WhatsApp:** webhook de la Cloud API de Meta en `/api/ingest/whatsapp` (`apps/api/src/ingest/whatsapp.ts`).
+  - `GET`: verificacion de Meta; responde `hub.challenge` si `hub.verify_token` es igual a `WHATSAPP_VERIFY_TOKEN`, si no 403.
+  - `POST`: valida `X-Hub-Signature-256` (HMAC SHA-256 del cuerpo crudo con `WHATSAPP_APP_SECRET`; por eso `app.ts` monta `express.raw` en esa ruta antes de `express.json`). Firma mala: 401. Firma buena: siempre 200, porque cualquier otro codigo hace que Meta reintente.
+  - Cada mensaje crea un lead con canal WhatsApp, nombre del perfil (o "WhatsApp +506 ...") y el telefono del remitente. Botones y listas usan su texto; imagenes, audios y documentos usan el pie o "Imagen sin texto". Reacciones y avisos de entrega o lectura se ignoran.
+  - Meta reintenta el webhook: el id del mensaje se guarda en `leads.externalRef` (unico), y un reintento devuelve el lead existente en vez de duplicarlo.
+  - Sin `WHATSAPP_APP_SECRET` / `WHATSAPP_VERIFY_TOKEN` las rutas responden 404.
+- **Siguiente canal:** Facebook/Instagram (Messenger, Instagram Messaging y Lead Ads) en `/api/ingest/meta`, con la misma firma y `ingestLead()`.
 
 ## Exportacion CSV
 
@@ -125,6 +137,7 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
 1. Base PostgreSQL administrada, con respaldos.
 2. Variables DATABASE_URL, JWT_SECRET (32 caracteres o mas) y NODE_ENV=production. Node 22.9 o superior; el archivo .env es opcional en el servidor.
    Para la captura desde el sitio web, tambien INGEST_WEB_SECRET (32 caracteres o mas) y, si se quiere, INGEST_ASSIGNEE_EMAIL e INGEST_BUSINESS_LINE.
+   Para WhatsApp, WHATSAPP_APP_SECRET y WHATSAPP_VERIFY_TOKEN.
 3. Ejecutar `npm ci`, `npm run build` y `npm run db:deploy -w @craisa/api`; despues, `npm start` detras de HTTPS.
 4. Primer administrador: definir ADMIN_EMAIL, ADMIN_NAME y ADMIN_PASSWORD (minimo 8 caracteres) y ejecutar `npm run db:admin -w @craisa/api`. Solo crea el usuario si no existe y nunca cambia uno existente, asi que puede quedar en el comando de arranque; despues de ingresar se borra ADMIN_PASSWORD.
 5. Crear los demas usuarios reales desde la pantalla Usuarios. El seed se niega a correr con NODE_ENV=production.

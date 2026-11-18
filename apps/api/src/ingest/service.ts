@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { CHANNEL_LABELS, type Channel } from '@craisa/shared'
 import { env } from '../env.ts'
 import { prisma } from '../lib/prisma.ts'
@@ -5,6 +6,7 @@ import { HttpError } from '../lib/http.ts'
 import { toDate, todayIso } from '../lib/dates.ts'
 import { audit } from '../lib/audit.ts'
 import { nextCode } from '../leads/service.ts'
+import { notify } from '../notifications/service.ts'
 
 type Tx = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
 
@@ -16,6 +18,8 @@ export interface InboundLead {
   company?: string | null
   contactName: string
   email?: string | null
+  /** Id del mensaje en el canal; si ya entro, se devuelve el lead existente en vez de crear otro. */
+  externalRef?: string | null
   message: string
   phone?: string | null
 }
@@ -48,7 +52,27 @@ async function resolveLine(tx: Tx, suggested?: string | null) {
   })
 }
 
+const isDuplicateRef = (e: unknown) =>
+  e instanceof Prisma.PrismaClientKnownRequestError &&
+  e.code === 'P2002' &&
+  String(e.meta?.target ?? '').includes('externalRef')
+
 export async function ingestLead(input: InboundLead) {
+  const ref = input.externalRef ?? null
+  if (ref) {
+    const existing = await prisma.lead.findUnique({ where: { externalRef: ref }, select: { code: true } })
+    if (existing) return existing.code
+  }
+  try {
+    return await createInbound(input, ref)
+  } catch (e) {
+    // Dos reintentos simultaneos pasan la consulta de arriba; el indice unico deja entrar solo a uno.
+    if (!ref || !isDuplicateRef(e)) throw e
+    return (await prisma.lead.findUniqueOrThrow({ where: { externalRef: ref }, select: { code: true } })).code
+  }
+}
+
+async function createInbound(input: InboundLead, ref: string | null) {
   const label = CHANNEL_LABELS[input.channel]
   const entryDate = todayIso()
   // La descripcion pide 5 caracteres en el formulario; un "hola" por chat igual debe entrar.
@@ -57,7 +81,7 @@ export async function ingestLead(input: InboundLead) {
     const assignee = await resolveAssignee(tx)
     const line = await resolveLine(tx, input.businessLine)
     const newCode = await nextCode(tx, entryDate)
-    await tx.lead.create({
+    const lead = await tx.lead.create({
       data: {
         code: newCode,
         autoCaptured: true,
@@ -68,6 +92,7 @@ export async function ingestLead(input: InboundLead) {
         contactName: input.contactName,
         description,
         email: input.email ?? null,
+        externalRef: ref,
         entryDate: toDate(entryDate),
         phone: input.phone ?? null,
         status: 'ASIGNADO',
@@ -79,6 +104,13 @@ export async function ingestLead(input: InboundLead) {
           },
         },
       },
+    })
+    await notify(tx, {
+      actorId: null,
+      leadId: lead.id,
+      message: `Lead nuevo desde ${label}`,
+      type: 'LEAD_AUTOMATICO',
+      userId: assignee.id,
     })
     return { code: newCode, assigneeName: assignee.name }
   })

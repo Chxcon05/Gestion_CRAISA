@@ -14,6 +14,7 @@ import { prisma } from '../lib/prisma.ts'
 import { HttpError, forbidden, notFound } from '../lib/http.ts'
 import { toDate } from '../lib/dates.ts'
 import { audit } from '../lib/audit.ts'
+import { notify } from '../notifications/service.ts'
 import { buildOrderBy, buildWhere } from './query.ts'
 import { canAssignTo, canDelete, canEdit, scopeWhere } from './permissions.ts'
 import { detailInclude, listInclude, toDetail, toListItem } from './serialize.ts'
@@ -90,7 +91,7 @@ export async function createLead(input: LeadCreate, user: SessionUser) {
   const code = await prisma.$transaction(async (tx) => {
     await assertReferences(tx, user, input)
     const newCode = await nextCode(tx, input.entryDate)
-    await tx.lead.create({
+    const created = await tx.lead.create({
       data: {
         ...input,
         code: newCode,
@@ -102,6 +103,13 @@ export async function createLead(input: LeadCreate, user: SessionUser) {
           create: { type: 'CREACION', userId: user.id, toStatus: input.status, content: 'Lead registrado' },
         },
       },
+    })
+    await notify(tx, {
+      actorId: user.id,
+      leadId: created.id,
+      message: `${user.name} le asigno un lead nuevo`,
+      type: 'ASIGNACION',
+      userId: input.assignedToId,
     })
     return newCode
   })
@@ -134,6 +142,13 @@ export async function updateLead(code: string, input: LeadUpdate, user: SessionU
       await tx.interaction.create({
         data: { leadId: lead.id, userId: user.id, type: 'ASIGNACION', content: `Asignado a ${assignee.name}` },
       })
+      await notify(tx, {
+        actorId: user.id,
+        leadId: lead.id,
+        message: `${user.name} le asigno este lead`,
+        type: 'ASIGNACION',
+        userId: input.assignedToId,
+      })
     }
   })
   return getLead(code, user)
@@ -142,12 +157,12 @@ export async function updateLead(code: string, input: LeadUpdate, user: SessionU
 export async function changeStatus(code: string, input: StatusChange, user: SessionUser) {
   const lead = await findEditable(code, user)
   if (lead.status === input.status && !input.note) return toDetail(lead, user)
-  await prisma.$transaction([
-    prisma.lead.update({
+  await prisma.$transaction(async (tx) => {
+    await tx.lead.update({
       where: { id: lead.id },
       data: { status: input.status, lossReason: input.status === 'PERDIDO' ? input.lossReason : null },
-    }),
-    prisma.interaction.create({
+    })
+    await tx.interaction.create({
       data: {
         leadId: lead.id,
         userId: user.id,
@@ -160,18 +175,34 @@ export async function changeStatus(code: string, input: StatusChange, user: Sess
             ? `Motivo: ${input.lossReason}`
             : `${STATUS_LABELS[lead.status]} a ${STATUS_LABELS[input.status]}`),
       },
-    }),
-  ])
+    })
+    if (lead.status !== input.status) {
+      await notify(tx, {
+        actorId: user.id,
+        leadId: lead.id,
+        message: `${user.name} cambio el estado a ${STATUS_LABELS[input.status]}`,
+        type: 'ACTIVIDAD',
+        userId: lead.assignedToId,
+      })
+    }
+  })
   return getLead(code, user)
 }
 
 export async function addNote(code: string, content: string, user: SessionUser) {
   const lead = await findEditable(code, user)
-  await prisma.$transaction([
-    prisma.interaction.create({ data: { leadId: lead.id, userId: user.id, type: 'NOTA', content } }),
+  await prisma.$transaction(async (tx) => {
+    await tx.interaction.create({ data: { leadId: lead.id, userId: user.id, type: 'NOTA', content } })
     // Una nota es gestion: debe mover la fecha de ultima actualizacion del lead.
-    prisma.lead.update({ where: { id: lead.id }, data: { updatedAt: new Date() } }),
-  ])
+    await tx.lead.update({ where: { id: lead.id }, data: { updatedAt: new Date() } })
+    await notify(tx, {
+      actorId: user.id,
+      leadId: lead.id,
+      message: `${user.name} agrego una nota`,
+      type: 'ACTIVIDAD',
+      userId: lead.assignedToId,
+    })
+  })
   return getLead(code, user)
 }
 

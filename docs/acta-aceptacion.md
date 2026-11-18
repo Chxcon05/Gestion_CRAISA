@@ -28,4 +28,4 @@ Verificado el 11/11/2026 con datos ficticios. La prueba `apps/web/e2e/aceptacion
 
 - Confirmar que no existe un CRM corporativo que deba usarse.
 - Aprobar el alojamiento, las credenciales, los respaldos y la revision de TI antes de usar datos reales.
-- Definir con Mercadeo las lineas de negocio y los productos definitivos, que se cargan desde Catalogos.
+- Definir con Mercadeo las lineas de negocio y los productos definitivos, que se cargan desde Productos.

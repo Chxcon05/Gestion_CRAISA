@@ -14,6 +14,9 @@
   --color-brand-900: #0b244b;
   --color-brand-950: #071a38;
   --color-accent-600: #aa182c;
+  /* Verde del logo CRAISA, oscurecido para que se lea sobre blanco en graficos e indicadores. */
+  --color-lime-brand: #8fae2c;
+  --color-canvas: #f3f5f9;
 }
 
 @layer base {
@@ -22,7 +25,7 @@
     font-feature-settings: 'cv11', 'ss01';
   }
   body {
-    @apply bg-slate-50 text-slate-900;
+    @apply bg-canvas text-slate-900;
   }
   /* El Preflight hereda el tamano en h1..h6; se fija uno base para que nunca quede menor que su parrafo. */
   h1 {
@@ -41,5 +44,26 @@
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+/* Barra de NavigationProgress: entra a los 150 ms para que una seccion ya en cache no la haga destellar. */
+.nav-progress {
+  animation: nav-progress-in 0.2s ease-out 0.15s both;
+}
+.nav-progress-bar {
+  animation: nav-progress-slide 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes nav-progress-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes nav-progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
   }
 }
