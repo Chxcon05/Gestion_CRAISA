@@ -2,6 +2,7 @@ import { Router, type Request } from 'express'
 import {
   CHANNEL_LABELS,
   STATUS_LABELS,
+  duplicatesQuerySchema,
   leadCreateSchema, leadFiltersSchema, leadUpdateSchema,
   noteSchema,
   statusChangeSchema,
@@ -16,6 +17,7 @@ import { buildOrderBy, buildWhere } from './query.ts'
 import { listInclude, toListItem } from './serialize.ts'
 import { toCsv } from './csv.ts'
 import { toXlsx } from './xlsx.ts'
+import { findDuplicates } from './insights.ts'
 import * as leads from './service.ts'
 
 export const leadsRouter = Router()
@@ -58,7 +60,7 @@ async function describeFilters(f: LeadFilters) {
   return out
 }
 
-// Van antes de '/:code' para que "export.csv" o "export.xlsx" no se tomen como codigo de lead.
+// Van antes de '/:code' para que "export.csv", "export.xlsx" o "duplicates" no se tomen como codigo de lead.
 leadsRouter.get('/export.csv', async (req, res) => {
   const { user, rows } = await exportRows(req)
   await audit(user.id, 'EXPORTACION_CSV', `${rows.length} registros; filtros ${JSON.stringify(req.query)}`)
@@ -79,6 +81,10 @@ leadsRouter.get('/export.xlsx', async (req, res) => {
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   res.setHeader('Content-Disposition', `attachment; filename="leads-craisa-${todayIso()}.xlsx"`)
   res.send(file)
+})
+
+leadsRouter.get('/duplicates', async (req, res) => {
+  res.json(await findDuplicates(parse(duplicatesQuerySchema, req.query), currentUser(req)))
 })
 
 leadsRouter.post('/', async (req, res) => {

@@ -57,7 +57,7 @@ function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
       title={active ? 'Clic para desactivar' : 'Clic para activar'}
       className={cn(
         'rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset',
-        active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-500 ring-slate-400/20',
+        active ? 'bg-lime-soft text-lime-ink ring-lime-brand/40' : 'bg-stone-100 text-stone-500 ring-stone-400/20',
       )}
     >
       {active ? 'Activo' : 'Inactivo'}
@@ -124,12 +124,12 @@ export function ProductsPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {products.length === 0 ? (
-                      <p className="text-sm text-slate-500">Sin productos.</p>
+                      <p className="text-sm text-stone-500">Sin productos.</p>
                     ) : (
-                      <ul className="divide-y divide-slate-100">
+                      <ul className="divide-y divide-stone-100">
                         {products.map((p) => (
                           <li key={p.id} className="flex items-center justify-between gap-2 py-2 text-sm">
-                            <span className={cn(p.active ? 'text-slate-800' : 'text-slate-400 line-through')}>{p.name}</span>
+                            <span className={cn(p.active ? 'text-stone-800' : 'text-stone-400 line-through')}>{p.name}</span>
                             <Toggle
                               active={p.active}
                               onClick={() => patchProduct.mutate({ id: p.id, active: p.active === false })}

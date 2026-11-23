@@ -8,7 +8,7 @@ import { currentUser } from '../auth/session.ts'
 
 export const usersRouter = Router()
 
-const publicFields = { id: true, name: true, email: true, role: true, active: true, createdAt: true } as const
+const publicFields = { id: true, name: true, email: true, role: true, active: true, whatsapp: true, createdAt: true } as const
 
 usersRouter.get('/', async (_req, res) => {
   res.json(await prisma.user.findMany({ orderBy: { name: 'asc' }, select: publicFields }))

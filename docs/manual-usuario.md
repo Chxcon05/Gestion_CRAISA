@@ -20,6 +20,8 @@ Lo que puede ver y hacer depende de su rol:
 
 Si falta un dato o tiene un formato invalido, el campo se marca en rojo con el motivo.
 
+- **Clientes repetidos:** al escribir el telefono o el correo, si ya existe un lead con ese dato aparece un aviso amarillo con su codigo, estado y responsable. El telefono se compara por sus ultimos 8 digitos, asi que +506 8888-1234 y 88881234 cuentan como el mismo. El aviso tambien se muestra en el detalle del lead.
+
 ## Buscar y filtrar
 
 En **Leads**:
@@ -29,6 +31,7 @@ En **Leads**:
 - **Filtrar:** por **Canal** o **Linea** (puede marcar varios valores), por responsable o por rango de fechas de ingreso.
 - **Seguimiento:** los botones **Vencidas**, **Para hoy** y **Esta semana** muestran los leads abiertos segun la fecha de su proxima accion.
 - **Ordenar:** pulse el titulo de una columna.
+- **Prioridad:** cada lead abierto tiene un puntaje de 0 a 100 (Alta desde 80, Media desde 60) segun la etapa, el canal, si es una empresa, si tiene producto, si dejo telefono y correo y si la consulta es detallada. Ordene por **Prioridad** para atender primero los mas prometedores; en el detalle se explica de donde salio cada punto. Los ganados y perdidos no tienen prioridad.
 - **Limpiar** quita todos los filtros.
 
 Los filtros quedan en la direccion de la pagina: puede guardarla en favoritos o enviarla a un companero.
@@ -54,6 +57,7 @@ La **Bitacora de gestion** muestra todo el historial, del mas reciente al mas an
 - **Indicadores:** leads registrados, nuevos sin atender, oportunidades y tasa de cierre (ganados entre ganados y perdidos).
 - **Embudo comercial:** cuantos leads hay en cada etapa y que porcentaje representan.
 - **Graficos:** leads ingresados por dia, semana o mes; canal de origen y linea de negocio.
+- **Tiempo de respuesta:** promedio desde que entra un lead hasta que se marca Contactado, el porcentaje atendido en menos de 24 horas y cuantos siguen sin contactar. Se puede ver por vendedor (solo el administrador) o por canal. Los leads registrados ya contactados no cuentan, porque no hubo espera que medir.
 - **Ir al detalle:** pulse una barra para abrir el listado con ese filtro aplicado.
 
 ## Notificaciones
@@ -73,5 +77,6 @@ En **Leads**, aplique los filtros que necesite y pulse **Exportar a Excel**. El 
 ## Administracion (solo Administrador)
 
 - **Usuarios:** crear usuarios con rol y contrasena inicial, cambiar el rol, y desactivar o reactivar el acceso. Un usuario desactivado no puede ingresar, pero sus leads se conservan.
+- **WhatsApp del vendedor:** en la columna WhatsApp de Usuarios se escribe su numero (8 digitos, o con codigo de pais si es de otro pais). Cada vez que se le asigne un lead le llega un WhatsApp desde el numero de la empresa con los datos del cliente, un enlace para escribirle y otro para abrir el lead. Sin numero, solo ve el aviso en la campana.
 - **Productos:** agregar lineas de negocio y productos, y activarlos o desactivarlos. Una opcion desactivada deja de aparecer en el formulario sin afectar los leads que ya la usan.
-- **Leads automaticos:** las consultas del formulario Contactenos del sitio web y los mensajes de WhatsApp entran solos (un lead por mensaje), asignadas al administrador y con la etiqueta "Automatico" junto al canal. El administrador abre el lead, elige la linea de negocio correcta y lo asigna al responsable desde Editar.
+- **Leads automaticos:** las consultas del formulario Contactenos del sitio web, los mensajes de WhatsApp y los correos que llegan a info@craisa.com entran solos, asignadas al administrador y con la etiqueta "Automatico" junto al canal. El administrador abre el lead, elige la linea de negocio correcta y lo asigna al responsable desde Editar. Si un cliente manda varios WhatsApp seguidos no se crean varios leads: los mensajes siguientes aparecen en la bitacora de su lead como "Cliente escribio", hasta que ese lead se cierre como Ganado o Perdido.

@@ -1,98 +1,116 @@
 import { z } from 'zod'
 import type { InboundLead } from './service.ts'
 
-// Solo se validan los campos que se usan; Meta agrega campos nuevos seguido y no deben romper el webhook.
-const messageSchema = z
+// Solo se validan los campos que se usan; Evolution agrega campos entre versiones y no deben romper el webhook.
+const keySchema = z
   .object({
-    from: z.string().regex(/^\d{6,20}$/),
+    fromMe: z.boolean().optional(),
     id: z.string().min(1),
-    type: z.string(),
+    remoteJid: z.string().min(1),
   })
   .passthrough()
 
-const payloadSchema = z.object({
-  entry: z.array(
-    z.object({
-      changes: z.array(
-        z.object({
-          field: z.string(),
-          value: z
-            .object({
-              contacts: z
-                .array(z.object({ profile: z.object({ name: z.string() }).partial().optional(), wa_id: z.string() }))
-                .optional(),
-              messages: z.array(messageSchema).optional(),
-            })
-            .passthrough(),
-        }),
-      ),
-    }),
-  ),
-  object: z.literal('whatsapp_business_account'),
-})
+const messageSchema = z
+  .object({
+    key: keySchema,
+    message: z.record(z.string(), z.unknown()).nullish(),
+    pushName: z.string().nullish(),
+  })
+  .passthrough()
+
+const payloadSchema = z
+  .object({
+    data: z.union([messageSchema, z.array(messageSchema)]),
+    event: z.string(),
+  })
+  .passthrough()
 
 type Message = z.infer<typeof messageSchema>
+type Obj = Record<string, unknown>
 
-// Una reaccion con emoji o un aviso del sistema no es una consulta: no generan lead.
-const IGNORED_TYPES = new Set(['reaction', 'request_welcome', 'system', 'unsupported'])
+// Grupos, estados y canales no son consultas de un cliente.
+const IGNORED_CHATS = ['@broadcast', '@g.us', '@newsletter']
+
+// Una reaccion, un mensaje borrado o un cambio de llaves no es una consulta: no generan lead.
+const IGNORED_TYPES = new Set(['protocolMessage', 'reactionMessage', 'senderKeyDistributionMessage'])
+
+// Envoltorios que Baileys pone a los mensajes temporales y de una sola vista; el contenido real va dentro.
+const WRAPPERS = ['documentWithCaptionMessage', 'ephemeralMessage', 'viewOnceMessage', 'viewOnceMessageV2']
 
 const MEDIA_LABELS: Record<string, string> = {
-  audio: 'Nota de voz',
-  contacts: 'Contacto compartido',
-  document: 'Documento',
-  image: 'Imagen',
-  location: 'Ubicacion',
-  sticker: 'Sticker',
-  video: 'Video',
+  audioMessage: 'Nota de voz',
+  contactMessage: 'Contacto compartido',
+  contactsArrayMessage: 'Contacto compartido',
+  documentMessage: 'Documento',
+  imageMessage: 'Imagen',
+  locationMessage: 'Ubicacion',
+  stickerMessage: 'Sticker',
+  videoMessage: 'Video',
 }
 
 const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null)
-const field = (m: Message, key: string) => (m[key] && typeof m[key] === 'object' ? (m[key] as Record<string, unknown>) : {})
+const obj = (v: unknown): Obj => (v && typeof v === 'object' ? (v as Obj) : {})
 
-function messageText(m: Message) {
-  if (m.type === 'text') return str(field(m, 'text').body)
-  if (m.type === 'button') return str(field(m, 'button').text)
-  if (m.type === 'interactive') {
-    const i = field(m, 'interactive')
-    const reply = (i.button_reply ?? i.list_reply ?? {}) as Record<string, unknown>
-    return str(reply.title)
+function unwrap(message: Obj): Obj {
+  for (const w of WRAPPERS) {
+    const inner = obj(obj(message[w]).message)
+    if (Object.keys(inner).length) return unwrap(inner)
   }
-  const label = MEDIA_LABELS[m.type] ?? `Mensaje de tipo ${m.type}`
-  const media = field(m, m.type)
-  const detail = str(media.caption) ?? str(media.name) ?? str(media.address)
+  return message
+}
+
+function messageText(raw: Obj) {
+  const m = unwrap(raw)
+  const type = Object.keys(m).find((k) => k !== 'messageContextInfo')
+  if (!type || IGNORED_TYPES.has(type)) return null
+  const body = obj(m[type])
+  if (type === 'conversation') return str(m.conversation)
+  if (type === 'extendedTextMessage') return str(body.text)
+  if (type === 'buttonsResponseMessage' || type === 'templateButtonReplyMessage') return str(body.selectedDisplayText)
+  if (type === 'listResponseMessage') return str(body.title)
+  const label = MEDIA_LABELS[type] ?? 'Mensaje sin texto'
+  const detail = str(body.caption) ?? str(body.fileName) ?? str(body.address) ?? str(body.name) ?? str(body.displayName)
   return detail ? `${label}: ${detail}` : `${label} sin texto`
 }
 
-/** "50688887777" a "+506 8888-7777"; los numeros de otros paises quedan como +<digitos>. */
-export function formatPhone(waId: string) {
-  const cr = /^506(\d{4})(\d{4})$/.exec(waId)
-  return cr ? `+506 ${cr[1]}-${cr[2]}` : `+${waId}`
+// Con el formato nuevo de WhatsApp el chat llega como "@lid", un id que no es el telefono; el numero viene aparte.
+function senderDigits(m: Message) {
+  const candidates = [m.key.remoteJid, m.key.remoteJidAlt, m.key.senderPn, m.key.participant]
+  for (const jid of candidates) {
+    if (typeof jid !== 'string' || !jid.endsWith('@s.whatsapp.net')) continue
+    const digits = jid.split('@')[0]!.split(':')[0]!
+    if (/^\d{6,20}$/.test(digits)) return digits
+  }
+  return null
 }
 
-/** Convierte una notificacion del webhook en un lead por mensaje; ignora estados de entrega y reacciones. */
-export function parseWhatsAppWebhook(body: unknown): InboundLead[] {
+/** "50688887777" a "+506 8888-7777"; los numeros de otros paises quedan como +<digitos>. */
+export function formatPhone(digits: string) {
+  const cr = /^506(\d{4})(\d{4})$/.exec(digits)
+  return cr ? `+506 ${cr[1]}-${cr[2]}` : `+${digits}`
+}
+
+/** Convierte un evento del webhook de Evolution en un lead por mensaje recibido; ignora lo enviado por la empresa. */
+export function parseEvolutionWebhook(body: unknown): InboundLead[] {
   const parsed = payloadSchema.safeParse(body)
-  if (!parsed.success) return []
+  // Segun la configuracion, Evolution manda "messages.upsert" o "MESSAGES_UPSERT".
+  if (!parsed.success || parsed.data.event.toLowerCase().replace('_', '.') !== 'messages.upsert') return []
+  const messages = Array.isArray(parsed.data.data) ? parsed.data.data : [parsed.data.data]
   const leads: InboundLead[] = []
-  for (const entry of parsed.data.entry) {
-    for (const change of entry.changes) {
-      if (change.field !== 'messages') continue
-      const { contacts = [], messages = [] } = change.value
-      for (const m of messages) {
-        if (IGNORED_TYPES.has(m.type)) continue
-        const text = messageText(m)
-        if (!text) continue
-        const phone = formatPhone(m.from)
-        const profile = str(contacts.find((c) => c.wa_id === m.from)?.profile?.name)
-        leads.push({
-          channel: 'WHATSAPP',
-          contactName: (profile && profile.length >= 2 ? profile : `WhatsApp ${phone}`).slice(0, 120),
-          externalRef: `whatsapp:${m.id}`,
-          message: text.slice(0, 2000),
-          phone,
-        })
-      }
-    }
+  for (const m of messages) {
+    if (m.key.fromMe || IGNORED_CHATS.some((s) => m.key.remoteJid.endsWith(s))) continue
+    const digits = senderDigits(m)
+    const text = messageText(obj(m.message))
+    if (!digits || !text) continue
+    const phone = formatPhone(digits)
+    const profile = str(m.pushName)
+    leads.push({
+      channel: 'WHATSAPP',
+      contactName: (profile && profile.length >= 2 ? profile : `WhatsApp ${phone}`).slice(0, 120),
+      externalRef: `whatsapp:${m.key.id}`,
+      message: text.slice(0, 2000),
+      phone,
+    })
   }
   return leads
 }

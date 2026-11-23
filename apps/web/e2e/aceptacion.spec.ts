@@ -35,7 +35,7 @@ test('criterios de entrega de punta a punta', async ({ page, browser }) => {
   await page.getByLabel('Nombre').fill(NAME)
   await page.getByRole('textbox', { name: 'Correo' }).fill('aceptacion@ejemplo.cr')
   await page.getByText('Sitio web', { exact: true }).click()
-  await page.getByLabel('Linea de negocio').selectOption({ label: 'Carga' })
+  await page.getByLabel('Linea de negocio').selectOption({ label: 'Movimiento de Carga' })
   await page.getByLabel('Descripcion de la consulta').fill('Cotizacion de montacargas electrico')
   await page.getByLabel('Responsable').selectOption({ label: 'Laura Jimenez' })
   await page.getByRole('button', { name: 'Registrar lead' }).click()

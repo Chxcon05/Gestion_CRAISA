@@ -1,22 +1,29 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/archivo';
 @import '@fontsource-variable/inter';
 
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  /* Archivo para titulos y cifras: su trazo industrial va con la maquinaria y con el logo en bloque de CRAISA. */
+  --font-display: 'Archivo Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 
-  --color-brand-50: #eef3fb;
-  --color-brand-100: #d6e2f5;
-  --color-brand-200: #adc4ea;
-  --color-brand-500: #2d5fae;
-  --color-brand-600: #1c4c94;
-  --color-brand-700: #143f7f;
-  --color-brand-800: #0f3166;
-  --color-brand-900: #0b244b;
-  --color-brand-950: #071a38;
+  /* Azul tomado del logo, mas vivo que el marino anterior. */
+  --color-brand-50: #eef4fc;
+  --color-brand-100: #d9e6f8;
+  --color-brand-200: #b3cdf1;
+  --color-brand-300: #84abe6;
+  --color-brand-500: #2a68c4;
+  --color-brand-600: #1a58b0;
+  --color-brand-700: #134f9c;
+  --color-brand-800: #0f3f7d;
+  --color-brand-900: #0c3163;
+  --color-brand-950: #08203f;
   --color-accent-600: #aa182c;
-  /* Verde del logo CRAISA, oscurecido para que se lea sobre blanco en graficos e indicadores. */
-  --color-lime-brand: #8fae2c;
-  --color-canvas: #f3f5f9;
+  /* Verde del sello del logo: lime-brand para barras y marcas, lime-ink cuando va como texto sobre blanco. */
+  --color-lime-brand: #7cb82f;
+  --color-lime-ink: #4d7c0f;
+  --color-lime-soft: #eef7e0;
+  --color-canvas: #faf9f7;
 }
 
 @layer base {
@@ -25,11 +32,11 @@
     font-feature-settings: 'cv11', 'ss01';
   }
   body {
-    @apply bg-canvas text-slate-900;
+    @apply bg-canvas text-stone-900;
   }
   /* El Preflight hereda el tamano en h1..h6; se fija uno base para que nunca quede menor que su parrafo. */
   h1 {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply font-display text-2xl font-semibold tracking-tight;
   }
   h2 {
     @apply text-base font-semibold;

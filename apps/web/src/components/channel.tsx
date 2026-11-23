@@ -20,7 +20,7 @@ export function ChannelLabel({ auto, channel, className }: { auto?: boolean; cha
   const Icon = CHANNEL_ICONS[channel]
   return (
     <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap', className)}>
-      <Icon className="size-3.5 text-slate-400" aria-hidden />
+      <Icon className="size-3.5 text-stone-400" aria-hidden />
       {CHANNEL_LABELS[channel]}
       {auto && (
         <span

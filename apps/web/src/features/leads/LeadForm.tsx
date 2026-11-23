@@ -23,6 +23,7 @@ import { Input, NativeSelect, Textarea } from '@/components/ui/input'
 import { CHANNEL_ICONS } from '@/components/channel'
 import { cn } from '@/lib/utils'
 import { useCatalogs, useLeadMutation } from './hooks'
+import { DuplicateWarning, useDuplicates } from './DuplicateWarning'
 
 type FormValues = LeadCreateInput
 
@@ -88,7 +89,8 @@ export function LeadForm({ lead }: { lead?: LeadDetail }) {
 
   const [lineId, status, channel] = useWatch({ control, name: ['businessLineId', 'status', 'channel'] })
   const products = (catalogs.data?.products ?? []).filter((p) => p.businessLineId === lineId && p.active)
-
+  const [phone, email] = useWatch({ control, name: ['phone', 'email'] })
+  const duplicates = useDuplicates(phone, email, lead?.code)
 
   const save = useLeadMutation(async (values: FormValues) => {
     if (lead) {
@@ -135,12 +137,13 @@ export function LeadForm({ lead }: { lead?: LeadDetail }) {
         <Field label="Correo" htmlFor="email" error={err('email')}>
           <Input id="email" type="email" autoComplete="email" {...register('email')} {...aria('email')} />
         </Field>
+        <DuplicateWarning matches={duplicates.data} className="sm:col-span-2" />
       </Section>
 
       <Section title="Origen e interes" description="Por donde llego la consulta y que le interesa al cliente.">
         {/* Fichas en lugar de un desplegable: los 9 canales se ven de un vistazo y se eligen con un toque. */}
         <fieldset className="sm:col-span-2" aria-describedby={errors.channel ? 'channel-error' : undefined}>
-          <legend className="mb-2 text-[13px] font-medium text-slate-700">
+          <legend className="mb-2 text-[13px] font-medium text-stone-700">
             Canal de origen
             <span className="ml-0.5 text-red-600" aria-hidden>
               *
@@ -157,12 +160,12 @@ export function LeadForm({ lead }: { lead?: LeadDetail }) {
                     'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-500/40',
                     selected
                       ? 'border-brand-500 bg-brand-50 font-medium text-brand-800'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50',
+                      : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50',
                     errors.channel && !selected && 'border-red-200',
                   )}
                 >
                   <input type="radio" value={c} {...register('channel')} className="sr-only" />
-                  <Icon className={cn('size-4', selected ? 'text-brand-600' : 'text-slate-400')} />
+                  <Icon className={cn('size-4', selected ? 'text-brand-600' : 'text-stone-400')} />
                   {CHANNEL_LABELS[c]}
                 </label>
               )
@@ -262,7 +265,7 @@ export function LeadForm({ lead }: { lead?: LeadDetail }) {
         )}
       </Section>
 
-      <div className="sticky bottom-0 -mx-4 flex justify-end gap-2 border-t border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+      <div className="sticky bottom-0 -mx-4 flex justify-end gap-2 border-t border-stone-200 bg-stone-50/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
         <Button variant="secondary" asChild>
           <Link to={lead ? `/leads/${lead.code}` : '/leads'}>Cancelar</Link>
         </Button>

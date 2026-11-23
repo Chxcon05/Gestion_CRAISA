@@ -1,4 +1,5 @@
 import type { Channel, InteractionType, LeadStatus, NotificationType, Role } from './enums.ts'
+import type { Priority } from './priority.ts'
 
 // Contratos de respuesta del API; las fechas viajan como ISO 8601.
 
@@ -34,7 +35,28 @@ export interface LeadListItem {
   assignedTo: UserRef | null
   nextAction: string | null
   nextActionAt: string | null
+  priority: Priority
   updatedAt: string
+}
+
+/** Lead previo con el mismo telefono o correo; canOpen es falso si el vendedor no tiene acceso a el. */
+export interface DuplicateMatch {
+  assignedTo: UserRef | null
+  canOpen: boolean
+  code: string
+  company: string | null
+  contactName: string
+  entryDate: string
+  matchedBy: ('email' | 'phone')[]
+  status: LeadStatus
+}
+
+/** Horas desde que entra un lead hasta que se marca Contactado (o una etapa posterior). */
+export interface ResponseTimeRow {
+  avgHours: number
+  contacted: number
+  key: string
+  label: string
 }
 
 export interface Interaction {
@@ -93,6 +115,16 @@ export interface DashboardData {
   byChannel: CountItem<Channel>[]
   byLine: CountItem[]
   series: { period: string; count: number }[]
+  response: {
+    avgHours: number | null
+    byChannel: ResponseTimeRow[]
+    bySeller: ResponseTimeRow[]
+    contacted: number
+    /** Abiertos del periodo que nadie ha contactado todavia. */
+    pending: number
+    /** Porcentaje de los contactados que lo fueron en menos de 24 horas. */
+    within24h: number
+  }
   upcoming: Pick<LeadListItem, 'code' | 'contactName' | 'company' | 'nextAction' | 'nextActionAt' | 'status' | 'assignedTo'>[]
 }
 

@@ -19,12 +19,12 @@ export function LeadEditPage() {
   const lead = useLead(code)
   return (
     <div className="mx-auto max-w-3xl">
-      <nav aria-label="Ruta" className="mb-3 flex items-center gap-1 text-sm text-slate-500">
-        <Link to="/leads" className="hover:text-slate-900">
+      <nav aria-label="Ruta" className="mb-3 flex items-center gap-1 text-sm text-stone-500">
+        <Link to="/leads" className="hover:text-stone-900">
           Leads
         </Link>
         <ChevronRight className="size-3.5" />
-        <Link to={`/leads/${code}`} className="font-mono hover:text-slate-900">
+        <Link to={`/leads/${code}`} className="font-mono hover:text-stone-900">
           {code}
         </Link>
       </nav>

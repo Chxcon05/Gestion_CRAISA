@@ -62,14 +62,14 @@ export function StatusDialog({ lead, open, onOpenChange, initial }: Props) {
     >
       <div className="space-y-4">
         <fieldset>
-          <legend className="mb-2 text-[13px] font-medium text-slate-700">Nuevo estado</legend>
+          <legend className="mb-2 text-[13px] font-medium text-stone-700">Nuevo estado</legend>
           <div className="grid grid-cols-2 gap-2">
             {LEAD_STATUSES.map((s) => (
               <label
                 key={s}
                 className={cn(
                   'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors',
-                  status === s ? 'border-brand-500 bg-brand-50 text-brand-900 ring-1 ring-brand-500' : 'border-slate-200 hover:bg-slate-50',
+                  status === s ? 'border-brand-500 bg-brand-50 text-brand-900 ring-1 ring-brand-500' : 'border-stone-200 hover:bg-stone-50',
                 )}
               >
                 <input
@@ -82,7 +82,7 @@ export function StatusDialog({ lead, open, onOpenChange, initial }: Props) {
                 />
                 <span className={cn('size-2 rounded-full', STATUS_STYLES[s].dot)} aria-hidden />
                 {STATUS_LABELS[s]}
-                {s === lead.status && <span className="ml-auto text-[11px] text-slate-400">actual</span>}
+                {s === lead.status && <span className="ml-auto text-[11px] text-stone-400">actual</span>}
               </label>
             ))}
           </div>

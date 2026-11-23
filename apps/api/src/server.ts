@@ -3,6 +3,8 @@ import { existsSync } from 'node:fs'
 import express from 'express'
 import { env } from './env.ts'
 import { createApp } from './app.ts'
+import { backfillScores } from './leads/insights.ts'
+import { startEmailPolling } from './ingest/email.ts'
 
 const app = createApp()
 
@@ -17,4 +19,8 @@ if (existsSync(webDist)) {
 
 app.listen(env.PORT, () => {
   console.info(`API CRAISA en http://localhost:${env.PORT}`)
+  backfillScores()
+    .then((n) => n && console.info(`Prioridad calculada en ${n} leads`))
+    .catch((e: unknown) => console.error('No se pudo calcular la prioridad de los leads', e))
+  if (startEmailPolling()) console.info(`Correo: revisando ${env.MAIL_IMAP_USER} cada ${env.MAIL_POLL_SECONDS} s`)
 })

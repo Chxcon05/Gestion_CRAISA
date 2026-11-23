@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const field =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-xs placeholder:text-slate-400 transition-colors focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/15 disabled:bg-slate-50 disabled:text-slate-500 aria-[invalid=true]:border-red-500 aria-[invalid=true]:ring-red-500/15'
+  'w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-stone-900 shadow-xs placeholder:text-stone-400 transition-colors focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20 disabled:bg-stone-50 disabled:text-stone-500 aria-[invalid=true]:border-red-500 aria-[invalid=true]:ring-red-500/15'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(({ className, ...props }, ref) => (
   <input ref={ref} className={cn(field, 'h-9', className)} {...props} />
@@ -22,7 +22,7 @@ export const NativeSelect = forwardRef<HTMLSelectElement, SelectHTMLAttributes<H
       <select ref={ref} className={cn(field, 'h-9 appearance-none pr-9', className)} {...props}>
         {children}
       </select>
-      <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-slate-400" />
+      <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-stone-400" />
     </div>
   ),
 )

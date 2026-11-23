@@ -36,24 +36,24 @@ function Item({ n, onOpen }: { n: NotificationItem; onOpen: (n: NotificationItem
         type="button"
         onClick={() => onOpen(n)}
         className={cn(
-          'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none',
+          'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-stone-50 focus-visible:bg-stone-50 focus-visible:outline-none',
           unread && 'bg-brand-50/40',
         )}
       >
         <span
           className={cn(
             'mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full',
-            unread ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-500',
+            unread ? 'bg-brand-100 text-brand-700' : 'bg-stone-100 text-stone-500',
           )}
         >
           <Icon className="size-4" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className={cn('block text-sm', unread ? 'font-medium text-slate-900' : 'text-slate-700')}>{n.message}</span>
-          <span className="mt-0.5 block truncate text-xs text-slate-500">
+          <span className={cn('block text-sm', unread ? 'font-medium text-stone-900' : 'text-stone-700')}>{n.message}</span>
+          <span className="mt-0.5 block truncate text-xs text-stone-500">
             {n.lead.code} · {n.lead.contactName}
           </span>
-          <span className="mt-1 block text-[11px] text-slate-400">{relativeTime(n.createdAt)}</span>
+          <span className="mt-1 block text-[11px] text-stone-400">{relativeTime(n.createdAt)}</span>
         </span>
         {unread && <span className="mt-2 size-2 shrink-0 rounded-full bg-brand-600" aria-label="Sin leer" />}
       </button>
@@ -88,11 +88,11 @@ export function NotificationsBell({ className }: { className?: string }) {
       <P.Trigger className={cn(className, 'relative')} aria-label={label ? `Notificaciones: ${label}` : 'Notificaciones'} title="Notificaciones">
         <Bell className="size-[18px]" />
         {unread > 0 ? (
-          <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white tabular-nums ring-2 ring-white">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white tabular-nums ring-2 ring-white">
             {unread > 9 ? '9+' : unread}
           </span>
         ) : (
-          overdue > 0 && <span className="absolute top-2 right-2.5 size-2 rounded-full bg-red-500 ring-2 ring-white" aria-hidden />
+          overdue > 0 && <span className="absolute top-1.5 right-2 size-2 rounded-full bg-red-600 ring-2 ring-white" aria-hidden />
         )}
       </P.Trigger>
       <P.Portal>
@@ -100,10 +100,10 @@ export function NotificationsBell({ className }: { className?: string }) {
           align="end"
           sideOffset={8}
           collisionPadding={16}
-          className="z-50 flex max-h-[min(32rem,calc(100vh-6rem))] w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl focus:outline-none"
+          className="z-50 flex max-h-[min(32rem,calc(100vh-6rem))] w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-xl focus:outline-none"
         >
-          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-            <p className="text-sm font-semibold text-slate-900">Notificaciones</p>
+          <div className="flex items-center justify-between gap-3 border-b border-stone-100 px-4 py-3">
+            <p className="text-sm font-semibold text-stone-900">Notificaciones</p>
             {unread > 0 && (
               <button
                 type="button"
@@ -137,16 +137,16 @@ export function NotificationsBell({ className }: { className?: string }) {
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             {query.isPending ? (
-              <p className="px-4 py-8 text-center text-sm text-slate-500">Cargando...</p>
+              <p className="px-4 py-8 text-center text-sm text-stone-500">Cargando...</p>
             ) : query.isError ? (
               <p className="px-4 py-8 text-center text-sm text-red-600">{query.error.message}</p>
             ) : items.length === 0 ? (
               <div className="px-6 py-10 text-center">
-                <p className="text-sm font-medium text-slate-700">Sin notificaciones</p>
-                <p className="mt-1 text-xs text-slate-500">Aqui vera los leads que le asignen y lo que otros hagan en sus leads.</p>
+                <p className="text-sm font-medium text-stone-700">Sin notificaciones</p>
+                <p className="mt-1 text-xs text-stone-500">Aqui vera los leads que le asignen y lo que otros hagan en sus leads.</p>
               </div>
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-stone-100">
                 {items.map((n) => (
                   <Item key={n.id} n={n} onOpen={openItem} />
                 ))}

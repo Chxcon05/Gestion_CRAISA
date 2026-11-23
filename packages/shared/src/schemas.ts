@@ -90,6 +90,13 @@ export const webIngestSchema = leadBaseSchema
   .superRefine(leadRules)
 export type WebIngest = z.output<typeof webIngestSchema>
 
+// Basta uno de los dos; el telefono se compara por sus ultimos 8 digitos, asi "+506 8888-1234" y "88881234" coinciden.
+export const duplicatesQuerySchema = z.object({
+  email: z.string().trim().max(160).optional(),
+  exclude: z.string().trim().max(20).optional(),
+  phone: z.string().trim().max(30).optional(),
+})
+
 export const noteSchema = z.object({
   content: z.string().trim().min(1, 'Escriba la nota').max(2000),
 })
@@ -102,7 +109,7 @@ const csvArray = <T extends z.ZodTypeAny>(item: T) =>
     .transform((v) => (v === undefined ? [] : (Array.isArray(v) ? v : v.split(',')).filter(Boolean)))
     .pipe(z.array(item))
 
-export const SORT_FIELDS = ['code', 'contactName', 'entryDate', 'nextActionAt', 'status', 'updatedAt'] as const
+export const SORT_FIELDS = ['code', 'contactName', 'entryDate', 'nextActionAt', 'score', 'status', 'updatedAt'] as const
 
 export const leadFiltersSchema = z.object({
   q: z.string().trim().max(100).optional(),
@@ -133,11 +140,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Ingrese la contrasena'),
 })
 
+// Evolution y wa.me piden el numero con codigo de pais y sin simbolos; 8 digitos se toman como de Costa Rica.
+// Vacio borra el numero: ese usuario deja de recibir avisos por WhatsApp.
+const whatsappSchema = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/\D/g, ''))
+  .transform((d) => (d.length === 8 ? `506${d}` : d))
+  .refine((d) => d === '' || /^\d{10,15}$/.test(d), 'Use 8 digitos o el numero con codigo de pais')
+  .transform((d) => d || null)
+
 export const userCreateSchema = z.object({
   name: z.string().trim().min(2, 'Ingrese el nombre').max(120),
   email: z.string().trim().toLowerCase().email('Correo no valido'),
   password: z.string().min(8, 'Minimo 8 caracteres').max(100),
   role: z.enum(ROLES),
+  whatsapp: whatsappSchema.optional(),
 })
 
 export const userUpdateSchema = z.object({
@@ -145,6 +163,7 @@ export const userUpdateSchema = z.object({
   role: z.enum(ROLES).optional(),
   active: z.boolean().optional(),
   password: z.string().min(8, 'Minimo 8 caracteres').max(100).optional(),
+  whatsapp: whatsappSchema.optional(),
 })
 
 export const catalogItemSchema = z.object({

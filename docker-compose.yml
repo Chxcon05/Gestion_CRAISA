@@ -1,6 +1,10 @@
 # Solo la base de datos, para quien no tenga PostgreSQL instalado localmente.
 # Uso: docker compose up -d  y en .env
 # DATABASE_URL="postgresql://craisa:craisa@localhost:5432/craisa_leads"
+#
+# WhatsApp (Evolution API) va en un perfil aparte, para no levantarlo si no se usa:
+#   docker compose --profile whatsapp up -d evolution
+# Toma EVOLUTION_API_KEY del .env de la raiz; el panel queda en http://localhost:8080/manager
 services:
   db:
     image: postgres:17-alpine
@@ -12,5 +16,41 @@ services:
       - "5432:5432"
     volumes:
       - craisa-pg:/var/lib/postgresql/data
+
+  evolution:
+    image: evoapicloud/evolution-api:v2.3.0
+    profiles: [whatsapp]
+    depends_on: [evolution-db]
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_URL: http://localhost:8080
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-}
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution:evolution@evolution-db:5432/evolution?schema=public
+      DATABASE_CONNECTION_CLIENT_NAME: evolution
+      # Sin Redis: cache en memoria, suficiente para un solo numero y una maquina con poca RAM.
+      CACHE_REDIS_ENABLED: "false"
+      CACHE_LOCAL_ENABLED: "true"
+    # El webhook apunta al API que corre fuera de Docker (npm run dev) en el puerto 8081.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - evolution-instances:/evolution/instances
+
+  # Postgres propio de Evolution: no se mezcla con la BD del sistema ni ocupa el 5432 del equipo.
+  evolution-db:
+    image: postgres:17-alpine
+    profiles: [whatsapp]
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution
+      POSTGRES_DB: evolution
+    volumes:
+      - evolution-pg:/var/lib/postgresql/data
+
 volumes:
   craisa-pg:
+  evolution-instances:
+  evolution-pg:

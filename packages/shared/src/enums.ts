@@ -58,7 +58,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   VENDEDOR: 'Vendedor',
 }
 
-export const INTERACTION_TYPES = ['ASIGNACION', 'CAMBIO_ESTADO', 'CREACION', 'NOTA'] as const
+export const INTERACTION_TYPES = ['ASIGNACION', 'CAMBIO_ESTADO', 'CREACION', 'MENSAJE', 'NOTA'] as const
 export type InteractionType = (typeof INTERACTION_TYPES)[number]
 
 export const NOTIFICATION_TYPES = ['ACTIVIDAD', 'ASIGNACION', 'LEAD_AUTOMATICO'] as const

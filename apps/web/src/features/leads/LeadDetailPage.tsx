@@ -14,7 +14,7 @@ import {
   Trash2,
   XCircle,
 } from 'lucide-react'
-import { CLOSED_STATUSES, LEAD_STATUSES, STATUS_LABELS, type LeadDetail, type LeadStatus } from '@craisa/shared'
+import { CLOSED_STATUSES, LEAD_STATUSES, PRIORITY_LABELS, STATUS_LABELS, type LeadDetail, type LeadStatus } from '@craisa/shared'
 import { api } from '@/lib/api'
 import { formatDate, formatDateTime, relativeTime, todayIso } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -24,11 +24,12 @@ import { Dialog } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, ErrorState, PersonChip } from '@/components/states'
-import { StatusBadge } from '@/components/status'
+import { PriorityBadge, StatusBadge } from '@/components/status'
 import { ChannelLabel } from '@/components/channel'
 import { useLead, useLeadMutation } from './hooks'
 import { StatusDialog } from './StatusDialog'
 import { Timeline } from './Timeline'
+import { DuplicateWarning, useDuplicates } from './DuplicateWarning'
 
 const FUNNEL: readonly LeadStatus[] = LEAD_STATUSES.filter((s) => s !== 'PERDIDO')
 
@@ -46,7 +47,7 @@ function Stepper({ lead, onPick }: { lead: LeadDetail; onPick: (s: LeadStatus) =
             <li key={s} className="flex min-w-[5.5rem] flex-1 flex-col items-center">
               <div className="flex w-full items-center">
                 <span
-                  className={cn('h-0.5 flex-1', i === 0 ? 'bg-transparent' : done || here ? 'bg-brand-600' : 'bg-slate-200')}
+                  className={cn('h-0.5 flex-1', i === 0 ? 'bg-transparent' : done || here ? 'bg-brand-600' : 'bg-stone-200')}
                 />
                 <button
                   type="button"
@@ -57,10 +58,10 @@ function Stepper({ lead, onPick }: { lead: LeadDetail; onPick: (s: LeadStatus) =
                   className={cn(
                     'flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold transition-all disabled:cursor-default',
                     here
-                      ? 'border-brand-700 bg-brand-700 text-white ring-4 ring-brand-100'
+                      ? 'border-brand-700 bg-brand-700 text-white ring-3 ring-brand-100'
                       : done
                         ? 'border-brand-600 bg-brand-600 text-white'
-                        : 'border-slate-200 bg-white text-slate-400 hover:border-brand-300 hover:text-brand-600',
+                        : 'border-stone-200 bg-white text-stone-400 hover:border-brand-300 hover:text-brand-600',
                   )}
                 >
                   {done ? <Check className="size-4" strokeWidth={3} /> : i + 1}
@@ -68,14 +69,14 @@ function Stepper({ lead, onPick }: { lead: LeadDetail; onPick: (s: LeadStatus) =
                 <span
                   className={cn(
                     'h-0.5 flex-1',
-                    i === FUNNEL.length - 1 ? 'bg-transparent' : done ? 'bg-brand-600' : 'bg-slate-200',
+                    i === FUNNEL.length - 1 ? 'bg-transparent' : done ? 'bg-brand-600' : 'bg-stone-200',
                   )}
                 />
               </div>
               <span
                 className={cn(
                   'mt-2 px-1 text-center text-xs leading-tight',
-                  here ? 'font-semibold text-brand-800' : 'text-slate-500',
+                  here ? 'font-semibold text-brand-800' : 'text-stone-500',
                 )}
               >
                 {STATUS_LABELS[s]}
@@ -92,8 +93,8 @@ function Stepper({ lead, onPick }: { lead: LeadDetail; onPick: (s: LeadStatus) =
         className={cn(
           'inline-flex items-center justify-center gap-1.5 self-start rounded-full border px-3 py-1.5 text-xs font-medium disabled:cursor-default lg:self-center',
           lost
-            ? 'border-slate-600 bg-slate-600 text-white'
-            : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50',
+            ? 'border-stone-600 bg-stone-600 text-white'
+            : 'border-stone-200 text-stone-500 hover:border-stone-300 hover:bg-stone-50',
         )}
       >
         <XCircle className="size-3.5" />
@@ -110,7 +111,7 @@ function whatsappUrl(phone: string) {
 }
 
 const contactAction =
-  'inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-xs transition-colors hover:border-slate-300 hover:bg-slate-50'
+  'inline-flex h-9 items-center gap-2 rounded-full border border-stone-200 bg-white px-3.5 text-sm font-medium text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50'
 
 function ContactActions({ lead }: { lead: LeadDetail }) {
   return (
@@ -140,8 +141,8 @@ function ContactActions({ lead }: { lead: LeadDetail }) {
 function Info({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="grid grid-cols-[8.5rem_1fr] gap-3 py-2.5 text-sm">
-      <dt className="text-slate-500">{label}</dt>
-      <dd className="min-w-0 text-slate-900">{children || <span className="text-slate-400">-</span>}</dd>
+      <dt className="text-stone-500">{label}</dt>
+      <dd className="min-w-0 text-stone-900">{children || <span className="text-stone-400">-</span>}</dd>
     </div>
   )
 }
@@ -165,7 +166,7 @@ function NoteForm({ lead }: { lead: LeadDetail }) {
           toast.error(err instanceof Error ? err.message : 'No se pudo guardar la nota')
         }
       }}
-      className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 focus-within:border-brand-300 focus-within:bg-white focus-within:ring-3 focus-within:ring-brand-500/10"
+      className="rounded-xl border border-stone-200 bg-stone-50/60 p-3 focus-within:border-brand-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-600/20"
     >
       <label htmlFor="note" className="sr-only">
         Nota de gestion
@@ -176,10 +177,10 @@ function NoteForm({ lead }: { lead: LeadDetail }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Registre una llamada, un correo o un acuerdo con el cliente..."
-        className="w-full resize-none bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+        className="w-full resize-none bg-transparent text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none"
       />
       <div className="flex items-center justify-between gap-2 pt-1">
-        <span className="text-xs text-slate-400">Queda registrada con su nombre y la hora.</span>
+        <span className="text-xs text-stone-400">Queda registrada con su nombre y la hora.</span>
         <Button type="submit" size="sm" disabled={add.isPending || empty}>
           {add.isPending ? 'Guardando...' : 'Agregar nota'}
         </Button>
@@ -245,12 +246,12 @@ function NextActionCard({ lead }: { lead: LeadDetail }) {
           </form>
         ) : lead.nextAction ? (
           <>
-            <p className="text-base font-medium text-slate-900">{lead.nextAction}</p>
+            <p className="text-base font-medium text-stone-900">{lead.nextAction}</p>
             {lead.nextActionAt && (
               <p
                 className={cn(
                   'mt-1 text-sm',
-                  overdue ? 'font-medium text-red-600' : isToday ? 'font-medium text-amber-700' : 'text-slate-500',
+                  overdue ? 'font-medium text-red-600' : isToday ? 'font-medium text-amber-700' : 'text-stone-500',
                 )}
               >
                 {isToday ? 'Hoy' : formatDate(lead.nextActionAt, { weekday: 'long' })}
@@ -259,7 +260,7 @@ function NextActionCard({ lead }: { lead: LeadDetail }) {
             )}
           </>
         ) : (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-stone-500">
             {closed ? 'Lead cerrado, no requiere seguimiento.' : 'Sin proxima accion. Defina una para no perder el seguimiento.'}
           </p>
         )}
@@ -272,10 +273,10 @@ function DetailSkeleton() {
   return (
     <div className="space-y-6" aria-busy>
       <Skeleton className="h-4 w-40" />
-      <Skeleton className="h-56 rounded-2xl" />
+      <Skeleton className="h-56 rounded-xl" />
       <div className="grid gap-6 lg:grid-cols-3">
-        <Skeleton className="h-96 rounded-2xl lg:col-span-2" />
-        <Skeleton className="h-96 rounded-2xl" />
+        <Skeleton className="h-96 rounded-xl lg:col-span-2" />
+        <Skeleton className="h-96 rounded-xl" />
       </div>
     </div>
   )
@@ -290,6 +291,7 @@ export function LeadDetailPage() {
   const [pick, setPick] = useState<LeadStatus>()
   const [dialogKey, setDialogKey] = useState(0)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const duplicates = useDuplicates(lead.data?.phone, lead.data?.email, code)
 
   if (lead.isPending) return <DetailSkeleton />
   if (lead.isError) return <ErrorState message={lead.error.message} onRetry={() => lead.refetch()} />
@@ -315,12 +317,12 @@ export function LeadDetailPage() {
 
   return (
     <>
-      <nav aria-label="Ruta" className="mb-4 flex items-center gap-1 text-sm text-slate-500">
-        <Link to="/leads" className="hover:text-slate-900">
+      <nav aria-label="Ruta" className="mb-4 flex items-center gap-1 text-sm text-stone-500">
+        <Link to="/leads" className="hover:text-stone-900">
           Leads
         </Link>
         <ChevronRight className="size-3.5" />
-        <span className="font-mono text-slate-700">{l.code}</span>
+        <span className="font-mono text-stone-700">{l.code}</span>
       </nav>
 
       <Card className="mb-6 overflow-hidden">
@@ -329,13 +331,13 @@ export function LeadDetailPage() {
             <Avatar name={l.contactName} className="hidden size-14 text-base sm:inline-flex" />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{l.contactName}</h1>
+                <h1 className="text-[1.75rem] leading-tight font-semibold tracking-tight text-stone-900">{l.contactName}</h1>
                 <StatusBadge status={l.status} />
               </div>
-              <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+              <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">
                 {l.company && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Building2 className="size-4 text-slate-400" />
+                    <Building2 className="size-4 text-stone-400" />
                     {l.company}
                   </span>
                 )}
@@ -366,7 +368,7 @@ export function LeadDetailPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-slate-400 hover:bg-red-50 hover:text-red-600"
+                className="text-stone-400 hover:bg-red-50 hover:text-red-600"
                 onClick={() => setConfirmDelete(true)}
                 aria-label="Eliminar lead"
                 title="Eliminar lead"
@@ -376,32 +378,34 @@ export function LeadDetailPage() {
             )}
           </div>
         </div>
-        <div className="border-t border-slate-100 bg-slate-50/60 px-5 py-5 sm:px-6">
+        <div className="border-t border-stone-100 bg-stone-50/50 px-5 py-6 sm:px-6">
           <Stepper lead={l} onPick={openStatus} />
           {l.status === 'PERDIDO' && l.lossReason && (
-            <p className="mt-4 rounded-lg bg-white px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200">
+            <p className="mt-4 rounded-md bg-white px-3 py-2 text-sm text-stone-600 ring-1 ring-stone-200">
               <span className="font-medium">Motivo de perdida:</span> {l.lossReason}
             </p>
           )}
         </div>
       </Card>
 
+      <DuplicateWarning matches={duplicates.data} className="mb-6" />
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle>Consulta del cliente</CardTitle>
-              <span className="text-xs text-slate-500">Ingreso el {formatDate(l.entryDate)}</span>
+              <span className="text-xs text-stone-500">Ingreso el {formatDate(l.entryDate)}</span>
             </CardHeader>
             <CardContent>
-              <p className="text-sm leading-relaxed whitespace-pre-line text-slate-700">{l.description}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-line text-stone-700">{l.description}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>Bitacora de gestion</CardTitle>
-              <span className="text-xs text-slate-500">{l.interactions.length} registros</span>
+              <span className="text-xs text-stone-500">{l.interactions.length} registros</span>
             </CardHeader>
             <CardContent className="space-y-6">
               {l.canEdit && <NoteForm lead={l} />}
@@ -413,12 +417,29 @@ export function LeadDetailPage() {
         <div className="space-y-6">
           <NextActionCard key={`${l.nextAction}-${l.nextActionAt}`} lead={l} />
 
+          {l.priority.level && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Prioridad {PRIORITY_LABELS[l.priority.level].toLowerCase()}</CardTitle>
+                <PriorityBadge priority={l.priority} />
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-1 text-sm text-stone-600">
+                  {l.priority.reasons.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs text-stone-500">Puntaje de 0 a 100. Alta desde 80, media desde 60.</p>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>Detalle</CardTitle>
             </CardHeader>
             <CardContent className="py-1">
-              <dl className="divide-y divide-slate-100">
+              <dl className="divide-y divide-stone-100">
                 <Info label="Codigo">
                   <span className="font-mono">{l.code}</span>
                 </Info>
@@ -455,7 +476,7 @@ export function LeadDetailPage() {
           </>
         }
       >
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-stone-600">
           Si el lead solo dejo de ser relevante, considere marcarlo como <strong>{STATUS_LABELS.PERDIDO}</strong>: asi se
           conserva el historial en el tablero.
         </p>

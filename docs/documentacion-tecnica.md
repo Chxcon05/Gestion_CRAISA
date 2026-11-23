@@ -119,12 +119,29 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
 - **Quien lo llama:** la funcion de servidor del sitio en Vercel, nunca el navegador, para que la clave no quede expuesta.
 - **Resultado:** lead en estado Asignado, con `autoCaptured = true`, asignado a `INGEST_ASSIGNEE_EMAIL` (o al primer administrador activo) y en la linea `INGEST_BUSINESS_LINE` (por defecto "Sin clasificar", que se crea sola). Cada envio crea un lead nuevo, sin deduplicacion.
 - **Seguridad:** clave comparada en tiempo constante; sin `INGEST_WEB_SECRET` la ruta responde 404. Limite global de 60 solicitudes por minuto en produccion.
-- **WhatsApp:** webhook de la Cloud API de Meta en `/api/ingest/whatsapp` (`apps/api/src/ingest/whatsapp.ts`).
-  - `GET`: verificacion de Meta; responde `hub.challenge` si `hub.verify_token` es igual a `WHATSAPP_VERIFY_TOKEN`, si no 403.
-  - `POST`: valida `X-Hub-Signature-256` (HMAC SHA-256 del cuerpo crudo con `WHATSAPP_APP_SECRET`; por eso `app.ts` monta `express.raw` en esa ruta antes de `express.json`). Firma mala: 401. Firma buena: siempre 200, porque cualquier otro codigo hace que Meta reintente.
-  - Cada mensaje crea un lead con canal WhatsApp, nombre del perfil (o "WhatsApp +506 ...") y el telefono del remitente. Botones y listas usan su texto; imagenes, audios y documentos usan el pie o "Imagen sin texto". Reacciones y avisos de entrega o lectura se ignoran.
-  - Meta reintenta el webhook: el id del mensaje se guarda en `leads.externalRef` (unico), y un reintento devuelve el lead existente en vez de duplicarlo.
-  - Sin `WHATSAPP_APP_SECRET` / `WHATSAPP_VERIFY_TOKEN` las rutas responden 404.
+- **Correo:** el servidor revisa por IMAP el buzon `MAIL_IMAP_USER` (info@craisa.com, Google Workspace) cada `MAIL_POLL_SECONDS` segundos (`apps/api/src/ingest/email.ts`). No es una ruta: arranca con el servidor si estan `MAIL_IMAP_USER` y `MAIL_IMAP_PASSWORD`.
+  - **Clave:** contrasena de aplicacion de Google (requiere verificacion en dos pasos en la cuenta). La clave normal no funciona por IMAP.
+  - **Solo lectura:** la carpeta se abre con EXAMINE; no se marca nada como leido ni se mueve. Lo importado se reconoce por `externalRef = email:<Message-ID>`, que es unico.
+  - **Ventana:** cada pasada mira los correos de las ultimas `MAIL_LOOKBACK_HOURS` horas (48 por defecto); al activarla la primera vez se importan esos correos.
+  - **Filtros:** no generan lead los boletines (cabeceras List-*), las respuestas automaticas (Auto-Submitted, X-Autoreply), los remitentes no-reply o de sistema ni lo que envia el propio buzon.
+  - **Lead:** canal Correo, nombre del remitente (o la parte antes de la arroba), correo, el primer telefono de Costa Rica que aparezca en el texto, y el asunto mas el cuerpo sin el hilo citado como descripcion.
+- **WhatsApp:** Evolution API conectada por QR al celular de la empresa; su webhook llama a `POST /api/ingest/whatsapp` (`apps/api/src/ingest/whatsapp.ts`).
+  - **No es oficial:** Evolution usa WhatsApp Web. WhatsApp puede bloquear el numero si detecta envios masivos; el sistema solo manda un aviso por asignacion.
+  - **Clave:** header `x-ingest-key` (o `?key=` en la URL) igual a `EVOLUTION_WEBHOOK_SECRET`, comparado en tiempo constante. Clave mala: 401. Clave buena: siempre 200, para que Evolution no reintente. Sin el secreto la ruta responde 404.
+  - **Que entra:** solo el evento `messages.upsert`. Se ignora lo que envia la empresa (`fromMe`), los grupos (`@g.us`), los estados (`@broadcast`), los canales (`@newsletter`), las reacciones y los mensajes borrados. Si el chat llega como `@lid`, el numero se toma de `remoteJidAlt` o `senderPn`; si no hay, se descarta.
+  - **Texto:** `conversation`, `extendedTextMessage`, botones y listas usan su texto; imagenes, audios y documentos usan el pie o "Imagen sin texto". Los mensajes temporales y de una sola vista se desenvuelven.
+  - **Un lead por cliente:** si el telefono (ultimos 8 digitos, como la deteccion de duplicados) tiene un lead que no esta Ganado ni Perdido, el mensaje entra a su bitacora como `MENSAJE` y el responsable recibe un aviso en la campana. Si no, se crea un lead nuevo asignado al administrador.
+  - **Reintentos:** el id del mensaje se guarda en `leads.externalRef` o `interactions.externalRef` (los dos unicos); un reintento no duplica nada.
+  - **Aviso al vendedor:** al asignar un lead a un usuario con WhatsApp (pantalla Usuarios), el API manda por Evolution (`POST /message/sendText/{EVOLUTION_INSTANCE}`) el codigo, el cliente, la consulta, el enlace `wa.me` del cliente y el enlace al lead en `APP_URL` (`apps/api/src/notifications/whatsapp.ts`). Sale despues de guardar y sin esperar: si Evolution falla, solo se registra en el log. Nadie recibe aviso de una asignacion que hizo el mismo.
+  - **Puesta en marcha local:**
+    1. En `.env`: `EVOLUTION_API_KEY` y `EVOLUTION_WEBHOOK_SECRET`.
+    2. `docker compose --profile whatsapp up -d evolution` y abrir `http://localhost:8080/manager` con la `EVOLUTION_API_KEY`.
+    3. Crear la instancia `atencion_cliente` y escanear el QR desde WhatsApp Business > Dispositivos vinculados.
+    4. Configurar el webhook (reemplazar las claves):
+       ```bash
+       curl -X POST http://localhost:8080/webhook/set/atencion_cliente          -H "apikey: <EVOLUTION_API_KEY>" -H "Content-Type: application/json"          -d '{"webhook":{"enabled":true,"url":"http://host.docker.internal:8081/api/ingest/whatsapp","headers":{"x-ingest-key":"<EVOLUTION_WEBHOOK_SECRET>"},"events":["MESSAGES_UPSERT"]}}'
+       ```
+       Si la version de Evolution no reenvia `headers`, usar la URL con `?key=<EVOLUTION_WEBHOOK_SECRET>`.
 - **Siguiente canal:** Facebook/Instagram (Messenger, Instagram Messaging y Lead Ads) en `/api/ingest/meta`, con la misma firma y `ingestLead()`.
 
 ## Exportacion CSV
@@ -137,7 +154,7 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
 1. Base PostgreSQL administrada, con respaldos.
 2. Variables DATABASE_URL, JWT_SECRET (32 caracteres o mas) y NODE_ENV=production. Node 22.9 o superior; el archivo .env es opcional en el servidor.
    Para la captura desde el sitio web, tambien INGEST_WEB_SECRET (32 caracteres o mas) y, si se quiere, INGEST_ASSIGNEE_EMAIL e INGEST_BUSINESS_LINE.
-   Para WhatsApp, WHATSAPP_APP_SECRET y WHATSAPP_VERIFY_TOKEN.
+   Para WhatsApp, EVOLUTION_API_KEY, EVOLUTION_URL, EVOLUTION_WEBHOOK_SECRET y APP_URL, con Evolution desplegado aparte.
 3. Ejecutar `npm ci`, `npm run build` y `npm run db:deploy -w @craisa/api`; despues, `npm start` detras de HTTPS.
 4. Primer administrador: definir ADMIN_EMAIL, ADMIN_NAME y ADMIN_PASSWORD (minimo 8 caracteres) y ejecutar `npm run db:admin -w @craisa/api`. Solo crea el usuario si no existe y nunca cambia uno existente, asi que puede quedar en el comando de arranque; despues de ingresar se borra ADMIN_PASSWORD.
 5. Crear los demas usuarios reales desde la pantalla Usuarios. El seed se niega a correr con NODE_ENV=production.

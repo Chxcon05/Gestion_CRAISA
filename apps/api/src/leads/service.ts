@@ -15,8 +15,10 @@ import { HttpError, forbidden, notFound } from '../lib/http.ts'
 import { toDate } from '../lib/dates.ts'
 import { audit } from '../lib/audit.ts'
 import { notify } from '../notifications/service.ts'
+import { notifyAssignment } from '../notifications/whatsapp.ts'
 import { buildOrderBy, buildWhere } from './query.ts'
 import { canAssignTo, canDelete, canEdit, scopeWhere } from './permissions.ts'
+import { refreshScore } from './insights.ts'
 import { detailInclude, listInclude, toDetail, toListItem } from './serialize.ts'
 
 type Tx = Prisma.TransactionClient
@@ -104,6 +106,7 @@ export async function createLead(input: LeadCreate, user: SessionUser) {
         },
       },
     })
+    await refreshScore(tx, created.id)
     await notify(tx, {
       actorId: user.id,
       leadId: created.id,
@@ -113,7 +116,9 @@ export async function createLead(input: LeadCreate, user: SessionUser) {
     })
     return newCode
   })
-  return getLead(code, user)
+  const detail = await getLead(code, user)
+  void notifyAssignment(detail.id, user.id)
+  return detail
 }
 
 async function findEditable(code: string, user: SessionUser) {
@@ -124,6 +129,7 @@ async function findEditable(code: string, user: SessionUser) {
 
 export async function updateLead(code: string, input: LeadUpdate, user: SessionUser) {
   const lead = await findEditable(code, user)
+  const reassigned = Boolean(input.assignedToId && input.assignedToId !== lead.assignedToId)
   await prisma.$transaction(async (tx) => {
     await assertReferences(tx, user, input, lead.businessLineId)
     const lineChanged = input.businessLineId && input.businessLineId !== lead.businessLineId
@@ -137,7 +143,8 @@ export async function updateLead(code: string, input: LeadUpdate, user: SessionU
         ...(lineChanged && input.productId === undefined && { productId: null }),
       },
     })
-    if (input.assignedToId && input.assignedToId !== lead.assignedToId) {
+    await refreshScore(tx, lead.id)
+    if (reassigned && input.assignedToId) {
       const assignee = await tx.user.findUniqueOrThrow({ where: { id: input.assignedToId }, select: { name: true } })
       await tx.interaction.create({
         data: { leadId: lead.id, userId: user.id, type: 'ASIGNACION', content: `Asignado a ${assignee.name}` },
@@ -151,6 +158,7 @@ export async function updateLead(code: string, input: LeadUpdate, user: SessionU
       })
     }
   })
+  if (reassigned) void notifyAssignment(lead.id, user.id)
   return getLead(code, user)
 }
 
@@ -162,6 +170,7 @@ export async function changeStatus(code: string, input: StatusChange, user: Sess
       where: { id: lead.id },
       data: { status: input.status, lossReason: input.status === 'PERDIDO' ? input.lossReason : null },
     })
+    await refreshScore(tx, lead.id)
     await tx.interaction.create({
       data: {
         leadId: lead.id,

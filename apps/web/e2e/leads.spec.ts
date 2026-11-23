@@ -31,8 +31,8 @@ test('registra un lead, cambia su estado con nota y queda en la bitacora', async
   await page.getByLabel('Empresa').fill('Finca Prueba')
   await page.getByLabel('Telefono').fill('8888-7777')
   await page.getByText('Feria', { exact: true }).click()
-  await page.getByLabel('Linea de negocio').selectOption({ label: 'Agricola' })
-  await page.getByLabel('Producto de interes').selectOption({ label: 'Tractor 75 HP' })
+  await page.getByLabel('Linea de negocio').selectOption({ label: 'Maquinaria Agricola' })
+  await page.getByLabel('Producto de interes').selectOption({ label: 'Tractor CASE IH Farmall (55 a 90 HP)' })
   await page.getByLabel('Descripcion de la consulta').fill('Interes en tractor para finca de cafe')
   await page.getByLabel('Responsable').selectOption({ label: 'Carlos Mora' })
   await page.getByRole('button', { name: 'Registrar lead' }).click()
@@ -48,6 +48,16 @@ test('registra un lead, cambia su estado con nota y queda en la bitacora', async
 
   await expect(page.getByText('Primera llamada, pide cotizacion')).toBeVisible()
   await expect(page.getByText('Estado actualizado a Contactado')).toBeVisible()
+})
+
+test('avisa al registrar un cliente que ya tiene un lead', async ({ page }) => {
+  await login(page, 'admin@craisa.test')
+  await page.goto('/leads/nuevo')
+  // Telefono de un lead del seed escrito con prefijo y sin guion.
+  await page.getByLabel('Telefono').fill('+506 88142290')
+  const warning = page.getByText('Este cliente ya tiene un lead')
+  await expect(warning).toBeVisible()
+  await expect(page.getByText('mismo telefono')).toBeVisible()
 })
 
 test('marcar como perdido exige motivo', async ({ page }) => {
@@ -136,7 +146,7 @@ test('el vendedor recibe la notificacion del lead que le asignan y la abre', asy
 
 test('el dashboard enlaza al listado filtrado', async ({ page }) => {
   await login(page, 'admin@craisa.test')
-  await page.getByRole('button', { name: 'Este anio' }).click()
+  await page.getByRole('button', { name: 'Este año' }).click()
   await expect(page.getByText('Leads en el periodo')).toBeVisible()
   await page.getByRole('link', { name: /Acciones vencidas/ }).click()
   await expect(page).toHaveURL(/overdue=1/)

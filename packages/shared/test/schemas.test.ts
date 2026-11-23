@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { leadCreateSchema, leadFiltersSchema, statusChangeSchema, webIngestSchema } from '../src/index.ts'
+import { leadCreateSchema, leadFiltersSchema, statusChangeSchema, userUpdateSchema, webIngestSchema } from '../src/index.ts'
 
 const valid = {
   entryDate: '2026-11-01',
@@ -79,5 +79,19 @@ describe('webIngestSchema', () => {
   it('rechaza el campo trampa lleno y la falta de contacto', () => {
     expect(webIngestSchema.safeParse({ ...web, website: 'x' }).success).toBe(false)
     expect(webIngestSchema.safeParse({ ...web, email: '' }).success).toBe(false)
+  })
+})
+
+describe('WhatsApp del usuario', () => {
+  const whatsapp = (v: string) => userUpdateSchema.safeParse({ whatsapp: v })
+
+  it('deja solo digitos y antepone 506 a un numero local', () => {
+    expect(whatsapp('8888-7777').data?.whatsapp).toBe('50688887777')
+    expect(whatsapp('+1 (415) 555-0100').data?.whatsapp).toBe('14155550100')
+  })
+
+  it('vacio borra el numero y uno incompleto se rechaza', () => {
+    expect(whatsapp('').data?.whatsapp).toBeNull()
+    expect(whatsapp('8888').success).toBe(false)
   })
 })

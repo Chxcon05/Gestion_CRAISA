@@ -32,7 +32,7 @@ export function buildWhere(f: LeadFilters, user: SessionUser): Prisma.LeadWhereI
 
 export function buildOrderBy(f: LeadFilters): Prisma.LeadOrderByWithRelationInput[] {
   const primary: Prisma.LeadOrderByWithRelationInput =
-    f.sort === 'nextActionAt' ? { nextActionAt: { sort: f.dir, nulls: 'last' } } : { [f.sort]: f.dir }
+    f.sort === 'nextActionAt' || f.sort === 'score' ? { [f.sort]: { sort: f.dir, nulls: 'last' } } : { [f.sort]: f.dir }
   // El codigo desempata: sin el, la paginacion puede repetir u omitir filas con la misma fecha.
   return [primary, { code: 'desc' }]
 }

@@ -24,18 +24,20 @@ interface UserRow {
   email: string
   role: Role
   active: boolean
+  whatsapp: string | null
   createdAt: string
 }
 type NewUser = z.input<typeof userCreateSchema>
+type NewUserData = z.output<typeof userCreateSchema>
 
 function NewUserDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const qc = useQueryClient()
-  const { register, handleSubmit, reset, formState } = useForm<NewUser>({
+  const { register, handleSubmit, reset, formState } = useForm<NewUser, unknown, NewUserData>({
     resolver: zodResolver(userCreateSchema),
     defaultValues: { role: 'VENDEDOR' },
   })
   const create = useMutation({
-    mutationFn: (v: NewUser) => api('/users', { method: 'POST', json: v }),
+    mutationFn: (v: NewUserData) => api('/users', { method: 'POST', json: v }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['users'] })
       void qc.invalidateQueries({ queryKey: ['catalogs'] })
@@ -79,6 +81,14 @@ function NewUserDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o
             ))}
           </NativeSelect>
         </Field>
+        <Field
+          label="WhatsApp"
+          htmlFor="u-whatsapp"
+          hint="Recibe aqui el aviso de cada lead que se le asigne."
+          error={e.whatsapp?.message}
+        >
+          <Input id="u-whatsapp" type="tel" inputMode="tel" placeholder="8888 7777" {...register('whatsapp')} aria-invalid={Boolean(e.whatsapp)} />
+        </Field>
         <Field label="Contrasena inicial" htmlFor="u-pass" required error={e.password?.message}>
           <Input
             id="u-pass"
@@ -99,7 +109,7 @@ export function UsersPage() {
   const [open, setOpen] = useState(false)
   const users = useQuery({ queryKey: ['users'], queryFn: () => api<UserRow[]>('/users') })
   const update = useMutation({
-    mutationFn: ({ id, ...data }: { id: string; role?: Role; active?: boolean }) =>
+    mutationFn: ({ id, ...data }: { id: string; role?: Role; active?: boolean; whatsapp?: string }) =>
       api(`/users/${id}`, { method: 'PATCH', json: data }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['users'] })
@@ -134,12 +144,15 @@ export function UsersPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/70 text-left text-xs text-slate-500">
+                <tr className="border-b border-stone-200/80 text-left text-xs font-medium text-stone-500">
                   <th scope="col" className="px-4 py-2.5 font-medium">
                     Usuario
                   </th>
                   <th scope="col" className="px-4 py-2.5 font-medium">
                     Rol
+                  </th>
+                  <th scope="col" className="hidden px-4 py-2.5 font-medium md:table-cell">
+                    WhatsApp
                   </th>
                   <th scope="col" className="hidden px-4 py-2.5 font-medium sm:table-cell">
                     Alta
@@ -153,15 +166,15 @@ export function UsersPage() {
                 {users.data.map((u) => {
                   const self = u.id === me.id
                   return (
-                    <tr key={u.id} className={cn('border-b border-slate-100 last:border-0', u.active ? '' : 'bg-slate-50/60')}>
+                    <tr key={u.id} className={cn('border-b border-stone-100 last:border-0', u.active ? '' : 'bg-stone-50/60')}>
                       <td className="px-4 py-3">
                         <div className={cn('flex items-center gap-3', u.active ? '' : 'opacity-60')}>
                           <Avatar name={u.name} className="size-8" />
                           <div>
-                            <p className="font-medium text-slate-900">
-                              {u.name} {self && <span className="text-xs font-normal text-slate-400">(usted)</span>}
+                            <p className="font-medium text-stone-900">
+                              {u.name} {self && <span className="text-xs font-normal text-stone-400">(usted)</span>}
                             </p>
-                            <p className="text-xs text-slate-500">{u.email}</p>
+                            <p className="text-xs text-stone-500">{u.email}</p>
                           </div>
                         </div>
                       </td>
@@ -180,7 +193,23 @@ export function UsersPage() {
                           ))}
                         </NativeSelect>
                       </td>
-                      <td className="hidden px-4 py-3 text-slate-500 sm:table-cell">{formatDate(u.createdAt)}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        {/* key con el numero: tras guardar, el input se remonta con el valor que devolvio el API. */}
+                        <Input
+                          key={u.whatsapp ?? ''}
+                          aria-label={`WhatsApp de ${u.name}`}
+                          type="tel"
+                          inputMode="tel"
+                          placeholder="Sin numero"
+                          defaultValue={u.whatsapp ?? ''}
+                          onBlur={(ev) => {
+                            const value = ev.target.value.trim()
+                            if (value !== (u.whatsapp ?? '')) update.mutate({ id: u.id, whatsapp: value })
+                          }}
+                          className="h-8 w-40"
+                        />
+                      </td>
+                      <td className="hidden px-4 py-3 text-stone-500 sm:table-cell">{formatDate(u.createdAt)}</td>
                       <td className="px-4 py-3 text-right">
                         <Button
                           variant={u.active ? 'secondary' : 'primary'}

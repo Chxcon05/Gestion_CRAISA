@@ -41,6 +41,7 @@ enum InteractionType {
   ASIGNACION
   CAMBIO_ESTADO
   CREACION
+  MENSAJE
   NOTA
 }
 
@@ -57,6 +58,8 @@ model User {
   passwordHash String
   role         Role     @default(VENDEDOR)
   active       Boolean  @default(true)
+  /// Numero con codigo de pais (50688887777) al que llegan los avisos de asignacion por WhatsApp
+  whatsapp     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -116,6 +119,8 @@ model Lead {
   autoCaptured   Boolean    @default(false)
   /// Id del mensaje en el canal de origen (wamid de WhatsApp); Meta reintenta el webhook y asi no se duplica
   externalRef    String?    @unique
+  /// Puntaje de prioridad (scoreLead de @craisa/shared). Null hasta que el arranque lo calcula en leads viejos
+  score          Int?
   createdAt      DateTime   @default(now())
   /// Fecha de ultima actualizacion que pide el documento de alcance
   updatedAt      DateTime   @updatedAt
@@ -133,6 +138,7 @@ model Lead {
   @@index([assignedToId])
   @@index([entryDate])
   @@index([nextActionAt])
+  @@index([score])
   @@map("leads")
 }
 
@@ -145,14 +151,16 @@ model LeadSequence {
 
 /// Bitacora de gestion: notas y cambios de estado o responsable.
 model Interaction {
-  id         String          @id @default(cuid())
-  leadId     String
-  userId     String?
-  type       InteractionType
-  content    String
-  fromStatus LeadStatus?
-  toStatus   LeadStatus?
-  createdAt  DateTime        @default(now())
+  id          String          @id @default(cuid())
+  leadId      String
+  userId      String?
+  type        InteractionType
+  content     String
+  fromStatus  LeadStatus?
+  toStatus    LeadStatus?
+  /// Id del mensaje de WhatsApp agregado al lead; Evolution reintenta el webhook y asi no se duplica
+  externalRef String?         @unique
+  createdAt   DateTime        @default(now())
 
   lead Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)

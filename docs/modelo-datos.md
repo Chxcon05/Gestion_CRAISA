@@ -18,11 +18,11 @@ erDiagram
 
 | Tabla | Campos principales | Proposito |
 |---|---|---|
-| `users` | id, name, email (unico), passwordHash, role, active | Usuarios internos y su rol. Desactivar corta el acceso de inmediato. |
+| `users` | id, name, email (unico), passwordHash, role, active, whatsapp | Usuarios internos y su rol. Desactivar corta el acceso de inmediato. Con `whatsapp` (codigo de pais y numero) recibe el aviso de cada lead asignado. |
 | `business_lines` | id, name (unico), active | Lineas de negocio. Las define Mercadeo; el seed trae ejemplos. |
 | `products` | id, name, businessLineId, active | Productos de cada linea (unico por linea + nombre). |
 | `leads` | ver detalle abajo | Consulta comercial. |
-| `interactions` | id, leadId, userId, type, content, fromStatus, toStatus, createdAt | Bitacora: creacion, notas, cambios de estado y reasignaciones. |
+| `interactions` | id, leadId, userId, type, content, fromStatus, toStatus, externalRef (unico), createdAt | Bitacora: creacion, notas, cambios de estado, reasignaciones y mensajes del cliente por WhatsApp (`externalRef` es el id del mensaje). |
 | `lead_sequences` | year, last | Ultimo numero usado por anio: los codigos nunca se repiten. |
 | `audit_logs` | id, userId, action, detail, createdAt | Ingresos, exportaciones, borrados y cambios de usuarios. |
 | `notifications` | id, userId, actorId, leadId, type, message, readAt, createdAt | Avisos de la campana. Nadie recibe aviso de lo que hizo el mismo; las acciones vencidas se calculan, no se guardan. |
@@ -55,7 +55,7 @@ erDiagram
 | `LeadStatus` | NUEVO, ASIGNADO, CONTACTADO, EN_SEGUIMIENTO, OPORTUNIDAD, GANADO, PERDIDO (orden del embudo) |
 | `Channel` | CORREO, FACEBOOK, FERIA, INSTAGRAM, LLAMADA, OTRO, SITIO_WEB, VISITA_COMERCIAL, WHATSAPP |
 | `Role` | ADMIN, VENDEDOR |
-| `InteractionType` | ASIGNACION, CAMBIO_ESTADO, CREACION, NOTA |
+| `InteractionType` | ASIGNACION, CAMBIO_ESTADO, CREACION, MENSAJE, NOTA |
 | `NotificationType` | ACTIVIDAD, ASIGNACION, LEAD_AUTOMATICO |
 
 Las etiquetas visibles de cada valor estan en `packages/shared/src/enums.ts`.

@@ -1,5 +1,5 @@
 import type { Prisma } from '@prisma/client'
-import type { Interaction, LeadDetail, LeadListItem, SessionUser } from '@craisa/shared'
+import { scoreLead, type Interaction, type LeadDetail, type LeadListItem, type SessionUser } from '@craisa/shared'
 import { toIsoDate } from '../lib/dates.ts'
 import { canDelete, canEdit } from './permissions.ts'
 
@@ -37,6 +37,8 @@ export function toListItem(l: ListRow): LeadListItem {
     assignedTo: l.assignedTo,
     nextAction: l.nextAction,
     nextActionAt: toIsoDate(l.nextActionAt),
+    // Se recalcula al leer para que los motivos coincidan siempre con los datos actuales.
+    priority: scoreLead(l),
     updatedAt: l.updatedAt.toISOString(),
   }
 }

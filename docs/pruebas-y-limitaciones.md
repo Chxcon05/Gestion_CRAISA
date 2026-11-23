@@ -49,9 +49,9 @@ npm run build       # compilacion de la web
 
 ## Limitaciones conocidas
 
-- **Integraciones.** No hay integraciones automaticas con WhatsApp, Meta, correo, ERP ni inventarios: los leads se registran a mano. Esta fuera del alcance de esta version.
-- **Lineas y productos.** Son de ejemplo. Mercadeo debe definir los definitivos en **Productos**.
-- **Duplicados.** No se detectan duplicados: el mismo cliente puede registrarse dos veces.
+- **Integraciones.** Los leads entran solos desde el sitio web, WhatsApp y el correo info@craisa.com. No hay integracion con Facebook, Instagram, ERP ni inventarios: esos se registran a mano.
+- **Lineas y productos.** Son las secciones y equipos del sitio web de CRAISA. Si cambia el catalogo, Mercadeo los ajusta en **Productos**.
+- **Duplicados.** Se avisa cuando el telefono o el correo ya existen, pero no se bloquea el registro ni se fusionan leads: lo decide el vendedor.
 - **Archivos adjuntos.** No hay adjuntos (cotizaciones, fotos) en la bitacora.
 - **Contrasenas.** No hay recuperacion de contrasena por correo; la restablece un administrador. Tampoco hay inicio de sesion unico con las cuentas corporativas.
 - **Graficos.** El dashboard cuenta leads por fecha de ingreso. No mide tiempos de respuesta ni conversion entre etapas.
