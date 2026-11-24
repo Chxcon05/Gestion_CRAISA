@@ -130,6 +130,8 @@ async function findEditable(code: string, user: SessionUser) {
 export async function updateLead(code: string, input: LeadUpdate, user: SessionUser) {
   const lead = await findEditable(code, user)
   const reassigned = Boolean(input.assignedToId && input.assignedToId !== lead.assignedToId)
+  // Un lead automatico espera como Nuevo sin responsable; al repartirlo deja de contar como sin atender.
+  const firstAssignment = reassigned && !lead.assignedToId && lead.status === 'NUEVO'
   await prisma.$transaction(async (tx) => {
     await assertReferences(tx, user, input, lead.businessLineId)
     const lineChanged = input.businessLineId && input.businessLineId !== lead.businessLineId
@@ -141,13 +143,20 @@ export async function updateLead(code: string, input: LeadUpdate, user: SessionU
         ...(input.nextActionAt !== undefined && { nextActionAt: input.nextActionAt ? toDate(input.nextActionAt) : null }),
         // Si cambia la linea y no se envio producto, el anterior ya no aplica.
         ...(lineChanged && input.productId === undefined && { productId: null }),
+        ...(firstAssignment && { status: 'ASIGNADO' as const }),
       },
     })
     await refreshScore(tx, lead.id)
     if (reassigned && input.assignedToId) {
       const assignee = await tx.user.findUniqueOrThrow({ where: { id: input.assignedToId }, select: { name: true } })
       await tx.interaction.create({
-        data: { leadId: lead.id, userId: user.id, type: 'ASIGNACION', content: `Asignado a ${assignee.name}` },
+        data: {
+          leadId: lead.id,
+          userId: user.id,
+          type: 'ASIGNACION',
+          content: `Asignado a ${assignee.name}`,
+          ...(firstAssignment && { toStatus: 'ASIGNADO' as const }),
+        },
       })
       await notify(tx, {
         actorId: user.id,

@@ -117,7 +117,7 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
 
 - **Sitio web:** `POST /api/ingest/web` con la cabecera `X-Ingest-Key` igual a `INGEST_WEB_SECRET`. Cuerpo JSON: `contactName`, `email` y/o `phone`, `company` (opcional), `businessLine` (opcional: nombre de la linea, se compara sin tildes ni mayusculas; si no coincide se usa la de por defecto), `message` y `website` (campo trampa que debe llegar vacio). Responde `201 { code }`.
 - **Quien lo llama:** la funcion de servidor del sitio en Vercel, nunca el navegador, para que la clave no quede expuesta.
-- **Resultado:** lead en estado Asignado, con `autoCaptured = true`, asignado a `INGEST_ASSIGNEE_EMAIL` (o al primer administrador activo) y en la linea `INGEST_BUSINESS_LINE` (por defecto "Sin clasificar", que se crea sola). Cada envio crea un lead nuevo, sin deduplicacion.
+- **Resultado:** lead en estado Nuevo y sin responsable, con `autoCaptured = true` y en la linea `INGEST_BUSINESS_LINE` (por defecto "Sin clasificar", que se crea sola). Cuenta en "Nuevos sin atender" y todos los administradores activos reciben el aviso en la campana. Cuando un administrador le pone responsable pasa a Asignado. Cada envio crea un lead nuevo, sin deduplicacion.
 - **Seguridad:** clave comparada en tiempo constante; sin `INGEST_WEB_SECRET` la ruta responde 404. Limite global de 60 solicitudes por minuto en produccion.
 - **Correo:** el servidor revisa por IMAP el buzon `MAIL_IMAP_USER` (info@craisa.com, Google Workspace) cada `MAIL_POLL_SECONDS` segundos (`apps/api/src/ingest/email.ts`). No es una ruta: arranca con el servidor si estan `MAIL_IMAP_USER` y `MAIL_IMAP_PASSWORD`.
   - **Clave:** contrasena de aplicacion de Google (requiere verificacion en dos pasos en la cuenta). La clave normal no funciona por IMAP.
@@ -130,7 +130,7 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
   - **Clave:** header `x-ingest-key` (o `?key=` en la URL) igual a `EVOLUTION_WEBHOOK_SECRET`, comparado en tiempo constante. Clave mala: 401. Clave buena: siempre 200, para que Evolution no reintente. Sin el secreto la ruta responde 404.
   - **Que entra:** solo el evento `messages.upsert`. Se ignora lo que envia la empresa (`fromMe`), los grupos (`@g.us`), los estados (`@broadcast`), los canales (`@newsletter`), las reacciones y los mensajes borrados. Si el chat llega como `@lid`, el numero se toma de `remoteJidAlt` o `senderPn`; si no hay, se descarta.
   - **Texto:** `conversation`, `extendedTextMessage`, botones y listas usan su texto; imagenes, audios y documentos usan el pie o "Imagen sin texto". Los mensajes temporales y de una sola vista se desenvuelven.
-  - **Un lead por cliente:** si el telefono (ultimos 8 digitos, como la deteccion de duplicados) tiene un lead que no esta Ganado ni Perdido, el mensaje entra a su bitacora como `MENSAJE` y el responsable recibe un aviso en la campana. Si no, se crea un lead nuevo asignado al administrador.
+  - **Un lead por cliente:** si el telefono (ultimos 8 digitos, como la deteccion de duplicados) tiene un lead que no esta Ganado ni Perdido, el mensaje entra a su bitacora como `MENSAJE` y el responsable (o, si aun no tiene, los administradores) recibe un aviso en la campana. Si no, se crea un lead Nuevo sin responsable.
   - **Reintentos:** el id del mensaje se guarda en `leads.externalRef` o `interactions.externalRef` (los dos unicos); un reintento no duplica nada.
   - **Aviso al vendedor:** al asignar un lead a un usuario con WhatsApp (pantalla Usuarios), el API manda por Evolution (`POST /message/sendText/{EVOLUTION_INSTANCE}`) el codigo, el cliente, la consulta, el enlace `wa.me` del cliente y el enlace al lead en `APP_URL` (`apps/api/src/notifications/whatsapp.ts`). Sale despues de guardar y sin esperar: si Evolution falla, solo se registra en el log. Nadie recibe aviso de una asignacion que hizo el mismo.
   - **Puesta en marcha local:**
@@ -153,7 +153,7 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
 
 1. Base PostgreSQL administrada, con respaldos.
 2. Variables DATABASE_URL, JWT_SECRET (32 caracteres o mas) y NODE_ENV=production. Node 22.9 o superior; el archivo .env es opcional en el servidor.
-   Para la captura desde el sitio web, tambien INGEST_WEB_SECRET (32 caracteres o mas) y, si se quiere, INGEST_ASSIGNEE_EMAIL e INGEST_BUSINESS_LINE.
+   Para la captura desde el sitio web, tambien INGEST_WEB_SECRET (32 caracteres o mas) y, si se quiere, INGEST_BUSINESS_LINE.
    Para WhatsApp, EVOLUTION_API_KEY, EVOLUTION_URL, EVOLUTION_WEBHOOK_SECRET y APP_URL, con Evolution desplegado aparte.
 3. Ejecutar `npm ci`, `npm run build` y `npm run db:deploy -w @craisa/api`; despues, `npm start` detras de HTTPS.
 4. Primer administrador: definir ADMIN_EMAIL, ADMIN_NAME y ADMIN_PASSWORD (minimo 8 caracteres) y ejecutar `npm run db:admin -w @craisa/api`. Solo crea el usuario si no existe y nunca cambia uno existente, asi que puede quedar en el comando de arranque; despues de ingresar se borra ADMIN_PASSWORD.

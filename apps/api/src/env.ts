@@ -14,7 +14,6 @@ const schema = z.object({
   EVOLUTION_URL: z.string().url().default('http://localhost:8080'),
   EVOLUTION_WEBHOOK_SECRET: z.string().min(32, 'EVOLUTION_WEBHOOK_SECRET debe tener al menos 32 caracteres').optional(),
   // Captura automatica: sin INGEST_WEB_SECRET la ruta del formulario web no existe (404).
-  INGEST_ASSIGNEE_EMAIL: z.string().trim().toLowerCase().email().optional(),
   INGEST_BUSINESS_LINE: z.string().trim().min(2).default('Sin clasificar'),
   INGEST_WEB_SECRET: z.string().min(32, 'INGEST_WEB_SECRET debe tener al menos 32 caracteres').optional(),
   // Buzon que se revisa por IMAP (info@craisa.com). Sin usuario y clave no se revisa ningun correo.

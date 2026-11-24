@@ -2,13 +2,11 @@ import { Prisma } from '@prisma/client'
 import { CHANNEL_LABELS, CLOSED_STATUSES, type Channel } from '@craisa/shared'
 import { env } from '../env.ts'
 import { prisma } from '../lib/prisma.ts'
-import { HttpError } from '../lib/http.ts'
 import { toDate, todayIso } from '../lib/dates.ts'
 import { audit } from '../lib/audit.ts'
 import { nextCode } from '../leads/service.ts'
 import { phoneKey, refreshScore } from '../leads/insights.ts'
 import { notify } from '../notifications/service.ts'
-import { notifyAssignment } from '../notifications/whatsapp.ts'
 
 type Tx = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
 
@@ -26,15 +24,11 @@ export interface InboundLead {
   phone?: string | null
 }
 
-// Los leads automaticos van al admin para que el los reparta; nunca quedan sin responsable.
-async function resolveAssignee(tx: Tx) {
-  if (env.INGEST_ASSIGNEE_EMAIL) {
-    const configured = await tx.user.findFirst({ where: { email: env.INGEST_ASSIGNEE_EMAIL, active: true } })
-    if (configured) return configured
-  }
-  const admin = await tx.user.findFirst({ where: { role: 'ADMIN', active: true }, orderBy: { createdAt: 'asc' } })
-  if (!admin) throw new HttpError(503, 'NO_ASSIGNEE', 'No hay un administrador activo para recibir el lead')
-  return admin
+// Los leads automaticos entran sin responsable, como Nuevos sin atender, hasta que un admin los reparte:
+// por eso el aviso va a todos los admins activos y no a uno fijo.
+async function activeAdmins(tx: Tx) {
+  const admins = await tx.user.findMany({ where: { role: 'ADMIN', active: true }, select: { id: true } })
+  return admins.map((a) => a.id)
 }
 
 // Sin tildes ni mayusculas: el sitio escribe "Agricola" o "Construccion" con tilde y el catalogo no.
@@ -103,13 +97,10 @@ async function appendMessage(lead: { id: string; code: string; assignedToId: str
     await tx.interaction.create({ data: { leadId: lead.id, type: 'MENSAJE', content: input.message, externalRef: ref } })
     // El cliente volvio a escribir: cuenta como actividad del lead, igual que una nota.
     await tx.lead.update({ where: { id: lead.id }, data: { updatedAt: new Date() }, select: { id: true } })
-    await notify(tx, {
-      actorId: null,
-      leadId: lead.id,
-      message: `Mensaje nuevo por ${label}`,
-      type: 'ACTIVIDAD',
-      userId: lead.assignedToId,
-    })
+    const recipients = lead.assignedToId ? [lead.assignedToId] : await activeAdmins(tx)
+    for (const userId of recipients) {
+      await notify(tx, { actorId: null, leadId: lead.id, message: `Mensaje nuevo por ${label}`, type: 'ACTIVIDAD', userId })
+    }
   })
   return lead.code
 }
@@ -120,14 +111,12 @@ async function createInbound(input: InboundLead, ref: string | null) {
   // La descripcion pide 5 caracteres en el formulario; un "hola" por chat igual debe entrar.
   const description = input.message.length < 5 ? `Mensaje desde ${label}: ${input.message}` : input.message
   const created = await prisma.$transaction(async (tx) => {
-    const assignee = await resolveAssignee(tx)
     const line = await resolveLine(tx, input.businessLine)
     const newCode = await nextCode(tx, entryDate)
     const lead = await tx.lead.create({
       data: {
         code: newCode,
         autoCaptured: true,
-        assignedToId: assignee.id,
         businessLineId: line.id,
         channel: input.channel,
         company: input.company ?? null,
@@ -137,27 +126,22 @@ async function createInbound(input: InboundLead, ref: string | null) {
         externalRef: ref,
         entryDate: toDate(entryDate),
         phone: input.phone ?? null,
-        status: 'ASIGNADO',
+        status: 'NUEVO',
         interactions: {
           create: {
             type: 'CREACION',
-            toStatus: 'ASIGNADO',
-            content: `Lead capturado automaticamente desde ${label} y asignado a ${assignee.name}`,
+            toStatus: 'NUEVO',
+            content: `Lead capturado automaticamente desde ${label}, pendiente de asignar`,
           },
         },
       },
     })
     await refreshScore(tx, lead.id)
-    await notify(tx, {
-      actorId: null,
-      leadId: lead.id,
-      message: `Lead nuevo desde ${label}`,
-      type: 'LEAD_AUTOMATICO',
-      userId: assignee.id,
-    })
-    return { code: newCode, assigneeName: assignee.name, id: lead.id }
+    for (const userId of await activeAdmins(tx)) {
+      await notify(tx, { actorId: null, leadId: lead.id, message: `Lead nuevo desde ${label}`, type: 'LEAD_AUTOMATICO', userId })
+    }
+    return newCode
   })
-  await audit(null, 'LEAD_AUTOMATICO', `${created.code} - ${label} - ${created.assigneeName}`)
-  void notifyAssignment(created.id, null)
-  return created.code
+  await audit(null, 'LEAD_AUTOMATICO', `${created} - ${label}`)
+  return created
 }

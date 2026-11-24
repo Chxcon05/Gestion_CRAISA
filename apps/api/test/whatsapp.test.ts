@@ -13,7 +13,6 @@ let ctx: Awaited<ReturnType<typeof resetDb>>
 
 beforeEach(async () => {
   ctx = await resetDb()
-  env.INGEST_ASSIGNEE_EMAIL = undefined
   env.EVOLUTION_WEBHOOK_SECRET = SECRET
 })
 
@@ -66,14 +65,14 @@ describe('webhook de Evolution', () => {
     expect(res.status).toBe(200)
     const lead = await prisma.lead.findFirstOrThrow({ include: { interactions: true } })
     expect(lead).toMatchObject({
-      assignedToId: ctx.admin.id,
+      assignedToId: null,
       autoCaptured: true,
       channel: 'WHATSAPP',
       contactName: 'Juan Perez',
       description: 'Quiero cotizar un tractor',
       externalRef: 'whatsapp:A',
       phone: '+506 8888-7777',
-      status: 'ASIGNADO',
+      status: 'NUEVO',
     })
     expect(lead.interactions[0]!.content).toContain('desde WhatsApp')
   })

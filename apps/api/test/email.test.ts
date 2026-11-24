@@ -59,8 +59,7 @@ describe('captura desde el correo', () => {
     expect(await ingestEmail(source, 'info@craisa.com')).toBe(code)
 
     const lead = await prisma.lead.findUniqueOrThrow({ where: { code: code! }, include: { assignedTo: true } })
-    expect(lead).toMatchObject({ autoCaptured: true, channel: 'CORREO', contactName: 'compras', status: 'ASIGNADO' })
-    expect(lead.assignedTo?.role).toBe('ADMIN')
+    expect(lead).toMatchObject({ assignedToId: null, autoCaptured: true, channel: 'CORREO', contactName: 'compras', status: 'NUEVO' })
     expect(await prisma.lead.count()).toBe(1)
   })
 })
