@@ -1,1 +1,0 @@
-export const api = (path, opts = {}) => fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', ...(opts.headers || {}), Authorization: opts.headers?.Authorization ? opts.headers.Authorization : 'Bearer ' + (sessionStorage.getItem('token') || '') } })
