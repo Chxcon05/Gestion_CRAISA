@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
+  ArrowLeft,
   Building2,
   CalendarClock,
   Check,
@@ -12,21 +13,30 @@ import {
   Pencil,
   Phone,
   Trash2,
+  UserRound,
   XCircle,
 } from 'lucide-react'
-import { CLOSED_STATUSES, LEAD_STATUSES, PRIORITY_LABELS, STATUS_LABELS, type LeadDetail, type LeadStatus } from '@craisa/shared'
+import {
+  CLOSED_STATUSES,
+  LEAD_STATUSES,
+  ROLES_WITH_GLOBAL_SCOPE,
+  STATUS_LABELS,
+  type LeadDetail,
+  type LeadStatus,
+} from '@craisa/shared'
+import { useUser } from '@/app/auth'
 import { api } from '@/lib/api'
 import { formatDate, formatDateTime, relativeTime, todayIso } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { Input, NativeSelect } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, ErrorState, PersonChip } from '@/components/states'
-import { PriorityBadge, StatusBadge } from '@/components/status'
+import { StatusBadge } from '@/components/status'
 import { ChannelLabel } from '@/components/channel'
-import { useLead, useLeadMutation } from './hooks'
+import { useCatalogs, useLead, useLeadMutation } from './hooks'
 import { StatusDialog } from './StatusDialog'
 import { Timeline } from './Timeline'
 import { DuplicateWarning, useDuplicates } from './DuplicateWarning'
@@ -269,6 +279,68 @@ function NextActionCard({ lead }: { lead: LeadDetail }) {
   )
 }
 
+function AssigneeCard({ lead }: { lead: LeadDetail }) {
+  const user = useUser()
+  const catalogs = useCatalogs()
+  const save = useLeadMutation((assignedToId: string) =>
+    api<LeadDetail>(`/leads/${lead.code}`, { method: 'PATCH', json: { assignedToId } }),
+  )
+  // El API solo deja a los vendedores asignarse a si mismos, asi que a ellos se les muestra sin selector.
+  const canReassign = lead.canEdit && ROLES_WITH_GLOBAL_SCOPE.includes(user.role)
+
+  return (
+    <Card className={cn(!lead.assignedTo && 'border-amber-200 ring-1 ring-amber-100')}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <UserRound className={cn('size-4', lead.assignedTo ? 'text-brand-500' : 'text-amber-500')} />
+          Responsable
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {canReassign ? (
+          <>
+            <label htmlFor="assignee" className="sr-only">
+              Responsable
+            </label>
+            <NativeSelect
+              id="assignee"
+              value={lead.assignedTo?.id ?? ''}
+              disabled={save.isPending}
+              onChange={async (e) => {
+                const name = e.target.selectedOptions[0]?.text
+                try {
+                  await save.mutateAsync(e.target.value)
+                  toast.success(`Lead asignado a ${name}`)
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : 'No se pudo asignar')
+                }
+              }}
+            >
+              {!lead.assignedTo && (
+                <option value="" disabled>
+                  Sin asignar
+                </option>
+              )}
+              {(catalogs.data?.users ?? []).map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </NativeSelect>
+            <p className="mt-2 text-xs text-stone-500">
+              {lead.assignedTo ? 'Al cambiarlo se le avisa al nuevo responsable.' : 'Elija quien atiende este lead.'}
+            </p>
+          </>
+        ) : lead.assignedTo ? (
+          <PersonChip name={lead.assignedTo.name} />
+        ) : (
+          <p className="text-sm text-stone-500">Sin asignar</p>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 function DetailSkeleton() {
   return (
     <div className="space-y-6" aria-busy>
@@ -286,6 +358,7 @@ export function LeadDetailPage() {
   const { code = '' } = useParams()
   const lead = useLead(code)
   const navigate = useNavigate()
+  const location = useLocation()
   const qc = useQueryClient()
   const [statusOpen, setStatusOpen] = useState(false)
   const [pick, setPick] = useState<LeadStatus>()
@@ -303,6 +376,10 @@ export function LeadDetailPage() {
     setStatusOpen(true)
   }
 
+  // Volver en el historial conserva los filtros de la lista o el tablero de donde se vino; si se entro
+  // directo por un enlace (aviso de WhatsApp), no hay a donde volver y se cae en la lista.
+  const goBack = () => (location.key === 'default' ? navigate('/leads') : navigate(-1))
+
   const remove = async () => {
     try {
       await api(`/leads/${l.code}`, { method: 'DELETE' })
@@ -318,6 +395,9 @@ export function LeadDetailPage() {
   return (
     <>
       <nav aria-label="Ruta" className="mb-4 flex items-center gap-1 text-sm text-stone-500">
+        <Button variant="secondary" size="icon" className="mr-2" onClick={goBack} aria-label="Volver" title="Volver">
+          <ArrowLeft />
+        </Button>
         <Link to="/leads" className="hover:text-stone-900">
           Leads
         </Link>
@@ -417,22 +497,7 @@ export function LeadDetailPage() {
         <div className="space-y-6">
           <NextActionCard key={`${l.nextAction}-${l.nextActionAt}`} lead={l} />
 
-          {l.priority.level && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Prioridad {PRIORITY_LABELS[l.priority.level].toLowerCase()}</CardTitle>
-                <PriorityBadge priority={l.priority} />
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-1 text-sm text-stone-600">
-                  {l.priority.reasons.map((r) => (
-                    <li key={r}>{r}</li>
-                  ))}
-                </ul>
-                <p className="mt-3 text-xs text-stone-500">Puntaje de 0 a 100. Alta desde 80, media desde 60.</p>
-              </CardContent>
-            </Card>
-          )}
+          <AssigneeCard lead={l} />
 
           <Card>
             <CardHeader>
@@ -442,9 +507,6 @@ export function LeadDetailPage() {
               <dl className="divide-y divide-stone-100">
                 <Info label="Codigo">
                   <span className="font-mono">{l.code}</span>
-                </Info>
-                <Info label="Responsable">
-                  {l.assignedTo ? <PersonChip name={l.assignedTo.name} /> : 'Sin asignar'}
                 </Info>
                 <Info label="Telefono">{l.phone}</Info>
                 <Info label="Correo">{l.email && <span className="break-all">{l.email}</span>}</Info>
