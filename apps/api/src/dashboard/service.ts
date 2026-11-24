@@ -5,7 +5,9 @@ import {
   CLOSED_STATUSES,
   LEAD_STATUSES,
   STATUS_LABELS,
+  granularityFor,
   type DashboardData,
+  type Granularity,
   type LeadStatus,
   type ResponseTimeRow,
   type SessionUser,
@@ -13,8 +15,6 @@ import {
 import { prisma } from '../lib/prisma.ts'
 import { addDays, toDate, toIsoDate, todayIso } from '../lib/dates.ts'
 import { scopeWhere } from '../leads/permissions.ts'
-
-type Granularity = 'day' | 'week' | 'month'
 
 const CONTACTED: LeadStatus[] = ['CONTACTADO', 'EN_SEGUIMIENTO', 'OPORTUNIDAD', 'GANADO', 'PERDIDO']
 const HOUR = 3_600_000
@@ -114,7 +114,7 @@ export function buckets(from: string, to: string, g: Granularity): string[] {
 }
 
 export async function getDashboard(
-  q: { from?: string; to?: string; granularity: Granularity },
+  q: { from?: string; to?: string; granularity?: Granularity },
   user: SessionUser,
 ): Promise<DashboardData> {
   const today = todayIso()
@@ -161,13 +161,18 @@ export async function getDashboard(
   const won = n('GANADO')
   const lost = n('PERDIDO')
 
-  const seriesMap = new Map(buckets(from, to, q.granularity).map((b) => [b, 0]))
+  // Sin granularidad se elige por el historial real; con menos de 7 dias, la serie arranca antes para
+  // que la tendencia tenga mas de un punto que dibujar.
+  const granularity = q.granularity ?? granularityFor(from, to)
+  const seriesFrom = q.granularity ? from : [from, addDays(to, -6)].sort()[0]!
+  const seriesMap = new Map(buckets(seriesFrom, to, granularity).map((b) => [b, 0]))
   for (const { entryDate } of dates) {
-    const b = bucketOf(toIsoDate(entryDate)!, q.granularity)
+    const b = bucketOf(toIsoDate(entryDate)!, granularity)
     seriesMap.set(b, (seriesMap.get(b) ?? 0) + 1)
   }
 
   return {
+    granularity,
     range: { from, to },
     kpis: {
       total,

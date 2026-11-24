@@ -18,7 +18,8 @@ services:
       - craisa-pg:/var/lib/postgresql/data
 
   evolution:
-    image: evoapicloud/evolution-api:v2.3.0
+    # v2.3.0 trae un Baileys viejo: WhatsApp rechaza el QR al vincular.
+    image: evoapicloud/evolution-api:v2.3.8
     profiles: [whatsapp]
     depends_on: [evolution-db]
     ports:

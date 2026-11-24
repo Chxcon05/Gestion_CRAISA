@@ -1,5 +1,6 @@
 import type { Channel, InteractionType, LeadStatus, NotificationType, Role } from './enums.ts'
 import type { Priority } from './priority.ts'
+import type { Granularity } from './schemas.ts'
 
 // Contratos de respuesta del API; las fechas viajan como ISO 8601.
 
@@ -98,6 +99,7 @@ export interface CountItem<K extends string = string> {
 }
 
 export interface DashboardData {
+  granularity: Granularity
   range: { from: string; to: string }
   kpis: {
     total: number

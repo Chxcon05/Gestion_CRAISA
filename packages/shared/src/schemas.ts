@@ -129,11 +129,22 @@ export const leadFiltersSchema = z.object({
 })
 export type LeadFilters = z.output<typeof leadFiltersSchema>
 
+export const GRANULARITIES = ['day', 'month', 'week'] as const
+export type Granularity = (typeof GRANULARITIES)[number]
+
 export const dashboardQuerySchema = z.object({
   from: isoDate.optional(),
   to: isoDate.optional(),
-  granularity: z.enum(['day', 'week', 'month']).default('week'),
+  // Sin granularidad el API la elige con granularityFor, segun lo que abarque el historial real.
+  granularity: z.enum(GRANULARITIES).optional(),
 })
+
+/** Hasta un mes por dia, hasta cuatro meses por semana y mas alla por mes: ni demasiados puntos ni uno solo. */
+export function granularityFor(from: string, to: string): Granularity {
+  const days = (Date.parse(to) - Date.parse(from)) / 86_400_000
+  if (days <= 31) return 'day'
+  return days <= 120 ? 'week' : 'month'
+}
 
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email('Correo no valido'),

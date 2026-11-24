@@ -1,6 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest'
+import { granularityFor } from '@craisa/shared'
 import { leadInput, login, resetDb } from './helpers.ts'
 import { bucketOf, buckets } from '../src/dashboard/service.ts'
+import { todayIso } from '../src/lib/dates.ts'
 
 describe('agrupacion por periodo', () => {
   it('agrupa por semana ISO desde el lunes y por mes', () => {
@@ -8,6 +10,12 @@ describe('agrupacion por periodo', () => {
     expect(bucketOf('2026-11-09', 'week')).toBe('2026-11-09')
     expect(bucketOf('2026-11-11', 'month')).toBe('2026-11')
     expect(buckets('2026-11-28', '2027-01-03', 'month')).toEqual(['2026-11', '2026-12', '2027-01'])
+  })
+
+  it('elige dia, semana o mes segun lo que abarca el periodo', () => {
+    expect(granularityFor('2026-11-23', '2026-11-24')).toBe('day')
+    expect(granularityFor('2026-09-01', '2026-11-24')).toBe('week')
+    expect(granularityFor('2026-01-01', '2026-11-24')).toBe('month')
   })
 })
 
@@ -54,5 +62,14 @@ describe('dashboard', () => {
     const beto = await login('beto@t.cr')
     const d = (await beto.get('/api/dashboard?from=2026-01-01&to=2026-12-31')).body
     expect(d.kpis.total).toBe(0)
+  })
+
+  // Con un historial de pocos dias, agrupar por mes dejaba un solo punto y los graficos salian vacios.
+  it('sin periodo y con historial corto agrupa por dia y muestra al menos 7 dias', async () => {
+    const beto = await login('beto@t.cr')
+    const d = (await beto.get('/api/dashboard')).body
+    expect(d.granularity).toBe('day')
+    expect(d.series).toHaveLength(7)
+    expect(d.series.at(-1).period).toBe(todayIso())
   })
 })

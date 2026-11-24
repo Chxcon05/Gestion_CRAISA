@@ -3,7 +3,16 @@ import { Link, useNavigate } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ArrowDown, ArrowRight, ArrowUp, Download } from 'lucide-react'
-import { CLOSED_STATUSES, ROLES_WITH_GLOBAL_SCOPE, type Channel, type CountItem, type DashboardData, type LeadStatus } from '@craisa/shared'
+import {
+  CLOSED_STATUSES,
+  ROLES_WITH_GLOBAL_SCOPE,
+  granularityFor,
+  type Channel,
+  type CountItem,
+  type DashboardData,
+  type Granularity,
+  type LeadStatus,
+} from '@craisa/shared'
 import { api, toSearch } from '@/lib/api'
 import { formatDate, formatNumber, shiftIso, todayIso } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -17,7 +26,6 @@ import { StatusBadge } from '@/components/status'
 import { ResponseCard } from './ResponseCard'
 
 type Preset = 'all' | '7' | '30' | '90' | 'year' | 'custom'
-type Granularity = 'day' | 'week' | 'month'
 type Range = { from?: string; to?: string }
 
 // Orden de uso, no alfabetico: primero el historial completo (lo mismo que el listado) y luego de corto a largo plazo.
@@ -38,13 +46,6 @@ function rangeFor(p: Preset, custom: { from: string; to: string }): Range {
   if (p === 'custom') return custom
   if (p === 'year') return { from: `${to.slice(0, 4)}-01-01`, to }
   return { from: shiftIso(to, 1 - Number(p)), to }
-}
-
-function granularityFor({ from, to }: Range): Granularity {
-  if (!from || !to) return 'month'
-  const days = (Date.parse(to) - Date.parse(from)) / 86_400_000
-  if (days <= 31) return 'day'
-  return days <= 120 ? 'week' : 'month'
 }
 
 /** Mismo largo justo antes del periodo elegido; sin limites (Todo) no hay con que comparar. */
@@ -498,18 +499,20 @@ export function DashboardPage() {
   const [preset, setPreset] = useState<Preset>('all')
   const [custom, setCustom] = useState({ from: shiftIso(todayIso(), -29), to: todayIso() })
   const range = rangeFor(preset, custom)
-  const granularity = granularityFor(range)
+  // Con "Todo" no se sabe aun desde cuando hay leads: la granularidad la elige el API y viene en la respuesta.
+  const asked = range.from && range.to ? granularityFor(range.from, range.to) : undefined
   const prevRange = previousRange(range)
 
   const q = useQuery({
-    queryKey: ['dashboard', range, granularity],
-    queryFn: () => api<DashboardData>(`/dashboard${toSearch({ ...range, granularity })}`),
+    queryKey: ['dashboard', range, asked],
+    queryFn: () => api<DashboardData>(`/dashboard${toSearch({ ...range, granularity: asked })}`),
   })
   const prev = useQuery({
-    queryKey: ['dashboard', prevRange, granularity],
-    queryFn: () => api<DashboardData>(`/dashboard${toSearch({ ...prevRange, granularity })}`),
+    queryKey: ['dashboard', prevRange, asked],
+    queryFn: () => api<DashboardData>(`/dashboard${toSearch({ ...prevRange, granularity: asked })}`),
     enabled: prevRange !== null,
   })
+  const granularity: Granularity = q.data?.granularity ?? asked ?? 'month'
 
   // Mismo periodo que el tablero: el listado filtrado muestra exactamente los leads de cada barra.
   const toLeads = (extra: Record<string, string>) => navigate(`/leads${toSearch({ ...range, ...extra })}`)
