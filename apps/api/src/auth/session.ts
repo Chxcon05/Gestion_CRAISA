@@ -17,7 +17,7 @@ declare global {
 }
 
 export function setSession(res: Response, userId: string) {
-  const token = jwt.sign({ sub: userId }, env.JWT_SECRET, { expiresIn: MAX_AGE_MS / 1000 })
+  const token = jwt.sign({ sub: userId }, env.JWT_SECRET, { algorithm: 'HS256', expiresIn: MAX_AGE_MS / 1000 })
   res.cookie(COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
@@ -39,7 +39,8 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
   if (typeof token !== 'string') throw unauthenticated('Inicie sesion')
   let sub: string
   try {
-    sub = (jwt.verify(token, env.JWT_SECRET) as { sub: string }).sub
+    // Algoritmo fijo: no se acepta un token que diga venir firmado con otro, como "none".
+    sub = (jwt.verify(token, env.JWT_SECRET, { algorithms: ['HS256'] }) as { sub: string }).sub
   } catch {
     throw unauthenticated('La sesion expiro, ingrese de nuevo')
   }

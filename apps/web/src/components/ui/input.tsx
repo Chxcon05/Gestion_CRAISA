@@ -5,9 +5,25 @@ import { cn } from '@/lib/utils'
 const field =
   'w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-stone-900 shadow-xs placeholder:text-stone-400 transition-colors focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20 disabled:bg-stone-50 disabled:text-stone-500 aria-[invalid=true]:border-red-500 aria-[invalid=true]:ring-red-500/15'
 
-export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(({ className, ...props }, ref) => (
-  <input ref={ref} className={cn(field, 'h-9', className)} {...props} />
-))
+// Un telefono solo lleva digitos, espacios, guiones, parentesis y el + del codigo de pais: lo demas
+// se quita al escribir o pegar, antes de que react-hook-form o el onBlur lean el valor.
+const NOT_PHONE = /[^\d\s()+-]/g
+
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, onChange, ...props }, ref) => (
+    <input
+      ref={ref}
+      className={cn(field, 'h-9', className)}
+      onChange={(e) => {
+        // Solo se reescribe si cambia: asignar el mismo valor mandaria el cursor al final.
+        const clean = props.type === 'tel' ? e.target.value.replace(NOT_PHONE, '') : e.target.value
+        if (clean !== e.target.value) e.target.value = clean
+        onChange?.(e)
+      }}
+      {...props}
+    />
+  ),
+)
 Input.displayName = 'Input'
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(

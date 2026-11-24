@@ -97,9 +97,22 @@ export const duplicatesQuerySchema = z.object({
   phone: z.string().trim().max(30).optional(),
 })
 
-export const noteSchema = z.object({
-  content: z.string().trim().min(1, 'Escriba la nota').max(2000),
-})
+export const NOTE_IMAGE_MAX_BYTES = 1_500_000
+export const NOTE_IMAGES_MAX = 4
+
+// Llegan en base64 sin el prefijo data:; el API revisa los primeros bytes para saber si de verdad son imagenes.
+const noteImage = z
+  .string()
+  .max(Math.ceil(NOTE_IMAGE_MAX_BYTES / 3) * 4, 'Cada imagen debe pesar menos de 1.5 MB')
+  .regex(/^[A-Za-z0-9+/]+={0,2}$/, 'Imagen no valida')
+
+export const noteSchema = z
+  .object({
+    content: z.string().trim().max(2000).default(''),
+    images: z.array(noteImage).max(NOTE_IMAGES_MAX, `Maximo ${NOTE_IMAGES_MAX} imagenes por nota`).default([]),
+  })
+  .refine((n) => n.content !== '' || n.images.length > 0, { message: 'Escriba la nota', path: ['content'] })
+export type NoteInput = z.output<typeof noteSchema>
 
 // Los arrays llegan por query string como "A,B" o repetidos (?status=A&status=B).
 const csvArray = <T extends z.ZodTypeAny>(item: T) =>
@@ -151,11 +164,21 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Ingrese la contrasena'),
 })
 
+// Con solo largo minimo pasaba "aaaaaaaa"; letras y numeros obligan a algo menos facil de adivinar.
+const strongPassword = z
+  .string()
+  .min(8, 'Minimo 8 caracteres')
+  .max(100)
+  .regex(/[A-Za-z]/, 'Incluya al menos una letra')
+  .regex(/\d/, 'Incluya al menos un numero')
+
 // Evolution y wa.me piden el numero con codigo de pais y sin simbolos; 8 digitos se toman como de Costa Rica.
 // Vacio borra el numero: ese usuario deja de recibir avisos por WhatsApp.
 const whatsappSchema = z
   .string()
   .trim()
+  // Antes se quitaba todo lo que no fuera digito y "abc88887777" pasaba como numero valido.
+  .regex(/^[\d\s()+-]*$/, 'Use solo numeros')
   .transform((v) => v.replace(/\D/g, ''))
   .transform((d) => (d.length === 8 ? `506${d}` : d))
   .refine((d) => d === '' || /^\d{10,15}$/.test(d), 'Use 8 digitos o el numero con codigo de pais')
@@ -164,7 +187,7 @@ const whatsappSchema = z
 export const userCreateSchema = z.object({
   name: z.string().trim().min(2, 'Ingrese el nombre').max(120),
   email: z.string().trim().toLowerCase().email('Correo no valido'),
-  password: z.string().min(8, 'Minimo 8 caracteres').max(100),
+  password: strongPassword,
   role: z.enum(ROLES),
   whatsapp: whatsappSchema.optional(),
 })
@@ -173,7 +196,7 @@ export const userUpdateSchema = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   role: z.enum(ROLES).optional(),
   active: z.boolean().optional(),
-  password: z.string().min(8, 'Minimo 8 caracteres').max(100).optional(),
+  password: strongPassword.optional(),
   whatsapp: whatsappSchema.optional(),
 })
 

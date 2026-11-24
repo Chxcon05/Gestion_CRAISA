@@ -61,6 +61,8 @@ export interface ResponseTimeRow {
 }
 
 export interface Interaction {
+  /** Capturas adjuntas a una nota; la imagen se pide aparte por su url para no inflar el detalle. */
+  attachments: { id: string; url: string }[]
   id: string
   type: InteractionType
   content: string

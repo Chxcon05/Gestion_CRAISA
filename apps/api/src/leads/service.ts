@@ -1,12 +1,14 @@
 import type { Prisma } from '@prisma/client'
 import {
   LEAD_STATUSES,
+  NOTE_IMAGE_MAX_BYTES,
   STATUS_LABELS,
   type LeadCreate,
   type LeadFilters,
   type LeadListResponse,
   type LeadStatus,
   type LeadUpdate,
+  type NoteInput,
   type SessionUser,
   type StatusChange,
 } from '@craisa/shared'
@@ -207,10 +209,39 @@ export async function changeStatus(code: string, input: StatusChange, user: Sess
   return getLead(code, user)
 }
 
-export async function addNote(code: string, content: string, user: SessionUser) {
+// Se mira la firma del archivo y no el tipo que declara el navegador, que se puede falsear.
+function sniffImage(buf: Buffer) {
+  if (buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png'
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg'
+  if (buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'image/webp'
+  return null
+}
+
+function toAttachments(images: string[]) {
+  return images.map((b64, i) => {
+    const data = Buffer.from(b64, 'base64')
+    const mimeType = sniffImage(data)
+    if (!mimeType) throw new HttpError(400, 'VALIDATION', 'Solo se aceptan imagenes PNG, JPG o WebP', { [`images.${i}`]: 'Imagen no valida' })
+    if (data.length > NOTE_IMAGE_MAX_BYTES) {
+      throw new HttpError(400, 'VALIDATION', 'Cada imagen debe pesar menos de 1.5 MB', { [`images.${i}`]: 'Imagen muy pesada' })
+    }
+    return { data, mimeType, size: data.length }
+  })
+}
+
+export async function addNote(code: string, note: NoteInput, user: SessionUser) {
   const lead = await findEditable(code, user)
+  const attachments = toAttachments(note.images)
   await prisma.$transaction(async (tx) => {
-    await tx.interaction.create({ data: { leadId: lead.id, userId: user.id, type: 'NOTA', content } })
+    await tx.interaction.create({
+      data: {
+        attachments: { create: attachments },
+        content: note.content,
+        leadId: lead.id,
+        type: 'NOTA',
+        userId: user.id,
+      },
+    })
     // Una nota es gestion: debe mover la fecha de ultima actualizacion del lead.
     await tx.lead.update({ where: { id: lead.id }, data: { updatedAt: new Date() } })
     await notify(tx, {
@@ -222,6 +253,16 @@ export async function addNote(code: string, content: string, user: SessionUser) 
     })
   })
   return getLead(code, user)
+}
+
+// Una sola consulta con el alcance del usuario: quien no ve el lead recibe 404 igual que con el lead.
+export async function getAttachment(code: string, id: string, user: SessionUser) {
+  const file = await prisma.attachment.findFirst({
+    where: { id, interaction: { lead: { code, ...scopeWhere(user) } } },
+    select: { data: true, mimeType: true },
+  })
+  if (!file) throw notFound('Imagen')
+  return file
 }
 
 export async function deleteLead(code: string, user: SessionUser) {

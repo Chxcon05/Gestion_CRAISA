@@ -162,11 +162,28 @@ model Interaction {
   externalRef String?         @unique
   createdAt   DateTime        @default(now())
 
-  lead Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  attachments Attachment[]
+  lead        Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([leadId, createdAt])
   @@map("interactions")
+}
+
+/// Capturas de los chats con el cliente adjuntas a una nota. Van en la BD y no en disco: el servicio
+/// web de Railway no tiene volumen y se perderian en cada despliegue.
+model Attachment {
+  id            String   @id @default(cuid())
+  interactionId String
+  mimeType      String
+  size          Int
+  data          Bytes
+  createdAt     DateTime @default(now())
+
+  interaction Interaction @relation(fields: [interactionId], references: [id], onDelete: Cascade)
+
+  @@index([interactionId])
+  @@map("attachments")
 }
 
 /// Trazabilidad de acciones sensibles: ingresos, exportaciones, borrados y cambios de usuarios.

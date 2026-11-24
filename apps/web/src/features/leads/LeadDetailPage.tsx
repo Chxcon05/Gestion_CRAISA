@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -8,17 +8,20 @@ import {
   CalendarClock,
   Check,
   ChevronRight,
+  ImagePlus,
   Mail,
   MessageCircle,
   Pencil,
   Phone,
   Trash2,
   UserRound,
+  X,
   XCircle,
 } from 'lucide-react'
 import {
   CLOSED_STATUSES,
   LEAD_STATUSES,
+  NOTE_IMAGES_MAX,
   ROLES_WITH_GLOBAL_SCOPE,
   STATUS_LABELS,
   type LeadDetail,
@@ -40,6 +43,7 @@ import { useCatalogs, useLead, useLeadMutation } from './hooks'
 import { StatusDialog } from './StatusDialog'
 import { Timeline } from './Timeline'
 import { DuplicateWarning, useDuplicates } from './DuplicateWarning'
+import { stripDataUrl, toNoteImage } from './images'
 
 const FUNNEL: readonly LeadStatus[] = LEAD_STATUSES.filter((s) => s !== 'PERDIDO')
 
@@ -159,10 +163,30 @@ function Info({ label, children }: { label: string; children: ReactNode }) {
 
 function NoteForm({ lead }: { lead: LeadDetail }) {
   const [text, setText] = useState('')
+  const [images, setImages] = useState<string[]>([])
+  const fileInput = useRef<HTMLInputElement>(null)
   const add = useLeadMutation(() =>
-    api<LeadDetail>(`/leads/${lead.code}/notes`, { method: 'POST', json: { content: text } }),
+    api<LeadDetail>(`/leads/${lead.code}/notes`, {
+      method: 'POST',
+      json: { content: text, images: images.map(stripDataUrl) },
+    }),
   )
-  const empty = text.trim() === ''
+  const empty = text.trim() === '' && images.length === 0
+
+  const attach = async (files: Blob[]) => {
+    const room = NOTE_IMAGES_MAX - images.length
+    const picked = files.filter((f) => f.type.startsWith('image/'))
+    if (picked.length > room) toast.error(`Maximo ${NOTE_IMAGES_MAX} imagenes por nota`)
+    for (const file of picked.slice(0, room)) {
+      try {
+        const url = await toNoteImage(file)
+        setImages((prev) => [...prev, url])
+      } catch {
+        toast.error('No se pudo leer la imagen')
+      }
+    }
+  }
+
   return (
     <form
       onSubmit={async (e) => {
@@ -171,6 +195,7 @@ function NoteForm({ lead }: { lead: LeadDetail }) {
         try {
           await add.mutateAsync(undefined)
           setText('')
+          setImages([])
           toast.success('Nota agregada')
         } catch (err) {
           toast.error(err instanceof Error ? err.message : 'No se pudo guardar la nota')
@@ -186,11 +211,61 @@ function NoteForm({ lead }: { lead: LeadDetail }) {
         rows={2}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Registre una llamada, un correo o un acuerdo con el cliente..."
+        onPaste={(e) => {
+          const files = Array.from(e.clipboardData.files)
+          if (files.some((f) => f.type.startsWith('image/'))) {
+            e.preventDefault()
+            void attach(files)
+          }
+        }}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault()
+          void attach(Array.from(e.dataTransfer.files))
+        }}
+        placeholder="Registre una llamada, un correo o un acuerdo. Puede pegar capturas del chat con Ctrl+V."
         className="w-full resize-none bg-transparent text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none"
       />
+      {images.length > 0 && (
+        <ul className="flex flex-wrap gap-2 pt-1">
+          {images.map((src, i) => (
+            <li key={src} className="relative">
+              <img src={src} alt={`Captura ${i + 1}`} className="size-16 rounded-lg border border-stone-200 object-cover" />
+              <button
+                type="button"
+                onClick={() => setImages((prev) => prev.filter((_, j) => j !== i))}
+                aria-label={`Quitar captura ${i + 1}`}
+                className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-stone-700 text-white hover:bg-stone-900"
+              >
+                <X className="size-3" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="flex items-center justify-between gap-2 pt-1">
-        <span className="text-xs text-stone-400">Queda registrada con su nombre y la hora.</span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={images.length >= NOTE_IMAGES_MAX}
+          onClick={() => fileInput.current?.click()}
+        >
+          <ImagePlus />
+          Adjuntar captura
+        </Button>
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          multiple
+          hidden
+          aria-label="Adjuntar captura"
+          onChange={(e) => {
+            void attach(Array.from(e.target.files ?? []))
+            e.target.value = ''
+          }}
+        />
         <Button type="submit" size="sm" disabled={add.isPending || empty}>
           {add.isPending ? 'Guardando...' : 'Agregar nota'}
         </Button>

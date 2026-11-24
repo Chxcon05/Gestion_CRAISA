@@ -21,6 +21,8 @@ export function createApp() {
   app.use(helmet())
   // Un evento de Evolution con media en base64 pasa de 100kb; con el limite general responderia 413.
   app.use('/api/ingest/whatsapp', express.json({ limit: '1mb' }))
+  // Una nota puede traer hasta cuatro capturas de 1.5 MB, que en base64 ocupan un tercio mas.
+  app.use('/api/leads/:code/notes', express.json({ limit: '9mb' }))
   app.use(express.json({ limit: '100kb' }))
   app.use(cookieParser())
 

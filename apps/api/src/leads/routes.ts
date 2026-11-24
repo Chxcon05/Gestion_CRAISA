@@ -104,8 +104,15 @@ leadsRouter.post('/:code/status', async (req, res) => {
 })
 
 leadsRouter.post('/:code/notes', async (req, res) => {
-  const { content } = parse(noteSchema, req.body)
-  res.status(201).json(await leads.addNote(param(req, 'code'), content, currentUser(req)))
+  res.status(201).json(await leads.addNote(param(req, 'code'), parse(noteSchema, req.body), currentUser(req)))
+})
+
+leadsRouter.get('/:code/attachments/:id', async (req, res) => {
+  const file = await leads.getAttachment(param(req, 'code'), param(req, 'id'), currentUser(req))
+  // Una captura no cambia nunca; private evita que un proxy compartido la guarde.
+  res.setHeader('Cache-Control', 'private, max-age=31536000, immutable')
+  res.setHeader('Content-Disposition', 'inline')
+  res.type(file.mimeType).send(Buffer.from(file.data))
 })
 
 leadsRouter.delete('/:code', async (req, res) => {

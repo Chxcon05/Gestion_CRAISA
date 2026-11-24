@@ -50,6 +50,11 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     res.status(400).json({ error: { code: 'VALIDATION', message: 'Revise los campos marcados', fields: zodFields(err) } })
     return
   }
+  // express.json corta el cuerpo por tamano con este tipo de error; sin esto llegaba como un 500.
+  if ((err as { type?: string }).type === 'entity.too.large') {
+    res.status(413).json({ error: { code: 'TOO_LARGE', message: 'El envio pesa demasiado' } })
+    return
+  }
   if (err instanceof Prisma.PrismaClientKnownRequestError && PRISMA_ERRORS[err.code]) {
     const [status, code, message] = PRISMA_ERRORS[err.code]!
     res.status(status).json({ error: { code, message } })

@@ -40,3 +40,14 @@ usersRouter.patch('/:id', async (req, res) => {
   await audit(me.id, 'USUARIO_ACTUALIZADO', `${user.email}: ${Object.keys(req.body ?? {}).join(', ')}`)
   res.json(user)
 })
+
+// Sus leads no se borran: quedan sin responsable para que el admin los reparta, y la bitacora
+// conserva lo que hizo aunque ya sin autor.
+usersRouter.delete('/:id', async (req, res) => {
+  const me = currentUser(req)
+  const id = param(req, 'id')
+  if (id === me.id) throw new HttpError(400, 'SELF_LOCKOUT', 'No puede eliminar su propio usuario')
+  const user = await prisma.user.delete({ where: { id }, select: { email: true, role: true } })
+  await audit(me.id, 'USUARIO_ELIMINADO', `${user.email} (${user.role})`)
+  res.status(204).end()
+})

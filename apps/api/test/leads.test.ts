@@ -114,6 +114,47 @@ describe('seguimiento', () => {
     expect(new Date(noted.body.updatedAt).getTime()).toBeGreaterThan(new Date(res.body.updatedAt).getTime())
   })
 
+  it('al eliminar un usuario sus leads quedan sin responsable', async () => {
+    const { res } = await create('admin@t.cr')
+    const admin = await login('admin@t.cr')
+    expect((await (await login('beto@t.cr')).delete(`/api/users/${ctx.ana.id}`)).status).toBe(403)
+    expect((await admin.delete(`/api/users/${ctx.admin.id}`)).status).toBe(400)
+    expect((await admin.delete(`/api/users/${ctx.ana.id}`)).status).toBe(204)
+    const lead = await admin.get(`/api/leads/${res.body.code}`)
+    expect(lead.body.assignedTo).toBeNull()
+    expect(lead.body.interactions.length).toBeGreaterThan(0)
+  })
+
+  it('guarda capturas en una nota y solo las sirve a quien ve el lead', async () => {
+    const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+    const { agent, res } = await create('ana@t.cr')
+    const code = res.body.code
+    const noted = await agent.post(`/api/leads/${code}/notes`).send({ images: [png] })
+    expect(noted.status).toBe(201)
+    const [note] = noted.body.interactions
+    expect(note).toMatchObject({ content: '', type: 'NOTA' })
+    expect(note.attachments).toHaveLength(1)
+
+    const img = await agent.get(note.attachments[0].url)
+    expect(img.status).toBe(200)
+    expect(img.headers['content-type']).toBe('image/png')
+    expect(Buffer.compare(img.body, Buffer.from(png, 'base64'))).toBe(0)
+
+    // Beto no ve el lead de Ana: la imagen responde igual que un lead ajeno.
+    const beto = await login('beto@t.cr')
+    expect((await beto.get(note.attachments[0].url)).status).toBe(404)
+  })
+
+  it('rechaza archivos que no son imagenes, notas vacias y envios muy pesados', async () => {
+    const { agent, res } = await create('ana@t.cr')
+    const url = `/api/leads/${res.body.code}/notes`
+    const fake = Buffer.from('<script>alert(1)</script>').toString('base64')
+    expect((await agent.post(url).send({ images: [fake] })).status).toBe(400)
+    expect((await agent.post(url).send({ content: '  ' })).status).toBe(400)
+    const tooBig = await agent.post(url).send({ images: ['A'.repeat(10 * 1024 * 1024)] })
+    expect(tooBig.status).toBe(413)
+  })
+
   it('guarda la proxima accion y la reasignacion queda en la bitacora', async () => {
     const { agent, res } = await create('admin@t.cr')
     const upd = await agent

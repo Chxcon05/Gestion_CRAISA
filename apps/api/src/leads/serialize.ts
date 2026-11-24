@@ -14,7 +14,11 @@ export const listInclude = {
 export const detailInclude = {
   ...listInclude,
   createdBy: userRef,
-  interactions: { orderBy: { createdAt: 'desc' }, include: { user: userRef } },
+  // Solo el id de cada captura: los bytes se sirven aparte y el detalle se pide en cada cambio.
+  interactions: {
+    orderBy: { createdAt: 'desc' },
+    include: { attachments: { orderBy: { createdAt: 'asc' }, select: { id: true } }, user: userRef },
+  },
 } satisfies Prisma.LeadInclude
 
 type ListRow = Prisma.LeadGetPayload<{ include: typeof listInclude }>
@@ -52,6 +56,7 @@ export function toDetail(l: DetailRow, user: SessionUser): LeadDetail {
     createdAt: l.createdAt.toISOString(),
     interactions: l.interactions.map(
       (i): Interaction => ({
+        attachments: i.attachments.map((a) => ({ id: a.id, url: `/api/leads/${l.code}/attachments/${a.id}` })),
         id: i.id,
         type: i.type,
         content: i.content,

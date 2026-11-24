@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { UserPlus } from 'lucide-react'
+import { Trash2, UserPlus } from 'lucide-react'
 import { ROLES, ROLE_LABELS, userCreateSchema, type Role } from '@craisa/shared'
 import type { z } from 'zod'
 import { api } from '@/lib/api'
@@ -118,6 +118,17 @@ export function UsersPage() {
     },
     onError: (e) => toast.error(e.message),
   })
+  const [toDelete, setToDelete] = useState<UserRow | null>(null)
+  const remove = useMutation({
+    mutationFn: (id: string) => api(`/users/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      // Sus leads quedaron sin responsable: la lista y el tablero cambian tambien.
+      for (const key of ['catalogs', 'dashboard', 'leads', 'users']) void qc.invalidateQueries({ queryKey: [key] })
+      toast.success('Usuario eliminado')
+      setToDelete(null)
+    },
+    onError: (e) => toast.error(e.message),
+  })
 
   return (
     <>
@@ -210,15 +221,28 @@ export function UsersPage() {
                         />
                       </td>
                       <td className="hidden px-4 py-3 text-stone-500 sm:table-cell">{formatDate(u.createdAt)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          variant={u.active ? 'secondary' : 'primary'}
-                          size="sm"
-                          disabled={self}
-                          onClick={() => update.mutate({ id: u.id, active: u.active === false })}
-                        >
-                          {u.active ? 'Desactivar' : 'Activar'}
-                        </Button>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant={u.active ? 'secondary' : 'primary'}
+                            size="sm"
+                            disabled={self}
+                            onClick={() => update.mutate({ id: u.id, active: u.active === false })}
+                          >
+                            {u.active ? 'Desactivar' : 'Activar'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={self}
+                            onClick={() => setToDelete(u)}
+                            aria-label={`Eliminar a ${u.name}`}
+                            title="Eliminar usuario"
+                            className="text-stone-400 hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -229,6 +253,27 @@ export function UsersPage() {
         )}
       </Card>
       <NewUserDialog open={open} onOpenChange={setOpen} />
+      <Dialog
+        open={toDelete !== null}
+        onOpenChange={(o) => !o && setToDelete(null)}
+        title="Eliminar usuario"
+        description={toDelete ? `Se eliminara a ${toDelete.name} (${toDelete.email}). Esta accion no se puede deshacer.` : ''}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setToDelete(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" disabled={remove.isPending} onClick={() => toDelete && remove.mutate(toDelete.id)}>
+              Eliminar
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-stone-600">
+          Sus leads quedaran <strong>sin responsable</strong> para que los reasigne, y la bitacora conserva lo que hizo. Si
+          solo debe dejar de entrar, mejor desactivelo.
+        </p>
+      </Dialog>
     </>
   )
 }

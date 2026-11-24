@@ -13,7 +13,7 @@ const ICONS = {
 
 // El texto automatico de un cambio de estado ya se ve en las insignias; solo se muestra si el usuario escribio una nota.
 function hasOwnText(i: Interaction) {
-  if (i.type === 'CREACION') return false
+  if (i.type === 'CREACION' || i.content === '') return false
   if (i.type !== 'CAMBIO_ESTADO' || i.fromStatus === null || i.toStatus === null) return true
   return i.content !== `${STATUS_LABELS[i.fromStatus]} a ${STATUS_LABELS[i.toStatus]}`
 }
@@ -48,6 +48,22 @@ export function Timeline({ items }: { items: Interaction[] }) {
                 </time>
               </div>
               {hasOwnText(i) && <p className="mt-1 text-sm whitespace-pre-line text-stone-700">{i.content}</p>}
+              {i.attachments.length > 0 && (
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {i.attachments.map((a, n) => (
+                    <li key={a.id}>
+                      <a href={a.url} target="_blank" rel="noreferrer" title="Ver captura completa">
+                        <img
+                          src={a.url}
+                          alt={`Captura ${n + 1} de la nota`}
+                          loading="lazy"
+                          className="h-32 w-auto max-w-56 rounded-lg border border-stone-200 object-cover transition-opacity hover:opacity-90"
+                        />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </li>
         )
