@@ -17,6 +17,8 @@ export interface InboundLead {
   channel: Channel
   company?: string | null
   contactName: string
+  /** Id del remitente en un chat sin telefono (Messenger, Instagram); agrupa sus mensajes en un lead. */
+  contactRef?: string | null
   email?: string | null
   /** Id del mensaje en el canal; si ya entro, se devuelve el lead existente en vez de crear otro. */
   externalRef?: string | null
@@ -53,11 +55,24 @@ const isDuplicateRef = (e: unknown) =>
   e.code === 'P2002' &&
   String(e.meta?.target ?? '').includes('externalRef')
 
+type OpenLead = { id: string; code: string; assignedToId: string | null }
+
 // Un cliente manda varios mensajes seguidos: van a la bitacora de su lead abierto y no a un lead nuevo cada uno.
-async function findOpenLead(phone: string) {
+function findOpenLead(input: InboundLead): Promise<OpenLead | null> {
+  if (input.contactRef) {
+    return prisma.lead.findFirst({
+      where: { contactRef: input.contactRef, status: { notIn: [...CLOSED_STATUSES] } },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, code: true, assignedToId: true },
+    })
+  }
+  return input.channel === 'WHATSAPP' && input.phone ? findOpenByPhone(input.phone) : Promise.resolve(null)
+}
+
+async function findOpenByPhone(phone: string) {
   const key = phoneKey(phone)
   if (!key) return null
-  const rows = await prisma.$queryRaw<{ id: string; code: string; assignedToId: string | null }[]>`
+  const rows = await prisma.$queryRaw<OpenLead[]>`
     SELECT id, code, "assignedToId" FROM leads
     WHERE status::text NOT IN (${Prisma.join([...CLOSED_STATUSES])})
       AND right(regexp_replace(coalesce(phone, ''), '\\D', '', 'g'), 8) = ${key}
@@ -80,7 +95,7 @@ export async function ingestLead(input: InboundLead) {
     if (existing) return existing
   }
   try {
-    const open = input.channel === 'WHATSAPP' && input.phone ? await findOpenLead(input.phone) : null
+    const open = await findOpenLead(input)
     return open ? await appendMessage(open, input, ref) : await createInbound(input, ref)
   } catch (e) {
     // Dos reintentos simultaneos pasan la consulta de arriba; el indice unico deja entrar solo a uno.
@@ -91,7 +106,7 @@ export async function ingestLead(input: InboundLead) {
   }
 }
 
-async function appendMessage(lead: { id: string; code: string; assignedToId: string | null }, input: InboundLead, ref: string | null) {
+async function appendMessage(lead: OpenLead, input: InboundLead, ref: string | null) {
   const label = CHANNEL_LABELS[input.channel]
   await prisma.$transaction(async (tx) => {
     await tx.interaction.create({ data: { leadId: lead.id, type: 'MENSAJE', content: input.message, externalRef: ref } })
@@ -121,6 +136,7 @@ async function createInbound(input: InboundLead, ref: string | null) {
         channel: input.channel,
         company: input.company ?? null,
         contactName: input.contactName,
+        contactRef: input.contactRef ?? null,
         description,
         email: input.email ?? null,
         externalRef: ref,

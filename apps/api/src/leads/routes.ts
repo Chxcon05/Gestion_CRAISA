@@ -2,23 +2,30 @@ import { Router, type Request } from 'express'
 import {
   CHANNEL_LABELS,
   STATUS_LABELS,
+  calendarQuerySchema,
   duplicatesQuerySchema,
+  importFileSchema,
   leadCreateSchema, leadFiltersSchema, leadUpdateSchema,
+  mergeSchema,
   noteSchema,
   statusChangeSchema,
+  viewFiltersSchema,
   type LeadFilters,
 } from '@craisa/shared'
 import { prisma } from '../lib/prisma.ts'
 import { param, parse } from '../lib/http.ts'
 import { audit } from '../lib/audit.ts'
 import { todayIso } from '../lib/dates.ts'
-import { currentUser } from '../auth/session.ts'
+import { currentUser, requireRole } from '../auth/session.ts'
 import { buildOrderBy, buildWhere } from './query.ts'
 import { listInclude, toListItem } from './serialize.ts'
 import { toCsv } from './csv.ts'
 import { toXlsx } from './xlsx.ts'
+import { buildTemplate, previewImport, runImport } from './import.ts'
 import { findDuplicates } from './insights.ts'
+import { mergeLeads } from './merge.ts'
 import * as leads from './service.ts'
+import { boardLeads, calendarLeads } from './views.ts'
 
 export const leadsRouter = Router()
 
@@ -83,6 +90,30 @@ leadsRouter.get('/export.xlsx', async (req, res) => {
   res.send(file)
 })
 
+leadsRouter.get('/board', async (req, res) => {
+  res.json(await boardLeads(parse(viewFiltersSchema, req.query), currentUser(req)))
+})
+
+leadsRouter.get('/calendar', async (req, res) => {
+  res.json(await calendarLeads(parse(calendarQuerySchema, req.query), currentUser(req)))
+})
+
+const adminOnly = requireRole('ADMIN')
+
+leadsRouter.get('/import/template.xlsx', adminOnly, async (_req, res) => {
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  res.setHeader('Content-Disposition', 'attachment; filename="plantilla-importar-leads.xlsx"')
+  res.send(await buildTemplate())
+})
+
+leadsRouter.post('/import/preview', adminOnly, async (req, res) => {
+  res.json(await previewImport(parse(importFileSchema, req.body)))
+})
+
+leadsRouter.post('/import', adminOnly, async (req, res) => {
+  res.json(await runImport(parse(importFileSchema, req.body), currentUser(req)))
+})
+
 leadsRouter.get('/duplicates', async (req, res) => {
   res.json(await findDuplicates(parse(duplicatesQuerySchema, req.query), currentUser(req)))
 })
@@ -105,6 +136,10 @@ leadsRouter.post('/:code/status', async (req, res) => {
 
 leadsRouter.post('/:code/notes', async (req, res) => {
   res.status(201).json(await leads.addNote(param(req, 'code'), parse(noteSchema, req.body), currentUser(req)))
+})
+
+leadsRouter.post('/:code/merge', adminOnly, async (req, res) => {
+  res.json(await mergeLeads(param(req, 'code'), parse(mergeSchema, req.body).from, currentUser(req)))
 })
 
 leadsRouter.get('/:code/attachments/:id', async (req, res) => {

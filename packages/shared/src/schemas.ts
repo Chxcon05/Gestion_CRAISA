@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { CHANNELS, LEAD_STATUSES, ROLES } from './enums.ts'
+import { AUDIT_ACTIONS, CHANNELS, LEAD_STATUSES, ROLES } from './enums.ts'
 
 const isoDate = z
   .string()
@@ -43,8 +43,8 @@ export const leadBaseSchema = z.object({
 
 type LeadShape = z.infer<typeof leadBaseSchema>
 
-// Reglas que cruzan campos; se reusan en crear y editar para que el mensaje sea el mismo.
-function leadRules(v: Partial<LeadShape>, ctx: z.RefinementCtx) {
+// Reglas que cruzan campos; se reusan en crear, editar e importar para que el mensaje sea el mismo.
+export function leadRules(v: Partial<LeadShape>, ctx: z.RefinementCtx) {
   if ('phone' in v || 'email' in v) {
     if (!v.phone && !v.email) {
       ctx.addIssue({ code: 'custom', path: ['phone'], message: 'Indique telefono o correo' })
@@ -97,6 +97,24 @@ export const duplicatesQuerySchema = z.object({
   phone: z.string().trim().max(30).optional(),
 })
 
+export const mergeSchema = z.object({
+  from: z.string().trim().regex(/^LEAD-\d{4}-\d{4,}$/, 'Codigo no valido'),
+})
+
+export const IMPORT_MAX_BYTES = 5_000_000
+export const IMPORT_MAX_ROWS = 1000
+
+// El Excel viaja en base64 dentro de JSON, igual que las capturas: el API no tiene multipart.
+export const importFileSchema = z.object({
+  data: z
+    .string()
+    .min(1, 'Elija un archivo')
+    .max(Math.ceil(IMPORT_MAX_BYTES / 3) * 4, 'El archivo debe pesar menos de 5 MB')
+    .regex(/^[A-Za-z0-9+/]+={0,2}$/, 'Archivo no valido'),
+  fileName: z.string().trim().min(1).max(200),
+})
+export type ImportFile = z.output<typeof importFileSchema>
+
 export const NOTE_IMAGE_MAX_BYTES = 1_500_000
 export const NOTE_IMAGES_MAX = 4
 
@@ -142,7 +160,27 @@ export const leadFiltersSchema = z.object({
 })
 export type LeadFilters = z.output<typeof leadFiltersSchema>
 
-export const GRANULARITIES = ['day', 'month', 'week'] as const
+// El tablero y el calendario usan los filtros del listado sin estado, orden ni paginacion:
+// el tablero ya separa por estado y el calendario solo muestra leads abiertos.
+export const viewFiltersSchema = leadFiltersSchema.omit({ dir: true, page: true, pageSize: true, sort: true, status: true })
+export type ViewFilters = z.output<typeof viewFiltersSchema>
+
+export const calendarQuerySchema = viewFiltersSchema.extend({
+  month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Use el formato AAAA-MM'),
+})
+export type CalendarQuery = z.output<typeof calendarQuerySchema>
+
+export const auditQuerySchema = z.object({
+  action: z.enum(AUDIT_ACTIONS).optional(),
+  from: isoDate.optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(10).max(100).default(50),
+  to: isoDate.optional(),
+  userId: z.string().optional(),
+})
+export type AuditQuery = z.output<typeof auditQuerySchema>
+
+export const GRANULARITIES =['day', 'month', 'week'] as const
 export type Granularity = (typeof GRANULARITIES)[number]
 
 export const dashboardQuerySchema = z.object({
@@ -161,7 +199,7 @@ export function granularityFor(from: string, to: string): Granularity {
 
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email('Correo no valido'),
-  password: z.string().min(1, 'Ingrese la contrasena'),
+  password: z.string().min(1, 'Ingrese la contraseña'),
 })
 
 // Con solo largo minimo pasaba "aaaaaaaa"; letras y numeros obligan a algo menos facil de adivinar.

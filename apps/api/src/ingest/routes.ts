@@ -5,6 +5,7 @@ import { webIngestSchema } from '@craisa/shared'
 import { env } from '../env.ts'
 import { HttpError, parse } from '../lib/http.ts'
 import { ingestLead } from './service.ts'
+import { ingestMeta, validSignature, type WithRawBody } from './meta.ts'
 import { parseEvolutionWebhook } from './whatsapp.ts'
 
 export const ingestRouter = Router()
@@ -24,6 +25,27 @@ function validKey(given: string | undefined, expected: string) {
   const b = Buffer.from(expected)
   return a.length === b.length && timingSafeEqual(a, b)
 }
+
+// Meta llama esta ruta una vez, al guardar el webhook en la app, y espera de vuelta el challenge tal cual.
+ingestRouter.get('/meta', (req, res) => {
+  const token = env.META_VERIFY_TOKEN
+  if (!token) throw new HttpError(404, 'NOT_FOUND', 'Ruta no encontrada')
+  const { 'hub.challenge': challenge, 'hub.mode': mode, 'hub.verify_token': given } = req.query
+  if (mode !== 'subscribe' || typeof challenge !== 'string' || typeof given !== 'string' || !validKey(given, token)) {
+    throw new HttpError(403, 'FORBIDDEN', 'Token de verificacion no valido')
+  }
+  res.type('text/plain').send(challenge)
+})
+
+ingestRouter.post('/meta', async (req, res) => {
+  const secret = env.META_APP_SECRET
+  if (!secret) throw new HttpError(404, 'NOT_FOUND', 'Ruta no encontrada')
+  if (!validSignature((req as WithRawBody).rawBody, req.get('x-hub-signature-256'), secret)) {
+    throw new HttpError(401, 'UNAUTHORIZED', 'Firma de Meta no valida')
+  }
+  const codes = await ingestMeta(req.body)
+  res.json({ received: codes.length })
+})
 
 ingestRouter.post('/web', ingestLimiter, async (req, res) => {
   const secret = env.INGEST_WEB_SECRET

@@ -46,8 +46,9 @@ apps/api/
     app.ts         middleware y montaje de rutas
     server.ts      arranque y servido de la web compilada
     env.ts         variables de entorno validadas
+    audit/         consulta del registro de auditoria
     auth/          login, logout, me, requireAuth, requireRole
-    leads/         rutas, servicio, permisos, filtros, CSV
+    leads/         rutas, servicio, permisos, filtros, CSV, tablero y calendario, importacion, fusion
     notifications/ avisos de la campana y acciones vencidas
     dashboard/     agregados por estado, canal, linea y periodo
     catalogs/      lineas y productos
@@ -75,12 +76,19 @@ Todas las rutas usan el prefijo `/api` y, salvo login y health, requieren sesion
 | GET /leads | Todos | Listado paginado. Filtros: q, status, channel, businessLineId, assignedToId (none = sin asignar), from, to, overdue=1, sort, dir, page, pageSize. |
 | GET /leads/export.xlsx | Todos | Excel con formato: mismos filtros, sin paginar (maximo 10 000 filas). Lo usa el boton Exportar. |
 | GET /leads/export.csv | Todos | Mismas filas en CSV (separador ;), para integraciones. |
+| GET /leads/board | Todos | Tablero: por estado, el total y hasta 50 leads (abiertos por prioridad, cerrados por ultima actualizacion). Mismos filtros que el listado, sin status ni paginacion. |
+| GET /leads/calendar | Todos | Leads abiertos con proxima accion en month=AAAA-MM; si el mes contiene hoy, tambien los vencidos. Mismos filtros que el tablero. |
+| GET /leads/import/template.xlsx | ADMIN | Plantilla de importacion con listas de canal, linea y responsable. |
+| POST /leads/import/preview | ADMIN | Revisa un Excel (`{ fileName, data }` en base64, hasta 5 MB y 1000 filas): errores por fila y posibles duplicados. No crea nada. |
+| POST /leads/import | ADMIN | Crea las filas validas del mismo archivo, con codigo, bitacora y aviso al responsable. |
 | POST /leads | Todos | Registrar lead. |
 | GET /leads/:code | Todos | Detalle con bitacora y permisos (canEdit, canDelete). |
 | PATCH /leads/:code | Editor del lead | Editar datos, proxima accion o responsable. |
 | POST /leads/:code/status | Editor del lead | Cambiar estado con nota y motivo de perdida. |
 | POST /leads/:code/notes | Editor del lead | Agregar nota a la bitacora. |
+| POST /leads/:code/merge | ADMIN | Fusiona `{ from }` en este lead: completa sus campos vacios, le pasa bitacora, capturas y avisos, y borra el otro. |
 | DELETE /leads/:code | ADMIN | Eliminar. |
+| GET /audit | ADMIN | Registro de auditoria paginado. Filtros: action, userId, from, to (dias de Costa Rica), page, pageSize. |
 | GET /dashboard | Todos | from, to, granularity (day, week, month). |
 | GET /catalogs | Todos | Lineas, productos y usuarios activos. |
 | POST y PATCH /catalogs/lines, /catalogs/products | ADMIN | Mantener lineas y productos. |
@@ -97,8 +105,8 @@ Hay dos roles. Mercadeo usa el rol Administrador.
 | Ver leads, dashboard y exportar | Todos | Solo asignados a el o registrados por el |
 | Registrar lead | Asigna a cualquiera | Solo a si mismo |
 | Editar, cambiar estado, notas | Todos | Los suyos |
-| Eliminar lead | Si | No |
-| Usuarios y productos | Si | No |
+| Eliminar, fusionar e importar leads | Si | No |
+| Auditoria, usuarios y productos | Si | No |
 
 El alcance se aplica en el servidor (`apps/api/src/leads/permissions.ts`) en todas las consultas, incluidas la exportacion y el dashboard. Un lead fuera del alcance responde 404, para no confirmar que existe.
 
@@ -142,7 +150,19 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
        curl -X POST http://localhost:8080/webhook/set/atencion_cliente          -H "apikey: <EVOLUTION_API_KEY>" -H "Content-Type: application/json"          -d '{"webhook":{"enabled":true,"url":"http://host.docker.internal:8081/api/ingest/whatsapp","headers":{"x-ingest-key":"<EVOLUTION_WEBHOOK_SECRET>"},"events":["MESSAGES_UPSERT"]}}'
        ```
        Si la version de Evolution no reenvia `headers`, usar la URL con `?key=<EVOLUTION_WEBHOOK_SECRET>`.
-- **Siguiente canal:** Facebook/Instagram (Messenger, Instagram Messaging y Lead Ads) en `/api/ingest/meta`, con la misma firma y `ingestLead()`.
+- **Facebook e Instagram:** el webhook de una app de Meta llama a `/api/ingest/meta` (`apps/api/src/ingest/meta.ts`).
+  - **Verificacion:** `GET` con `hub.mode=subscribe` y `hub.verify_token` igual a `META_VERIFY_TOKEN` devuelve `hub.challenge`. Sin el token, 404.
+  - **Firma:** cada `POST` trae `X-Hub-Signature-256`, un HMAC-SHA256 del cuerpo crudo con `META_APP_SECRET`, comparado en tiempo constante. Firma mala: 401. Sin el secreto, 404. Un error de la BD o de Graph responde 500 para que Meta reintente.
+  - **Chats:** `object = page` (Messenger) da canal Facebook e `instagram` da Instagram. Se ignoran los ecos de lo que responde la pagina, los mensajes borrados y los no soportados. Los adjuntos sin texto quedan como "Imagen sin texto" y los botones usan su titulo.
+  - **Un lead por cliente:** no hay telefono, asi que el remitente se guarda en `leads.contactRef` (`facebook:<psid>` o `instagram:<igsid>`). Si tiene un lead abierto, el mensaje va a su bitacora como `MENSAJE`; si no, se crea uno Nuevo.
+  - **Nombre:** con `META_PAGE_TOKEN` se pide a Graph (`name`, o `@username` en Instagram). Sin token o si Graph falla, queda "Facebook 543210" con el final del id.
+  - **Lead Ads:** el cambio `leadgen` de la pagina trae solo el id; el formulario se lee de Graph (`field_data,platform`) con `META_PAGE_TOKEN`. `platform = ig` da canal Instagram. Nombre, correo, telefono y empresa van a sus campos; las preguntas propias del formulario, a la descripcion. Se reconoce por `externalRef = metalead:<id>` y un reintento no vuelve a consultar Graph.
+  - **Puesta en marcha:**
+    1. En developers.facebook.com crear una app tipo Empresa con los productos Messenger, Instagram y Webhooks, y conectarle la pagina de CRAISA (con la cuenta de Instagram profesional vinculada).
+    2. Generar el token de la pagina con `instagram_basic`, `instagram_manage_messages`, `leads_retrieval`, `pages_manage_metadata`, `pages_messaging`, `pages_read_engagement` y `pages_show_list`, y pasarlo a uno de larga duracion.
+    3. Variables `META_APP_SECRET`, `META_PAGE_TOKEN` y `META_VERIFY_TOKEN` en el servidor.
+    4. En Webhooks, URL `https://<dominio>/api/ingest/meta` y el `META_VERIFY_TOKEN`. Suscribir la pagina a `leadgen`, `messages` y `messaging_postbacks`, y la cuenta de Instagram a `messages`.
+    5. Mientras la app este en modo desarrollo, Meta solo manda los mensajes de personas con rol en la app. Para recibir los de cualquier cliente hay que publicarla, con la verificacion del negocio y la revision de esos permisos.
 
 ## Exportacion CSV
 
@@ -155,6 +175,7 @@ Los canales digitales crean el lead sin intervencion de una persona. Cada canal 
 2. Variables DATABASE_URL, JWT_SECRET (32 caracteres o mas) y NODE_ENV=production. Node 22.9 o superior; el archivo .env es opcional en el servidor.
    Para la captura desde el sitio web, tambien INGEST_WEB_SECRET (32 caracteres o mas) y, si se quiere, INGEST_BUSINESS_LINE.
    Para WhatsApp, EVOLUTION_API_KEY, EVOLUTION_URL, EVOLUTION_WEBHOOK_SECRET y APP_URL, con Evolution desplegado aparte.
+   Para el correo, MAIL_IMAP_USER y MAIL_IMAP_PASSWORD. Para Facebook e Instagram, META_APP_SECRET, META_VERIFY_TOKEN y META_PAGE_TOKEN.
 3. Ejecutar `npm ci`, `npm run build` y `npm run db:deploy -w @craisa/api`; despues, `npm start` detras de HTTPS.
 4. Primer administrador: definir ADMIN_EMAIL, ADMIN_NAME y ADMIN_PASSWORD (minimo 8 caracteres) y ejecutar `npm run db:admin -w @craisa/api`. Solo crea el usuario si no existe y nunca cambia uno existente, asi que puede quedar en el comando de arranque; despues de ingresar se borra ADMIN_PASSWORD.
 5. Crear los demas usuarios reales desde la pantalla Usuarios. El seed se niega a correr con NODE_ENV=production.

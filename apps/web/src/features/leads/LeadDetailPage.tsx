@@ -24,6 +24,7 @@ import {
   NOTE_IMAGES_MAX,
   ROLES_WITH_GLOBAL_SCOPE,
   STATUS_LABELS,
+  type DuplicateMatch,
   type LeadDetail,
   type LeadStatus,
 } from '@craisa/shared'
@@ -43,6 +44,7 @@ import { useCatalogs, useLead, useLeadMutation } from './hooks'
 import { StatusDialog } from './StatusDialog'
 import { Timeline } from './Timeline'
 import { DuplicateWarning, useDuplicates } from './DuplicateWarning'
+import { MergeDialog } from './MergeDialog'
 import { stripDataUrl, toNoteImage } from './images'
 
 const FUNNEL: readonly LeadStatus[] = LEAD_STATUSES.filter((s) => s !== 'PERDIDO')
@@ -439,6 +441,8 @@ export function LeadDetailPage() {
   const [pick, setPick] = useState<LeadStatus>()
   const [dialogKey, setDialogKey] = useState(0)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [merging, setMerging] = useState<DuplicateMatch>()
+  const me = useUser()
   const duplicates = useDuplicates(lead.data?.phone, lead.data?.email, code)
 
   if (lead.isPending) return <DetailSkeleton />
@@ -543,7 +547,7 @@ export function LeadDetailPage() {
         </div>
       </Card>
 
-      <DuplicateWarning matches={duplicates.data} className="mb-6" />
+      <DuplicateWarning matches={duplicates.data} className="mb-6" onMerge={me.role === 'ADMIN' ? setMerging : undefined} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -597,6 +601,7 @@ export function LeadDetailPage() {
       </div>
 
       <StatusDialog key={dialogKey} lead={l} open={statusOpen} onOpenChange={setStatusOpen} initial={pick} />
+      {merging && <MergeDialog key={merging.code} lead={l} other={merging} onClose={() => setMerging(undefined)} />}
       <Dialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}

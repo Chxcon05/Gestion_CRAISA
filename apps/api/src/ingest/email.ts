@@ -113,11 +113,13 @@ export async function pollMailbox() {
         const date = m.internalDate ? new Date(m.internalDate) : null
         if (m.envelope?.messageId && date && date >= since) candidates.push({ uid: m.uid, ref: emailRef(m.envelope.messageId) })
       }
-      const known = await prisma.lead.findMany({
-        where: { externalRef: { in: candidates.map((c) => c.ref) } },
-        select: { externalRef: true },
-      })
-      const seen = new Set(known.map((k) => k.externalRef))
+      // Tambien en la bitacora: un correo de un lead fusionado queda guardado en la nota de la fusion.
+      const refs = candidates.map((c) => c.ref)
+      const [known, merged] = await Promise.all([
+        prisma.lead.findMany({ where: { externalRef: { in: refs } }, select: { externalRef: true } }),
+        prisma.interaction.findMany({ where: { externalRef: { in: refs } }, select: { externalRef: true } }),
+      ])
+      const seen = new Set([...known, ...merged].map((k) => k.externalRef))
       for (const c of candidates.filter((x) => !seen.has(x.ref))) {
         const msg = await client.fetchOne(String(c.uid), { source: true }, { uid: true })
         if (!msg || !msg.source) continue

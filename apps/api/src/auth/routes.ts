@@ -27,7 +27,7 @@ authRouter.post('/login', loginLimiter, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { email } })
   const ok = await compare(password, user?.passwordHash ?? DUMMY_HASH)
   if (!user || !ok || !user.active) {
-    throw new HttpError(401, 'INVALID_CREDENTIALS', 'Correo o contrasena incorrectos')
+    throw new HttpError(401, 'INVALID_CREDENTIALS', 'Correo o contraseña incorrectos')
   }
   setSession(res, user.id)
   await audit(user.id, 'LOGIN')

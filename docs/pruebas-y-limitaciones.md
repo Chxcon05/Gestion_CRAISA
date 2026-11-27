@@ -7,7 +7,7 @@
 | Sistema | Windows 11, Node.js 24, PostgreSQL 18 local |
 | Base de pruebas | `craisa_test`, separada de la de desarrollo (se migra y se limpia en cada corrida) |
 | Navegador e2e | Google Chrome de escritorio, configuracion regional es-CR |
-| Fecha de la corrida | 11/11/2026 |
+| Fecha de la corrida | 26/11/2026 |
 
 ## Como ejecutarlas
 
@@ -23,10 +23,10 @@ npm run build       # compilacion de la web
 |---|---|---|
 | Lint (oxlint) | Todo `apps/` y `packages/` | 0 errores, 0 avisos |
 | Typecheck (tsc estricto) | shared, api y web | Sin errores |
-| `packages/shared`: reglas de validacion | 9 | 9 aprobadas |
-| `apps/api`: API contra PostgreSQL | 24 | 24 aprobadas |
-| `apps/web`: e2e con Playwright | 8 | 8 aprobadas |
-| Build de produccion | - | Correcto; chunk inicial de 214 KB (69 KB gzip) |
+| `packages/shared`: reglas de validacion | 13 | 13 aprobadas |
+| `apps/api`: API contra PostgreSQL | 110 | 110 aprobadas |
+| `apps/web`: e2e con Playwright | 12 | 12 aprobadas |
+| Build de produccion | - | Correcto; chunk inicial de 240 KB (77 KB gzip) |
 
 ### Cobertura funcional
 
@@ -49,10 +49,12 @@ npm run build       # compilacion de la web
 
 ## Limitaciones conocidas
 
-- **Integraciones.** Los leads entran solos desde el sitio web, WhatsApp y el correo info@craisa.com. No hay integracion con Facebook, Instagram, ERP ni inventarios: esos se registran a mano.
+- **Integraciones.** Los leads entran solos desde el correo info@craisa.com, Facebook e Instagram (mensajes y formularios Lead Ads), el sitio web y WhatsApp. Las llamadas, ferias y visitas se registran a mano, y no hay integracion con ERP ni inventarios. Los comentarios publicos en las publicaciones no crean leads.
 - **Lineas y productos.** Son las secciones y equipos del sitio web de CRAISA. Si cambia el catalogo, Mercadeo los ajusta en **Productos**.
-- **Duplicados.** Se avisa cuando el telefono o el correo ya existen, pero no se bloquea el registro ni se fusionan leads: lo decide el vendedor.
-- **Archivos adjuntos.** No hay adjuntos (cotizaciones, fotos) en la bitacora.
+- **Duplicados.** Se avisa cuando el telefono o el correo ya existen, pero no se bloquea el registro: lo decide el vendedor. Solo el administrador puede fusionar dos leads, y la fusion no se puede deshacer.
+- **Archivos adjuntos.** La bitacora acepta capturas (PNG, JPG o WebP); no hay adjuntos de otro tipo, como cotizaciones en PDF.
+- **Importacion.** Solo archivos .xlsx, hasta 5 MB y 1000 filas. Los duplicados se avisan pero se importan igual.
+- **Tablero.** Muestra hasta 50 leads por columna; el resto se ve en la tabla. En el celular no se arrastra: se usa el menu Mover a.
 - **Contrasenas.** No hay recuperacion de contrasena por correo; la restablece un administrador. Tampoco hay inicio de sesion unico con las cuentas corporativas.
 - **Graficos.** El dashboard cuenta leads por fecha de ingreso. No mide tiempos de respuesta ni conversion entre etapas.
 - **Exportacion.** Limitada a 10 000 filas por archivo.
@@ -62,9 +64,8 @@ npm run build       # compilacion de la web
 ## Mejoras futuras sugeridas
 
 1. Confirmar con CRAISA si existe un CRM corporativo antes de seguir invirtiendo en este prototipo.
-2. Formulario web publico o integracion con WhatsApp Business y Meta Lead Ads para crear leads automaticamente.
-3. Deteccion de duplicados por telefono o correo al registrar.
-4. Recordatorios por correo de las proximas acciones vencidas.
-5. Reportes de embudo: conversion por etapa, tiempo promedio de respuesta y resultados por vendedor.
-6. Inicio de sesion unico con Microsoft 365 o Google Workspace, y recuperacion de contrasena.
-7. Adjuntos en la bitacora y vinculo con las cotizaciones del ERP.
+2. Recordatorios por correo de las proximas acciones vencidas.
+3. Reportes de embudo: conversion por etapa, tiempo promedio de respuesta y resultados por vendedor.
+4. Inicio de sesion unico con Microsoft 365 o Google Workspace, y recuperacion de contrasena por correo.
+5. Plantillas de respuesta rapida para WhatsApp y correo.
+6. Adjuntos en PDF en la bitacora y vinculo con las cotizaciones del ERP.

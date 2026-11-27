@@ -8,7 +8,7 @@ const NAME = `Aceptacion ${Date.now()}`
 async function login(page: Page, email: string) {
   await page.goto('/login')
   await page.getByLabel('Correo').fill(email)
-  await page.getByLabel('Contrasena').fill('Craisa2026!')
+  await page.getByLabel('Contraseña').fill('Craisa2026!')
   await page.getByRole('button', { name: 'Ingresar' }).click()
   await expect(page.getByRole('heading', { name: /^Buen(os|as) / })).toBeVisible()
 }

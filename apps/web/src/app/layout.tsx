@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
-import { ChevronDown, Inbox, LayoutDashboard, LogOut, Menu as MenuIcon, Package, Plus, Search, Users } from 'lucide-react'
+import { ChevronDown, Inbox, LayoutDashboard, LogOut, Menu as MenuIcon, Package, Plus, ScrollText, Search, Users } from 'lucide-react'
 import { ROLE_LABELS } from '@craisa/shared'
 import { cn } from '@/lib/utils'
 import { useLogout, useUser } from './auth'
@@ -17,6 +17,7 @@ const NAV: NavEntry[] = [
   { to: '/leads', label: 'Leads', icon: Inbox, badge: true },
 ]
 const ADMIN_NAV: NavEntry[] = [
+  { to: '/admin/auditoria', label: 'Auditoria', icon: ScrollText },
   { to: '/admin/productos', label: 'Productos', icon: Package },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Users },
 ]

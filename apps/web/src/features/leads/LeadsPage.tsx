@@ -19,6 +19,7 @@ import {
   Plus,
   RefreshCw,
   Search,
+  Upload,
   X,
 } from 'lucide-react'
 import {
@@ -44,6 +45,10 @@ import { PriorityBadge, STATUS_STYLES, StatusBadge } from '@/components/status'
 import { ChannelLabel } from '@/components/channel'
 import { Avatar, EmptyState, ErrorState, PageHeader } from '@/components/states'
 import { filtersQuery, useCatalogs, useLeadFilters, useLeads, type Filters } from './hooks'
+import { BoardView } from './BoardView'
+import { CalendarView } from './CalendarView'
+import { ImportDialog } from './ImportDialog'
+import { ViewSwitch } from './ViewSwitch'
 
 type Update = (p: Partial<Filters>) => void
 
@@ -291,7 +296,7 @@ function FilterBar({ filters, update, clear, activeCount }: ReturnType<typeof us
             value={filters.channel}
             onChange={(channel) => update({ channel })}
           />
-          {filters.status.length > 1 && (
+          {filters.status.length > 1 && !filters.view && (
             <MultiSelect
               label="Estados"
               options={LEAD_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
@@ -328,12 +333,15 @@ function FilterBar({ filters, update, clear, activeCount }: ReturnType<typeof us
       </div>
       <div className={cn(SCROLL_ROW, 'justify-between')}>
         <FollowUpChips filters={filters} update={update} />
-        {activeCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={clear} className="shrink-0">
-            <X />
-            Limpiar filtros ({activeCount})
-          </Button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {activeCount > 0 && (
+            <Button variant="ghost" size="sm" onClick={clear} className="shrink-0">
+              <X />
+              Limpiar filtros ({activeCount})
+            </Button>
+          )}
+          <ViewSwitch value={filters.view} onChange={(view) => update({ view, month: '' })} />
+        </div>
       </div>
     </div>
   )
@@ -569,7 +577,9 @@ export function LeadsPage() {
   const leads = useLeads(filters)
   const data = leads.data
   const qc = useQueryClient()
+  const user = useUser()
   const [reloading, setReloading] = useState(false)
+  const [importing, setImporting] = useState(false)
 
   // Un WhatsApp de un cliente con lead abierto no crea fila nueva, entra a su bitacora: por eso se recargan
   // tambien el detalle, la campana y el tablero, y se confirma con un aviso aunque la lista no cambie.
@@ -604,6 +614,12 @@ export function LeadsPage() {
                 Exportar a Excel
               </a>
             </Button>
+            {user.role === 'ADMIN' && (
+              <Button variant="secondary" onClick={() => setImporting(true)} title="Carga leads desde un archivo de Excel">
+                <Upload />
+                Importar
+              </Button>
+            )}
             <Button asChild className="hidden sm:inline-flex">
               <Link to="/leads/nuevo">
                 <Plus />
@@ -619,11 +635,16 @@ export function LeadsPage() {
       />
 
       <Card className="overflow-hidden shadow-xs">
-        <PipelineBar counts={data?.statusCounts} />
-        <StatusTabs filters={filters} update={update} counts={data?.statusCounts} />
+        {filters.view !== 'board' && <PipelineBar counts={data?.statusCounts} />}
+        {/* En las otras vistas el estado no filtra: el tablero ya lo separa y el calendario solo trae abiertos. */}
+        {!filters.view && <StatusTabs filters={filters} update={update} counts={data?.statusCounts} />}
         <FilterBar {...state} />
 
-        {leads.isPending ? (
+        {filters.view === 'calendar' ? (
+          <CalendarView filters={filters} update={update} />
+        ) : filters.view === 'board' ? (
+          <BoardView filters={filters} />
+        ) : leads.isPending ? (
           <TableSkeleton />
         ) : leads.isError ? (
           <ErrorState message={leads.error.message} onRetry={() => leads.refetch()} />
@@ -681,6 +702,7 @@ export function LeadsPage() {
           )
         )}
       </Card>
+      <ImportDialog open={importing} onOpenChange={setImporting} />
     </>
   )
 }

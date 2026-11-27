@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Catalogs, LeadDetail, LeadListResponse } from '@craisa/shared'
+import type { BoardResponse, Catalogs, LeadDetail, LeadListItem, LeadListResponse } from '@craisa/shared'
 import { api, toSearch } from '@/lib/api'
 
 export function useCatalogs() {
@@ -22,7 +22,13 @@ export interface Filters {
   dir: 'asc' | 'desc'
   page: number
   pageSize: number
+  /** Vista elegida en Leads; vacio es la tabla. No es un filtro: Limpiar la conserva. */
+  view: LeadsView
+  /** Mes del calendario (AAAA-MM); vacio es el mes en curso. */
+  month: string
 }
+
+export type LeadsView = '' | 'board' | 'calendar'
 
 const ARRAY_KEYS = ['status', 'channel', 'businessLineId'] as const
 
@@ -45,6 +51,8 @@ export function useLeadFilters() {
       dir: sp.get('dir') === 'asc' ? 'asc' : 'desc',
       page: Number(sp.get('page') ?? 1) || 1,
       pageSize: Number(sp.get('pageSize') ?? 20) || 20,
+      view: sp.get('view') === 'board' || sp.get('view') === 'calendar' ? (sp.get('view') as LeadsView) : '',
+      month: /^\d{4}-(0[1-9]|1[0-2])$/.test(sp.get('month') ?? '') ? sp.get('month')! : '',
     }
   }, [sp])
 
@@ -65,7 +73,12 @@ export function useLeadFilters() {
     setSp(out, { replace: true })
   }
 
-  const clear = () => setSp(new URLSearchParams(), { replace: true })
+  const clear = () => {
+    const out = new URLSearchParams()
+    if (filters.view) out.set('view', filters.view)
+    if (filters.month) out.set('month', filters.month)
+    setSp(out, { replace: true })
+  }
   const activeCount =
     ARRAY_KEYS.reduce((n, k) => n + (filters[k].length ? 1 : 0), 0) +
     (filters.q ? 1 : 0) +
@@ -99,6 +112,28 @@ export function useLeads(f: Filters) {
   return useQuery({
     queryKey: ['leads', filtersQuery(f)],
     queryFn: () => api<LeadListResponse>(`/leads${toSearch(filtersQuery(f))}`),
+    placeholderData: keepPreviousData,
+  })
+}
+
+// Mismos filtros que el listado, sin estado ni paginacion. La clave empieza con 'leads' para que
+// las mutaciones y el boton Recargar tambien refresquen el tablero y el calendario.
+const viewQuery = (f: Filters) => ({ ...filtersQuery(f), dir: undefined, page: undefined, pageSize: undefined, sort: undefined, status: undefined })
+
+export function useCalendar(f: Filters, month: string) {
+  const q = { ...viewQuery(f), month }
+  return useQuery({
+    queryKey: ['leads', 'calendar', q],
+    queryFn: () => api<LeadListItem[]>(`/leads/calendar${toSearch(q)}`),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useBoard(f: Filters) {
+  const q = viewQuery(f)
+  return useQuery({
+    queryKey: ['leads', 'board', q],
+    queryFn: () => api<BoardResponse>(`/leads/board${toSearch(q)}`),
     placeholderData: keepPreviousData,
   })
 }

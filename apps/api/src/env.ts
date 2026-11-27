@@ -24,6 +24,12 @@ const schema = z.object({
   MAIL_IMAP_USER: z.string().trim().toLowerCase().email().optional(),
   MAIL_LOOKBACK_HOURS: z.coerce.number().int().min(1).max(720).default(48),
   MAIL_POLL_SECONDS: z.coerce.number().int().min(30).default(60),
+  // Facebook e Instagram por el webhook de la app de Meta. Sin el secreto de la app la ruta es 404;
+  // sin el token de pagina los chats entran sin nombre y los formularios de Lead Ads no se pueden leer.
+  META_APP_SECRET: z.string().min(16, 'META_APP_SECRET debe tener al menos 16 caracteres').optional(),
+  META_GRAPH_VERSION: z.string().regex(/^v\d+\.\d+$/, 'META_GRAPH_VERSION va como v23.0').default('v23.0'),
+  META_PAGE_TOKEN: z.string().min(20, 'META_PAGE_TOKEN debe tener al menos 20 caracteres').optional(),
+  META_VERIFY_TOKEN: z.string().min(16, 'META_VERIFY_TOKEN debe tener al menos 16 caracteres').optional(),
 })
 
 const parsed = schema.safeParse(process.env)

@@ -21,6 +21,7 @@ Lo que puede ver y hacer depende de su rol:
 Si falta un dato o tiene un formato invalido, el campo se marca en rojo con el motivo.
 
 - **Clientes repetidos:** al escribir el telefono o el correo, si ya existe un lead con ese dato aparece un aviso amarillo con su codigo, estado y responsable. El telefono se compara por sus ultimos 8 digitos, asi que +506 8888-1234 y 88881234 cuentan como el mismo. El aviso tambien se muestra en el detalle del lead.
+- **Fusionar (solo Administrador):** en el aviso del detalle, **Fusionar** junto al lead repetido abre una comparacion de los dos. Elija cual se conserva y pulse **Fusionar**: la bitacora, las capturas y los avisos del otro pasan al conservado, que solo toma del otro los datos que le falten (correo, empresa, telefono). El otro lead se elimina y no se puede deshacer.
 
 ## Buscar y filtrar
 
@@ -33,6 +34,9 @@ En **Leads**:
 - **Ordenar:** pulse el titulo de una columna.
 - **Prioridad:** cada lead abierto tiene un puntaje de 0 a 100 (Alta desde 80, Media desde 60) segun la etapa, el canal, si es una empresa, si tiene producto, si dejo telefono y correo y si la consulta es detallada. Ordene por **Prioridad** para atender primero los mas prometedores; en el detalle se explica de donde salio cada punto. Los ganados y perdidos no tienen prioridad.
 - **Limpiar** quita todos los filtros.
+- **Tabla, Tablero y Calendario:** el selector junto a los filtros cambia la forma de ver los mismos leads filtrados.
+  - **Tablero:** una columna por estado. Arrastre una tarjeta a otra columna para cambiar su estado, o use el boton **...** de la tarjeta y **Mover a** (en el celular es la unica forma). Al moverla a Perdido se pide el motivo. Cada columna muestra hasta 50 leads; el enlace del final abre el resto en la tabla.
+  - **Calendario:** las proximas acciones de los leads abiertos en su fecha. Las vencidas aparecen en rojo en el dia de hoy. Use las flechas para cambiar de mes y **Hoy** para volver; en el celular se ve como una lista por dia.
 
 Los filtros quedan en la direccion de la pagina: puede guardarla en favoritos o enviarla a un companero.
 
@@ -74,7 +78,13 @@ Pulse un aviso para abrir el lead; queda marcado como leido. **Marcar todas como
 
 En **Leads**, aplique los filtros que necesite y pulse **Exportar a Excel**. El archivo es un Excel (.xlsx) con exactamente los registros filtrados: arriba indica cuantos son, con que filtros y quien lo genero; los encabezados quedan fijos, cada columna trae filtro, el estado va con su color y las acciones vencidas en rojo.
 
+## Importar desde Excel (solo Administrador)
+
+En **Leads**, pulse **Importar** y luego **Descargar plantilla**. Llene una fila por cliente: Nombre, Canal, Linea y Descripcion son obligatorios, y hace falta telefono o correo. La fecha va como dd/mm/aaaa (vacia es hoy) y el Responsable es el correo del vendedor (vacio queda Nuevo, sin asignar). Suba el archivo: el sistema revisa cada fila y muestra los errores y los clientes que ya existen, sin crear nada. Pulse **Importar** para crear solo las filas sin errores. Hasta 1000 filas por archivo.
+
 ## Administracion (solo Administrador)
+
+- **Auditoria:** lista de ingresos, exportaciones, importaciones, fusiones, borrados y cambios de usuarios, con fecha, usuario y detalle. Se filtra por accion, usuario y fechas.
 
 - **Usuarios:** crear usuarios con rol y contrasena inicial, cambiar el rol, y desactivar o reactivar el acceso. Un usuario desactivado no puede ingresar, pero sus leads se conservan.
 - **WhatsApp del vendedor:** en la columna WhatsApp de Usuarios se escribe su numero (8 digitos, o con codigo de pais si es de otro pais). Cada vez que se le asigne un lead le llega un WhatsApp desde el numero de la empresa con los datos del cliente, un enlace para escribirle y otro para abrir el lead. Sin numero, solo ve el aviso en la campana.

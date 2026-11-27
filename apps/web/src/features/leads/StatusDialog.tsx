@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { LEAD_STATUSES, STATUS_LABELS, type LeadDetail, type LeadStatus } from '@craisa/shared'
+import { LEAD_STATUSES, STATUS_LABELS, type LeadDetail, type LeadListItem, type LeadStatus } from '@craisa/shared'
 import { api, ApiError } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,8 @@ import { STATUS_STYLES } from '@/components/status'
 import { useLeadMutation } from './hooks'
 
 interface Props {
-  lead: LeadDetail
+  // El tablero lo abre con una tarjeta del listado, que no trae el motivo de perdida.
+  lead: Pick<LeadListItem, 'code' | 'contactName' | 'status'> & { lossReason?: string | null }
   open: boolean
   onOpenChange: (o: boolean) => void
   initial?: LeadStatus

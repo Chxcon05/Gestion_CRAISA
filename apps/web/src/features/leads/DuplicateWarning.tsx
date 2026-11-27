@@ -33,7 +33,16 @@ export function useDuplicates(phone: string | null | undefined, email: string | 
 
 const MATCH_LABEL = { email: 'correo', phone: 'telefono' } as const
 
-export function DuplicateWarning({ matches, className }: { matches: DuplicateMatch[] | undefined; className?: string }) {
+// onMerge solo llega en el detalle y para el admin: en el formulario el lead todavia no existe.
+export function DuplicateWarning({
+  matches,
+  className,
+  onMerge,
+}: {
+  matches: DuplicateMatch[] | undefined
+  className?: string
+  onMerge?: (m: DuplicateMatch) => void
+}) {
   if (!matches?.length) return null
   return (
     <output className={cn('block rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900', className)}>
@@ -57,6 +66,15 @@ export function DuplicateWarning({ matches, className }: { matches: DuplicateMat
               {formatDate(m.entryDate)} / {m.assignedTo ? m.assignedTo.name : 'Sin asignar'} / mismo{' '}
               {m.matchedBy.map((k) => MATCH_LABEL[k]).join(' y ')}
             </span>
+            {onMerge && m.canOpen && (
+              <button
+                type="button"
+                onClick={() => onMerge(m)}
+                className="rounded-md border border-amber-300 bg-white px-2 py-0.5 text-xs font-medium text-amber-900 hover:bg-amber-100"
+              >
+                Fusionar
+              </button>
+            )}
           </li>
         ))}
       </ul>

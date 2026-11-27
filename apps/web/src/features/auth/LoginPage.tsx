@@ -156,7 +156,7 @@ export function LoginPage() {
 
               <div className="space-y-1.5">
                 <label htmlFor="password" className="block text-[13px] font-medium text-stone-700">
-                  Contrasena
+                  Contraseña
                 </label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-stone-400" />
@@ -229,7 +229,7 @@ export function LoginPage() {
                   ))}
                 </ul>
                 <p className="mt-3 text-center text-xs text-stone-400">
-                  Contrasena de todas: <span className="font-mono text-stone-600">{DEMO_PASSWORD}</span>
+                  Contraseña de todas: <span className="font-mono text-stone-600">{DEMO_PASSWORD}</span>
                 </p>
               </div>
             )}

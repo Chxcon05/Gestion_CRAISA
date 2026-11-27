@@ -14,6 +14,53 @@ export interface SessionUser extends UserRef {
   role: Role
 }
 
+export interface AuditEntry {
+  action: string
+  createdAt: string
+  detail: string | null
+  id: string
+  /** Null cuando la accion la hizo el sistema (captura automatica, primer arranque). */
+  user: UserRef | null
+}
+
+export interface AuditListResponse {
+  items: AuditEntry[]
+  page: number
+  pageSize: number
+  total: number
+}
+
+/** Una columna del tablero: el total real y como mucho 50 tarjetas. */
+export interface BoardColumn {
+  items: LeadListItem[]
+  status: LeadStatus
+  total: number
+}
+
+export interface BoardResponse {
+  columns: BoardColumn[]
+}
+
+/** Resultado de validar una fila del Excel; row es el numero de fila que ve el usuario en Excel. */
+export interface ImportRowResult {
+  contactName: string
+  /** Codigos de leads existentes, o "Fila N" de una fila anterior del mismo archivo, con el mismo telefono o correo. */
+  duplicates: string[]
+  errors: Record<string, string>
+  row: number
+}
+
+export interface ImportPreview {
+  invalid: number
+  rows: ImportRowResult[]
+  valid: number
+}
+
+export interface ImportResult {
+  codes: string[]
+  created: number
+}
+
 export interface CatalogRef {
   id: string
   name: string

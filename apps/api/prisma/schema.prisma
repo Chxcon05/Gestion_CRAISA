@@ -115,8 +115,10 @@ model Lead {
   nextAction     String?
   nextActionAt   DateTime?  @db.Date
   lossReason     String?
-  /// Creado por un canal digital (formulario web, y despues WhatsApp o Meta), no por una persona
+  /// Creado por un canal digital (formulario web, correo, WhatsApp o Meta), no por una persona
   autoCaptured   Boolean    @default(false)
+  /// Quien escribe por Messenger o Instagram (facebook:<psid>); no dan telefono y asi sus mensajes van al mismo lead
+  contactRef     String?
   /// Id del mensaje en el canal de origen (wamid de WhatsApp); Meta reintenta el webhook y asi no se duplica
   externalRef    String?    @unique
   /// Puntaje de prioridad (scoreLead de @craisa/shared). Null hasta que el arranque lo calcula en leads viejos
@@ -134,6 +136,7 @@ model Lead {
 
   @@index([status])
   @@index([channel])
+  @@index([contactRef])
   @@index([businessLineId])
   @@index([assignedToId])
   @@index([entryDate])

@@ -34,6 +34,17 @@ export const router = createBrowserRouter([
           { path: 'leads/:code', lazy: () => import('@/features/leads/LeadDetailPage').then((m) => ({ Component: m.LeadDetailPage })) },
           { path: 'leads/:code/editar', lazy: () => import('@/features/leads/pages').then((m) => ({ Component: m.LeadEditPage })) },
           {
+            path: 'admin/auditoria',
+            lazy: () =>
+              import('@/features/admin/AuditPage').then((m) => ({
+                Component: () => (
+                  <RequireRole roles={['ADMIN']}>
+                    <m.AuditPage />
+                  </RequireRole>
+                ),
+              })),
+          },
+          {
             path: 'admin/productos',
             lazy: () =>
               import('@/features/admin/ProductsPage').then((m) => ({
